@@ -26,7 +26,8 @@ class LevelPathScreen extends StatefulWidget {
 
 class _LevelPathScreenState extends State<LevelPathScreen> {
   static const _spacing = 104.0;
-  static const _behind = 14, _ahead = 8;
+  // A window of the endless track: the road ahead is long enough to feel like a journey, with a sign every 10 levels.
+  static const _behind = 14, _ahead = 30;
   ScrollController? _scroll;
 
   Future<void> _play() async {
@@ -114,6 +115,15 @@ class _LevelPathScreenState extends State<LevelPathScreen> {
                             _at(pos(l), 56, _LockedNode(level: l, onTap: () => _say(l10n.levelLocked(current))))
                           else
                             _at(pos(l), 84, _CurrentNode(key: const Key('playLevel'), level: l, critter: critter, onTap: _play)),
+                        for (var l = first; l <= last; l++)
+                          if (l % 10 == 0)
+                            Positioned(
+                              // On the side of the road with more room.
+                              left: pos(l).dx > width / 2 ? pos(l).dx - 170 : pos(l).dx + 50,
+                              top: pos(l).dy - 22,
+                              width: 120,
+                              child: IgnorePointer(child: WoodLabel(text: '🏁 $l', fontSize: 18)),
+                            ),
                       ]),
                     ),
                   );
