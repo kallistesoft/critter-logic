@@ -173,6 +173,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     onPressed: () => _open(const TrophiesScreen()),
                   ),
                 ),
+                // Settings sits alone in the top-right corner.
+                const Spacer(),
                 const SizedBox(width: 6),
                 RoundIconButton(
                   key: const Key('settings'),
