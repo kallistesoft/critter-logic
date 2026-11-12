@@ -1,0 +1,102 @@
+{
+  "@@locale": "en",
+  "privacyOptions": "Privacy options",
+  "@privacyOptions": {
+    "description": "Home: opens the ad consent form"
+  },
+  "rateApp": "Rate Critter Logic",
+  "@rateApp": {
+    "description": "Home: opens the store page to leave a review; hidden once tapped"
+  },
+  "noAdsPrice": "No ads · {price}",
+  "@noAdsPrice": {
+    "description": "Remove ads purchase button; price comes localized from the store",
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "restorePurchase": "Restore purchase",
+  "@restorePurchase": {},
+  "parentGateTitle": "Ask a grown-up",
+  "@parentGateTitle": {
+    "description": "Parental gate before a purchase; addresses a child"
+  },
+  "parentGateQuestion": "To continue, enter the answer to {a} × {b}",
+  "@parentGateQuestion": {
+    "description": "Parental gate multiplication; addresses a child",
+    "placeholders": {
+      "a": {
+        "type": "int"
+      },
+      "b": {
+        "type": "int"
+      }
+    }
+  },
+  "cancel": "Cancel",
+  "@cancel": {},
+  "continueAction": "Continue",
+  "@continueAction": {
+    "description": "Dialog confirm button"
+  },
+  "updateAvailableTitle": "Update available",
+  "@updateAvailableTitle": {},
+  "updateAvailableBody": "A new version of Critter Logic is ready.",
+  "@updateAvailableBody": {},
+  "updateLater": "Later",
+  "@updateLater": {},
+  "updateNow": "Update",
+  "@updateNow": {},
+  "updateRequiredTitle": "Update required",
+  "@updateRequiredTitle": {},
+  "updateRequiredBody": "This version of Critter Logic is no longer supported. Update to keep playing, so your daily puzzle matches everyone else's.",
+  "@updateRequiredBody": {},
+  "updateRequiredButton": "UPDATE",
+  "@updateRequiredButton": {},
+  "home": "Home",
+  "@home": {
+    "description": "Game over: back to the home screen"
+  },
+  "shareResult": "Share result",
+  "@shareResult": {
+    "description": "Daily game over share button"
+  },
+  "shareCopied": "Result copied — paste it anywhere!",
+  "@shareCopied": {
+    "description": "Snackbar when sharing falls back to the clipboard"
+  },
+  "shareStreak": "{count, plural, one{📅 {count}-day streak} other{📅 {count}-day streak}}",
+  "@shareStreak": {
+    "description": "Shared text: consecutive days played",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noAdAvailable": "No ad available right now. Try again in a moment.",
+  "@noAdAvailable": {},
+  "dailyTitle": "Daily #{number}",
+  "@dailyTitle": {
+    "description": "Daily puzzle name, on the home card and the game screen",
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "gameNests": "Nests",
+  "@gameNests": {
+    "description": "Name of the Queens-like game: one critter per row, column and color zone"
+  },
+  "gamePairs": "Pairs",
+  "@gamePairs": {
+    "description": "Name of the Tango-like game: suns and moons"
+  },
+  "tagline": "Daily logic puzzles",
+  "@tagline": {
+    "description": "Home subtitle under the game name"
+  }
+}

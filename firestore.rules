@@ -1,0 +1,55 @@
+rules_version = '2';
+
+// Critter Logic leaderboards: anonymous players, times and counts only (no names).
+// Deploy: firebase deploy --only firestore:rules (or paste in the console).
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    // dailies/{kind}_{day}: { b: { "<bucket>": count } }, one bucket per 10 s, capped at 60.
+    match /dailies/{daily} {
+      allow read: if true;
+
+      function timePath() {
+        return /databases/$(database)/documents/dailies/$(daily)/times/$(request.auth.uid);
+      }
+
+      function bucket() {
+        return string(math.min(math.floor(getAfter(timePath()).data.ms / 10000), 60));
+      }
+
+      // Only together with the player's first time: that time's bucket goes up by exactly one.
+      allow create, update: if request.auth != null
+          && !exists(timePath())
+          && existsAfter(timePath())
+          && request.resource.data.keys().hasOnly(['b'])
+          && request.resource.data.b.diff(resource == null ? {} : resource.data.b).affectedKeys().hasOnly([bucket()])
+          && request.resource.data.b[bucket()] == (resource == null ? 0 : resource.data.b.get(bucket(), 0)) + 1;
+
+      // One time per player: created once, never changed.
+      match /times/{uid} {
+        allow read: if true;
+        allow create: if signedIn(uid)
+            && request.resource.data.keys().hasOnly(['ms'])
+            && request.resource.data.ms is int
+            && request.resource.data.ms >= 4000
+            && request.resource.data.ms <= 86400000;
+      }
+    }
+
+    // Lifetime records only go up, by small steps.
+    match /players/{uid} {
+      allow read: if true;
+      allow write: if signedIn(uid)
+          && request.resource.data.keys().hasOnly(['streak', 'solved'])
+          && request.resource.data.streak is int
+          && request.resource.data.solved is int
+          && request.resource.data.streak >= (resource == null ? 0 : resource.data.streak)
+          && request.resource.data.solved >= (resource == null ? 0 : resource.data.solved)
+          && request.resource.data.streak <= 10000
+          && request.resource.data.solved <= 100000;
+    }
+  }
+}
