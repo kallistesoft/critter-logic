@@ -8,17 +8,17 @@ import 'progress_store.dart';
 enum LuckyPrize { goldenCapsule, capsule, coins, hint, feather }
 
 /// Lucky Nest odds in per mille (the feather, "nothing", gets the rest) and limits. Tuned so a paid draw returns
-/// a little less than it costs on average (about 53 coins of value for 60): a coin sink that still feels generous.
+/// a little less than it costs on average (about 49 coins of value for 50): a coin sink that still feels generous.
 class LuckySettings {
   const LuckySettings({
     this.golden = 15,
     this.capsule = 120,
     this.coins = 200,
     this.hint = 300,
-    this.price = 60,
+    this.price = 50,
     this.paidPerDay = 3,
-    this.minCoins = 50,
-    this.maxCoins = 150,
+    this.minCoins = 40,
+    this.maxCoins = 120,
   });
 
   final int golden, capsule, coins, hint;

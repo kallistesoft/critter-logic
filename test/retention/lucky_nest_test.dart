@@ -29,8 +29,8 @@ void main() {
     expect(nest.state(5).paidLeft, 0);
     expect(nest.state(6).freeAvailable, isTrue);
     expect(nest.state(6).paidLeft, 3);
-    // 3 paid eggs cost 180; winnings can only add.
-    expect(stats.coins, greaterThanOrEqualTo(start - 180));
+    // 3 paid eggs cost 150; winnings can only add.
+    expect(stats.coins, greaterThanOrEqualTo(start - 150));
   });
 
   test('a paid egg needs the coins', () async {
@@ -52,7 +52,7 @@ void main() {
       final d = (await nest.draw(day))!; // free egg each day
       counts[d.prize] = counts[d.prize]! + 1;
       coins += d.coins;
-      expect(d.coins, d.prize == LuckyPrize.coins ? inInclusiveRange(50, 150) : 0);
+      expect(d.coins, d.prize == LuckyPrize.coins ? inInclusiveRange(40, 120) : 0);
     }
     expect(counts[LuckyPrize.goldenCapsule]! / 20000, closeTo(0.015, 0.004));
     expect(counts[LuckyPrize.feather]! / 20000, closeTo(0.365, 0.015));
@@ -69,7 +69,7 @@ void main() {
   test('Remote Config parsing keeps defaults for bad values', () {
     final s = LuckySettings.parse('golden=30, capsule=100, price=80, paid_per_day=5, max_coins=10');
     expect((s.golden, s.capsule, s.price, s.paidPerDay), (30, 100, 80, 5));
-    expect((s.minCoins, s.maxCoins), (50, 150), reason: 'min above max is rejected');
+    expect((s.minCoins, s.maxCoins), (40, 120), reason: 'min above max is rejected');
     final over = LuckySettings.parse('golden=900, capsule=200');
     expect((over.golden, over.capsule), (15, 120), reason: 'odds over 100% are rejected');
   });
