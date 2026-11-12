@@ -24,13 +24,22 @@ import 'confetti.dart';
 import 'nests_board.dart';
 import 'pairs_board.dart';
 import 'session.dart';
+import 'trail_board.dart';
 
 String gameName(AppLocalizations l10n, GameKind kind) => switch (kind) {
       GameKind.nests => l10n.gameNests,
       GameKind.pairs => l10n.gamePairs,
+      GameKind.trail => l10n.gameTrail,
     };
 
-/// The critter that sits on a Nests board: one the player owns, changing with the puzzle.
+/// The one-line rules under the board.
+String rulesShort(AppLocalizations l10n, GameKind kind) => switch (kind) {
+      GameKind.nests => l10n.nestsRulesShort,
+      GameKind.pairs => l10n.pairsRulesShort,
+      GameKind.trail => l10n.trailRulesShort,
+    };
+
+/// The critter that sits on a Nests board (and walks the Trail): one the player owns, changing with the puzzle.
 String boardCritter(StatsStore stats, int number) {
   final owned = stats.owned.toList()..sort();
   return owned.isEmpty ? 'chick' : owned[number % owned.length];
@@ -101,6 +110,7 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver, Ti
     final GameSession session = switch (widget.kind) {
       GameKind.nests => NestsSession(await (daily ? p.dailyNests(widget.number) : p.levelNests(widget.number))),
       GameKind.pairs => PairsSession(await (daily ? p.dailyPairs(widget.number) : p.levelPairs(widget.number))),
+      GameKind.trail => TrailSession(await (daily ? p.dailyTrail(widget.number) : p.levelTrail(widget.number))),
     };
     final saved = _services.stats.savedGame(_slot);
     if (saved != null && saved['n'] == widget.number && session.restore(saved) && !session.solved) {
@@ -164,6 +174,10 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver, Ti
     if (outcome == MoveOutcome.mistake) {
       sound.play(Sfx.conflict);
       HapticFeedback.mediumImpact();
+    } else if (s is TrailSession) {
+      // A soft tick for each step the trail grows, a softer one when it shrinks.
+      sound.play(s.onPath(cell) ? Sfx.place : Sfx.erase);
+      HapticFeedback.selectionClick();
     } else {
       final value = s.cells[cell];
       sound.play(switch (value) {
@@ -387,7 +401,7 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver, Ti
                   border: Border.all(color: paperEdge, width: 2),
                 ),
                 child: Text(
-                  widget.kind == GameKind.nests ? l10n.nestsRulesShort : l10n.pairsRulesShort,
+                  rulesShort(l10n, widget.kind),
                   textAlign: TextAlign.center,
                   style: chunky(14, color: inkSoft, weight: FontWeight.w500),
                 ),
@@ -414,6 +428,14 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver, Ti
           onMove: _onMove,
         ),
       PairsSession() => PairsBoard(session: s, readOnly: _finishing, celebrate: celebrate, onMove: _onMove),
+      TrailSession() => TrailBoard(
+          session: s,
+          critter: _critter,
+          readOnly: _finishing,
+          celebrate: celebrate,
+          onMove: _onMove,
+          onStrokeEnd: () => setState(() {}),
+        ),
       _ => const SizedBox.shrink(),
     };
   }

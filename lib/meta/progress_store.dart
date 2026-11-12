@@ -116,7 +116,7 @@ enum Counter {
   /// Dailies with no mistake and no hint.
   perfectDailies,
 
-  /// Days where both dailies were solved.
+  /// Days where every daily was solved.
   bothDailiesDays,
   shares,
   capsulesOpened,

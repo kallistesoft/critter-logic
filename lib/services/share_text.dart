@@ -21,7 +21,7 @@ String formatTime(int millis) {
   return '${s ~/ 60}:${(s % 60).toString().padLeft(2, '0')}';
 }
 
-const gameEmoji = {GameKind.nests: '🐣', GameKind.pairs: '☀️'};
+const gameEmoji = {GameKind.nests: '🐣', GameKind.pairs: '☀️', GameKind.trail: '🐾'};
 
 /// Text players paste into chats after the dailies: one line per game, the streak, the store link.
 String dailyShareText(int number, List<DailyResult> results, {required int streak, required AppLocalizations l10n}) {

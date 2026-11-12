@@ -19,6 +19,7 @@ import 'game/game_screen.dart';
 import 'game/nests_board.dart';
 import 'game/pairs_board.dart';
 import 'game/session.dart';
+import 'game/trail_board.dart';
 import 'navigation.dart';
 import 'palette.dart';
 import 'services.dart';
@@ -124,6 +125,7 @@ class _DailyResultScreenState extends State<DailyResultScreen> with SingleTicker
             ),
       GameKind.pairs =>
         await p.dailyPairs(widget.number).then((puzzle) => PairsSession(puzzle, initial: List.of(puzzle.solution))),
+      GameKind.trail => await p.dailyTrail(widget.number).then((puzzle) => TrailSession(puzzle, path: puzzle.solution)),
     };
     if (mounted) setState(() => _board = board);
   }
@@ -146,8 +148,8 @@ class _DailyResultScreenState extends State<DailyResultScreen> with SingleTicker
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final stats = _services.stats;
-    final other = GameKind.values.firstWhere((k) => k != widget.kind);
-    final otherDone = stats.daily(other, widget.number) != null;
+    // The next daily still to play today, if any.
+    final other = GameKind.values.where((k) => k != widget.kind && stats.daily(k, widget.number) == null).firstOrNull;
     final streak = stats.streak(widget.number);
     final rewards = widget.fresh ? widget.rewards : null;
     final r = widget.result;
@@ -224,7 +226,7 @@ class _DailyResultScreenState extends State<DailyResultScreen> with SingleTicker
                   onPressed: _share,
                 ),
                 const SizedBox(height: 12),
-                if (!otherDone) ...[
+                if (other != null) ...[
                   ChunkyButton(
                     key: const Key('playOther'),
                     label: l10n.playOtherDaily(gameName(l10n, other)),
@@ -262,6 +264,11 @@ class _DailyResultScreenState extends State<DailyResultScreen> with SingleTicker
                           critter: boardCritter(stats, widget.number),
                         ),
                         final PairsSession s => PairsBoard(session: s, readOnly: true),
+                        final TrailSession s => TrailBoard(
+                          session: s,
+                          readOnly: true,
+                          critter: boardCritter(stats, widget.number),
+                        ),
                         _ => const SizedBox.shrink(),
                       },
                     ),
