@@ -77,8 +77,8 @@ class StorePremiumService extends PremiumService {
 
   Future<void> _onPurchases(List<PurchaseDetails> purchases) async {
     for (final p in purchases) {
-      if (p.productID == productId &&
-          (p.status == PurchaseStatus.purchased || p.status == PurchaseStatus.restored)) {
+      if (p.productID != productId) continue; // coin packs are handled by StoreCoinService
+      if (p.status == PurchaseStatus.purchased || p.status == PurchaseStatus.restored) {
         await _stats.setPremium(true);
         notifyListeners();
       }
