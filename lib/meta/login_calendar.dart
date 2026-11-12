@@ -2,7 +2,8 @@ import 'progress_store.dart';
 import 'rewards.dart';
 
 /// The default 7-day track. Coins stay small next to [Economy.hintCost] (30): one loop pays 170 coins
-/// (about 6 hints), 340 if every coin day is doubled by an ad.
+/// (about 6 hints), 340 if every coin day is doubled by an ad. Day 7 is a normal capsule: with only 5 golden
+/// critters, a golden capsule every week would hand them all out in about 5 weeks.
 const defaultCalendarRewards = <Reward>[
   Reward.coins(20),
   Reward.coins(60), // "hint pack": two hints' worth
@@ -10,7 +11,7 @@ const defaultCalendarRewards = <Reward>[
   Reward.coins(30),
   Reward.capsule(),
   Reward.coins(60),
-  Reward.goldenCapsule(),
+  Reward.capsule(),
 ];
 
 /// Where the player is on the login calendar today.

@@ -16,7 +16,7 @@ chests add 50/100/300. The numbers below keep each new system a side income, not
 | Source | Coins per week (typical) | Notes |
 | --- | --- | --- |
 | Dailies (both, every day) | 280 | existing |
-| Login calendar | 170 (340 if every coin day is doubled by an ad) | + 2 capsules + 1 golden capsule per loop |
+| Login calendar | 170 (340 if every coin day is doubled by an ad) | + 3 capsules per loop |
 | Weekly event | 40 | + 1 capsule + 1 critter of the set + a frame |
 | Achievements | front-loaded, ~2 900 lifetime | 52 tiers; long tail |
 
@@ -35,7 +35,7 @@ If the clock is set back before the last claim, nothing can be claimed until it 
 | 4 | 30 coins | `30` |
 | 5 | Capsule | `capsule` |
 | 6 | 60 coins | `60` |
-| 7 | Golden capsule | `golden` |
+| 7 | Capsule (golden would give away the 5 golden critters in ~5 weeks) | `capsule` |
 
 API: `retention.calendar.state(now)` → `CalendarState` (`step` 0–6, `claimedToday`, `available`, `rewards`,
 `canDouble`, `loops`); `retention.claimCalendar(now, doubled: bool)` claims **and pays** (returns `GrantResult`,
@@ -157,7 +157,7 @@ The UI should also log `ad_reward` with `calendar_double` when the double is wat
 
 | Name | Type | Default | Range / format |
 | --- | --- | --- | --- |
-| `calendar_rewards` | String | `20,60,capsule,30,capsule,60,golden` | 7 items: coins 1–500, `capsule`, `golden`; else default |
+| `calendar_rewards` | String | `20,60,capsule,30,capsule,60,capsule` | 7 items: coins 1–500, `capsule`, `golden`; else default |
 | `calendar_ad_double` | Boolean | `true` | |
 | `achievement_bronze_coins` | Number | `20` | 0–500 |
 | `achievement_silver_coins` | Number | `50` | 0–1000 |
@@ -178,3 +178,40 @@ before the parameters exist in the console; `UpdateService.retention` holds the 
   "ends in 2d 5h", progress bar with 3 markers at the thresholds, a "!" when a prize is claimable. Tap = event screen
   with the 3 prizes and the set's critters (owned ones coloured).
 - **Result screen**: "+3 🐾 Panda Week" under the coins, and the trophy toast.
+
+## Coin shop (`lib/meta/shop.dart`, `retention.shop`)
+The main coin sink. Prices are set against income (~45 coins/day from dailies, ~170/week from the calendar).
+
+| Item | Price | Notes |
+|---|---|---|
+| Capsule | 150 | always available |
+| Streak repair | 100 | only when yesterday can be repaired (same once-a-week rule as the ad repair) |
+| Board themes: snowy, sunset, autumn, starry | 300 / 300 / 400 / 600 | owned forever, one equipped; `theme.meadow` is free and default |
+| Critter hats: flowers, party, beanie, crown | 200 / 200 / 250 / 500 | owned forever, one equipped, can be taken off |
+
+- **Daily deal:** one unowned cosmetic per day at −30% (the capsule once every cosmetic is owned), the same on every
+  device for a given day.
+- API: `offers(today)`, `buy(id, today)` → `PurchaseResult`, `equip(id)`, `equippedTheme`, `equippedHat`.
+- Analytics: `shop_purchase` (`item`, `price`, `deal`).
+- UI (after the meadow redesign): a shop stall on the home screen; the board reads `equippedTheme`, the critters wear
+  `equippedHat` (art needed for 4 themes and 4 hats).
+
+## Lucky Nest (`lib/meta/lucky_nest.dart`, `retention.luckyNest`)
+A cozy egg draw (deliberately no casino look: no slots, chips or "bet" wording; odds always shown).
+- **1 free egg per day**, then **up to 3 paid eggs per day at 60 coins**.
+- Odds: golden capsule 1.5%, capsule 12%, 50–150 coins 20%, free hint 30%, feather (nothing) 36.5%.
+  Average value per egg ≈ 53 coins for a 60-coin price: a sink that still feels generous.
+- Free hints won here live in `ProgressStore.freeHints`. **Hook:** the hint button must call
+  `progress.useFreeHint()` first and only charge coins (or offer the ad) when it returns false; show the free hint count
+  on the button.
+- API: `state(today)` (free available, paid left, price), `draw(today)` → `LuckyDraw` or null.
+- Analytics: `lucky_draw` (`prize`, `coins`, `free`).
+- UI: a nest with 3 eggs on the home meadow, badge when the free egg is ready; tap → wobble → crack → prize; an
+  "Odds" link listing `settings.odds`.
+
+### More Remote Config parameters
+| Name | Type | Default |
+|---|---|---|
+| `shop_prices` | String | empty (catalog prices); `id=price` pairs, 10–5000 |
+| `shop_deal_percent` | Number | `30` (0–90; 0 = no deal) |
+| `lucky_nest` | String | empty (defaults); `golden=15,capsule=120,coins=200,hint=300,price=60,paid_per_day=3,min_coins=50,max_coins=150` (odds in per mille) |

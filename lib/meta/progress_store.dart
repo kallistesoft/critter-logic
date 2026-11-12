@@ -70,6 +70,32 @@ class ProgressStore {
   /// Owned cosmetics, e.g. event frames ('frame.polar').
   Set<String> get cosmetics => _set('cosmetics');
   Future<void> addCosmetic(String id) => _addTo('cosmetics', id);
+
+  // ---- Lucky Nest and free hints ----
+
+  /// Local day the free egg was last taken.
+  int? get luckyFreeDay => _prefs.getInt('${prefix}lucky.freeDay');
+  Future<void> setLuckyFreeDay(int day) => _setInt('lucky.freeDay', day);
+
+  /// Paid eggs drawn on [day].
+  int luckyPaid(int day) => _int('lucky.paid.$day');
+  Future<void> addLuckyPaid(int day) => _setInt('lucky.paid.$day', luckyPaid(day) + 1);
+
+  /// Hints won (Lucky Nest); the hint button uses these before charging coins.
+  int get freeHints => _int('freeHints');
+  Future<void> addFreeHints(int n) => _setInt('freeHints', freeHints + n);
+
+  /// Uses one free hint if there is one.
+  Future<bool> useFreeHint() async {
+    if (freeHints <= 0) return false;
+    await _setInt('freeHints', freeHints - 1);
+    return true;
+  }
+
+  /// The cosmetic worn in a slot ('theme', 'hat'); null = the default look / no hat.
+  String? equipped(String slot) => _prefs.getString('${prefix}equipped.$slot');
+  Future<void> setEquipped(String slot, String? id) =>
+      id == null ? _prefs.remove('${prefix}equipped.$slot') : _prefs.setString('${prefix}equipped.$slot', id);
 }
 
 /// Counters behind the achievements that StatsStore can't derive.

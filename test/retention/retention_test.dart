@@ -56,12 +56,13 @@ void main() {
     for (var d = 4; d <= 7; d++) {
       await retention.claimCalendar(DateTime(2027, 1, d));
     }
-    expect(stats.goldenCapsules, 1);
+    expect(stats.capsules, 3, reason: 'days 3, 5 and 7');
+    expect(stats.goldenCapsules, 0);
     expect(stats.coins, coins + 40 + 60 + 30 + 60);
     final events = logged('calendar_claim');
     expect(events, hasLength(7));
     expect(events.first.$2, {'day': 1, 'reward': 'coins', 'coins': 40, 'doubled': 1});
-    expect(events.last.$2['reward'], 'golden');
+    expect(events.last.$2['reward'], 'capsule');
   });
 
   test('recordEvent counts a daily for counters, achievements and event tokens', () async {

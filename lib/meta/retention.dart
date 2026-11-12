@@ -9,6 +9,8 @@ import 'album.dart';
 import 'login_calendar.dart';
 import 'progress_store.dart';
 import 'rewards.dart';
+import 'lucky_nest.dart';
+import 'shop.dart';
 import 'weekly_event.dart';
 
 /// Something the player did that the retention systems count. Passed to [Retention.recordEvent].
@@ -78,6 +80,8 @@ class Retention {
       LoginCalendar(progress, rewards: settings.calendarRewards, adDouble: settings.calendarAdDouble);
   Achievements get achievements => Achievements(stats, progress, coins: settings.achievementCoins);
   WeeklyEvent get event => WeeklyEvent(progress, settings: settings.events);
+  LuckyNest get luckyNest => LuckyNest(stats, progress, settings: settings.lucky, analytics: analytics, random: _random);
+  Shop get shop => Shop(stats, progress, settings: settings.shop, analytics: analytics);
 
   // ---- App open ----
 
