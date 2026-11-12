@@ -1,5 +1,7 @@
 import 'nests/nests.dart';
+import 'nests/solver.dart';
 import 'pairs/pairs.dart';
+import 'pairs/solver.dart';
 
 /// Where puzzles come from: the bundled dailies (the same for everyone) and the endless level tracks.
 abstract class PuzzleSource {
@@ -14,32 +16,20 @@ abstract class PuzzleSource {
 /// One step the player can take: put [value] in [cell]. [wrong] means the cell currently holds something that
 /// isn't in the solution and the step clears it.
 class Hint<T> {
-  const Hint(this.cell, this.value, {this.wrong = false});
+  const Hint(this.cell, this.value, {this.wrong = false, this.rule = ''});
 
   final int cell;
   final T value;
   final bool wrong;
+
+  /// Why, for the UI to explain: 'wrong', a solver rule id (see nestsRuleLevels / pairsRuleLevels) or 'reveal'.
+  final String rule;
 }
 
-/// The simplest useful hint: first remove a misplaced critter, else reveal the critter of the first row without one.
-Hint<NestMark>? nestsHint(NestsPuzzle puzzle, List<NestMark> marks) {
-  for (var i = 0; i < marks.length; i++) {
-    if (marks[i] == NestMark.critter && !puzzle.isCritterInSolution(i)) return Hint(i, NestMark.empty, wrong: true);
-  }
-  for (var r = 0; r < puzzle.size; r++) {
-    final cell = r * puzzle.size + puzzle.solution[r];
-    if (marks[cell] != NestMark.critter) return Hint(cell, NestMark.critter);
-  }
-  return null;
-}
+/// The next logical step for the player: fix a wrong mark first, else the simplest deduction (see
+/// [nestsDeductionHint]).
+Hint<NestMark>? nestsHint(NestsPuzzle puzzle, List<NestMark> marks) => nestsDeductionHint(puzzle, marks);
 
-/// First fix a wrong symbol, else fill the first empty cell.
-Hint<int?>? pairsHint(PairsPuzzle puzzle, List<int?> cells) {
-  for (var i = 0; i < cells.length; i++) {
-    if (cells[i] != null && cells[i] != puzzle.solution[i]) return Hint(i, puzzle.solution[i], wrong: true);
-  }
-  for (var i = 0; i < cells.length; i++) {
-    if (cells[i] == null) return Hint(i, puzzle.solution[i]);
-  }
-  return null;
-}
+/// The next logical step for the player: fix a wrong symbol first, else the simplest deduction (see
+/// [pairsDeductionHint]).
+Hint<int?>? pairsHint(PairsPuzzle puzzle, List<int?> cells) => pairsDeductionHint(puzzle, cells);
