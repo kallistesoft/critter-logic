@@ -17,6 +17,7 @@ class LuckySettings {
     this.hint = 300,
     this.price = 50,
     this.paidPerDay = 0,
+    this.paidEnabled = true,
     this.minCoins = 40,
     this.maxCoins = 120,
   });
@@ -25,6 +26,11 @@ class LuckySettings {
   final int price;
   /// Paid eggs allowed per day; 0 = no limit (the default). Remote Config can set a cap.
   final int paidPerDay;
+
+  /// Paid eggs offered at all. Coins can be bought, so a paid egg is a random reward bought with real money
+  /// (a "loot box"); Remote Config turns them off where that's not allowed (a country condition for Belgium sets
+  /// `paid=0`). The free daily egg stays.
+  final bool paidEnabled;
   final int minCoins, maxCoins;
 
   int get feather => 1000 - golden - capsule - coins - hint;
@@ -63,6 +69,7 @@ class LuckySettings {
       hint: hint,
       price: pick('price', d.price, 1000) < 10 ? d.price : pick('price', d.price, 1000),
       paidPerDay: pick('paid_per_day', d.paidPerDay, 100),
+      paidEnabled: (v['paid'] ?? 1) != 0,
       minCoins: minCoins <= maxCoins ? minCoins : d.minCoins,
       maxCoins: minCoins <= maxCoins ? maxCoins : d.maxCoins,
     );
@@ -104,7 +111,9 @@ class LuckyNest {
 
   LuckyState state(int today) => LuckyState(
         freeAvailable: progress.luckyFreeDay != today,
-        paidLeft: settings.paidPerDay == 0
+        paidLeft: !settings.paidEnabled
+            ? 0
+            : settings.paidPerDay == 0
             ? null
             : (settings.paidPerDay - progress.luckyPaid(today)).clamp(0, settings.paidPerDay),
         price: settings.price,
