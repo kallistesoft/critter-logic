@@ -1109,4 +1109,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get coinsPreview =>
       'Store not available in the dev build: this is a preview.';
+
+  @override
+  String get settingWorld => 'World';
+
+  @override
+  String get settingWorldMore => 'More worlds in the shop';
 }

@@ -300,5 +300,7 @@
   "welcomeWorldSkip": "Passer",
   "fieldJournal": "Carnet de terrain",
   "previewDaily": "Aujourd’hui",
-  "coinsPreview": "Boutique indisponible dans la version de développement : ceci est un aperçu."
+  "coinsPreview": "Boutique indisponible dans la version de développement : ceci est un aperçu.",
+  "settingWorld": "Monde",
+  "settingWorldMore": "Plus de mondes à la boutique"
 }

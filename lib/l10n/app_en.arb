@@ -877,11 +877,17 @@
   "settingReminders": "Daily reminder",
   "@settingReminders": {},
   "settingLanguage": "Language",
-  "@settingLanguage": {"description": "Settings row: picks the app language"},
+  "@settingLanguage": {
+    "description": "Settings row: picks the app language"
+  },
   "languageSystem": "System default",
-  "@languageSystem": {"description": "Language picker: follow the phone's language"},
+  "@languageSystem": {
+    "description": "Language picker: follow the phone's language"
+  },
   "reminderChannel": "Daily puzzle",
-  "@reminderChannel": {"description": "Android notification channel name for the daily reminder, shown in the phone's settings"},
+  "@reminderChannel": {
+    "description": "Android notification channel name for the daily reminder, shown in the phone's settings"
+  },
   "credits": "Art and sounds: Kenney (kenney.nl), CC0",
   "@credits": {},
   "critterChick": "Chick",
@@ -1164,5 +1170,13 @@
   "coinsPreview": "Store not available in the dev build: this is a preview.",
   "@coinsPreview": {
     "description": "Snackbar when tapping a coin pack in a dev build (no store)"
+  },
+  "settingWorld": "World",
+  "settingWorldMore": "More worlds in the shop",
+  "@settingWorld": {
+    "description": "Settings row: the equipped World (visual theme)"
+  },
+  "@settingWorldMore": {
+    "description": "World picker button opening the shop Worlds tab"
   }
 }

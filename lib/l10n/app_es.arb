@@ -300,5 +300,7 @@
   "welcomeWorldGo": "Jugar en {world}",
   "welcomeWorldSkip": "Saltar",
   "fieldJournal": "Diario de campo",
-  "previewDaily": "Hoy"
+  "previewDaily": "Hoy",
+  "settingWorld": "Mundo",
+  "settingWorldMore": "Más mundos en la tienda"
 }

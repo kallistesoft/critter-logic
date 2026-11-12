@@ -132,6 +132,31 @@ void main() {
     });
   });
 
+  testWidgets('Settings switches between owned Worlds and links to the shop for the others', (tester) async {
+    await app.pump(tester);
+    await tester.tap(find.byKey(const Key('settings')));
+    await tester.pumpAndSettle();
+    await scrollTo(tester, find.byKey(const Key('worldRow')));
+    expect(find.descendant(of: find.byKey(const Key('worldRow')), matching: find.text('Meadow')), findsOneWidget);
+    await tester.tap(find.byKey(const Key('worldRow')));
+    await tester.pumpAndSettle();
+    // Only the free Worlds are owned: Meadow and Lodge, plus the link to the shop.
+    expect(find.byKey(const Key('pickWorld-meadow')), findsOneWidget);
+    expect(find.byKey(const Key('pickWorld-lodge')), findsOneWidget);
+    expect(find.byKey(const Key('pickWorld-neon')), findsNothing);
+    await tester.tap(find.byKey(const Key('pickWorld-lodge')));
+    await tester.pumpAndSettle();
+    expect(activeWorld.id, 'world.lodge');
+    expect(progress().equipped('world'), 'world.lodge');
+    expect(find.descendant(of: find.byKey(const Key('worldRow')), matching: find.text('Wild Lodge')), findsOneWidget);
+    await tester.tap(find.byKey(const Key('worldRow')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('moreWorlds')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('buy-world.neon')), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('the Lodge draws wildlife badges, never the cartoon sprites', (tester) async {
     await stats.addCritter('bear');
     app.world = 'world.lodge';

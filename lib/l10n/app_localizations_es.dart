@@ -1115,4 +1115,10 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get coinsPreview =>
       'Tienda no disponible en la versión de desarrollo: esto es una vista previa.';
+
+  @override
+  String get settingWorld => 'Mundo';
+
+  @override
+  String get settingWorldMore => 'Más mundos en la tienda';
 }

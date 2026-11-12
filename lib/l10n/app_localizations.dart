@@ -1905,6 +1905,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Store not available in the dev build: this is a preview.'**
   String get coinsPreview;
+
+  /// Settings row: the equipped World (visual theme)
+  ///
+  /// In en, this message translates to:
+  /// **'World'**
+  String get settingWorld;
+
+  /// World picker button opening the shop Worlds tab
+  ///
+  /// In en, this message translates to:
+  /// **'More worlds in the shop'**
+  String get settingWorldMore;
 }
 
 class _AppLocalizationsDelegate
