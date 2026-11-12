@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../puzzles/nests/nests.dart';
-import '../critter_image.dart';
+import '../cosmetics.dart';
 import '../palette.dart';
 import '../widgets.dart';
 import 'board_bits.dart';
@@ -209,7 +209,7 @@ class _Cell extends StatelessWidget {
         key: const ValueKey('c'),
         child: Transform.translate(
           offset: Offset(0, -hop * size * 0.32),
-          child: CritterImage(critter, size: size * 0.8),
+          child: HattedCritter(critter, size: size * 0.8),
         ),
       ),
       NestMark.empty =>

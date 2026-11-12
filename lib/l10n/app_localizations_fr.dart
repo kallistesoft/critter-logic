@@ -427,6 +427,456 @@ class AppLocalizationsFr extends AppLocalizations {
   String get setPolar => 'Banquise';
 
   @override
+  String get close => 'Fermer';
+
+  @override
+  String get calendarTitle => 'Cadeaux du jour';
+
+  @override
+  String get calendarSubtitle => 'Un cadeau pour chaque jour de visite';
+
+  @override
+  String calendarDay(int day) {
+    return 'Jour $day';
+  }
+
+  @override
+  String get calendarClaim => 'Récupérer';
+
+  @override
+  String get calendarDouble => 'x2';
+
+  @override
+  String get calendarTomorrow => 'Reviens demain pour le prochain cadeau !';
+
+  @override
+  String get capsuleWord => 'Capsule';
+
+  @override
+  String get goldenCapsuleWord => 'Capsule dorée';
+
+  @override
+  String get trophies => 'Trophées';
+
+  @override
+  String get trophyClaim => 'Récupérer';
+
+  @override
+  String get trophyDone => 'Terminé !';
+
+  @override
+  String get trophyUnlocked => 'Trophée débloqué !';
+
+  @override
+  String get achievementFirstDaily => 'Premiers pas';
+
+  @override
+  String get achievementFirstDailyDesc => 'Résous ton premier défi du jour';
+
+  @override
+  String get achievementDailies => 'Bonne habitude';
+
+  @override
+  String achievementDailiesDesc(int n) {
+    return 'Résous $n défis du jour';
+  }
+
+  @override
+  String get achievementStreak => 'En feu';
+
+  @override
+  String achievementStreakDesc(int n) {
+    return 'Atteins une série de $n jours';
+  }
+
+  @override
+  String get achievementBothDailies => 'Doublé';
+
+  @override
+  String achievementBothDailiesDesc(int n) {
+    return 'Résous les deux défis du jour $n jours';
+  }
+
+  @override
+  String get achievementPerfectDaily => 'Sans faute';
+
+  @override
+  String achievementPerfectDailyDesc(int n) {
+    return 'Résous $n défis sans erreur ni indice';
+  }
+
+  @override
+  String get achievementFastNests => 'Nids éclair';
+
+  @override
+  String achievementFastNestsDesc(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Résous $n défis Nids en moins d\'une minute',
+      one: 'Résous un défi Nids en moins d\'une minute',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get achievementFastPairs => 'Paires éclair';
+
+  @override
+  String achievementFastPairsDesc(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Résous $n défis Paires en moins d\'une minute',
+      one: 'Résous un défi Paires en moins d\'une minute',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get achievementNestsLevels => 'Bâtisseur de nids';
+
+  @override
+  String achievementNestsLevelsDesc(int n) {
+    return 'Gagne $n niveaux de Nids';
+  }
+
+  @override
+  String get achievementPairsLevels => 'Saute-pierres';
+
+  @override
+  String achievementPairsLevelsDesc(int n) {
+    return 'Gagne $n niveaux de Paires';
+  }
+
+  @override
+  String get achievementLevels => 'Grimpeur';
+
+  @override
+  String achievementLevelsDesc(int n) {
+    return 'Gagne $n niveaux';
+  }
+
+  @override
+  String get achievementNoHint => 'Sans aide';
+
+  @override
+  String achievementNoHintDesc(int n) {
+    return 'Résous $n casse-têtes sans indice';
+  }
+
+  @override
+  String get achievementCritters => 'Collectionneur';
+
+  @override
+  String achievementCrittersDesc(int n) {
+    return 'Collectionne $n bestioles';
+  }
+
+  @override
+  String get achievementSets => 'Maître des collections';
+
+  @override
+  String achievementSetsDesc(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Complète $n collections de l\'album',
+      one: 'Complète une collection de l\'album',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get achievementGolden => 'Touche dorée';
+
+  @override
+  String achievementGoldenDesc(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Trouve $n bestioles dorées',
+      one: 'Trouve une bestiole dorée',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get achievementCapsules => 'Casse-œufs';
+
+  @override
+  String achievementCapsulesDesc(int n) {
+    return 'Ouvre $n capsules';
+  }
+
+  @override
+  String get achievementShares => 'Fier de moi';
+
+  @override
+  String achievementSharesDesc(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Partage $n résultats',
+      one: 'Partage un résultat',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get achievementCalendar => 'Habitué';
+
+  @override
+  String achievementCalendarDesc(int n) {
+    return 'Récupère $n cadeaux du jour';
+  }
+
+  @override
+  String get achievementEvents => 'Star des événements';
+
+  @override
+  String achievementEventsDesc(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Termine $n événements de la semaine',
+      one: 'Termine un événement de la semaine',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get eventPolar => 'Semaine polaire';
+
+  @override
+  String get eventPanda => 'Semaine des pandas';
+
+  @override
+  String get eventJungle => 'Semaine de la jungle';
+
+  @override
+  String get eventSafari => 'Semaine safari';
+
+  @override
+  String get eventFarm => 'Semaine de la ferme';
+
+  @override
+  String get eventWinter => 'Semaine d\'hiver';
+
+  @override
+  String eventEndsDays(int days, int hours) {
+    return 'Encore $days j $hours h';
+  }
+
+  @override
+  String eventEndsHours(int hours, int minutes) {
+    return 'Encore $hours h $minutes min';
+  }
+
+  @override
+  String eventTokens(int n) {
+    return '+$n jetons d\'événement';
+  }
+
+  @override
+  String eventTokensShort(int n, String event) {
+    return '+$n 🐾 $event';
+  }
+
+  @override
+  String get eventPrizeReady => 'Un prix d\'événement t\'attend !';
+
+  @override
+  String eventHowTo(int daily, int level) {
+    return 'Défi du jour : +$daily 🐾 · Niveau gagné : +$level 🐾';
+  }
+
+  @override
+  String eventPrizeCritter(String set) {
+    return 'Une nouvelle bestiole ($set) + un cadre';
+  }
+
+  @override
+  String get eventLastDay => 'Dernier jour ! Récupère tes prix avant minuit.';
+
+  @override
+  String get eventSetCritters => 'Les bestioles de la semaine';
+
+  @override
+  String get eventClaim => 'Récupérer';
+
+  @override
+  String get eventClaimed => 'Récupéré';
+
+  @override
+  String get shop => 'Boutique';
+
+  @override
+  String get shopCapsules => 'Capsules';
+
+  @override
+  String get shopHats => 'Chapeaux';
+
+  @override
+  String get shopCoins => 'Pièces';
+
+  @override
+  String get shopDeal => 'Offre du jour';
+
+  @override
+  String get shopEquip => 'Équiper';
+
+  @override
+  String get shopEquipped => 'Équipé';
+
+  @override
+  String get shopTakeOff => 'Retirer';
+
+  @override
+  String get shopCapsuleBody => 'Une bestiole surprise pour ton album';
+
+  @override
+  String get shopStreakRepair => 'Réparer la série';
+
+  @override
+  String get shopStreakRepairBody => 'Rattrape la journée manquée d\'hier';
+
+  @override
+  String get shopStreakRepairNone => 'Ta série est intacte';
+
+  @override
+  String shopNotEnough(int n) {
+    return 'Il te manque $n pièces.';
+  }
+
+  @override
+  String get shopBought => 'C\'est à toi !';
+
+  @override
+  String shopOrSet(String set) {
+    return 'Offert avec la collection $set';
+  }
+
+  @override
+  String get shopOrAlbum => 'Offert avec l\'album complet';
+
+  @override
+  String get shopCoinsNote =>
+      'Les pièces servent aux indices, aux capsules et aux décors. Demande d\'abord à un adulte.';
+
+  @override
+  String coinPackCoins(int n) {
+    return '$n pièces';
+  }
+
+  @override
+  String coinPackBonus(int percent) {
+    return '+$percent %';
+  }
+
+  @override
+  String get coinPackBest => 'Meilleure offre';
+
+  @override
+  String get hatFlowers => 'Couronne de fleurs';
+
+  @override
+  String get hatParty => 'Chapeau de fête';
+
+  @override
+  String get hatBeanie => 'Tuque';
+
+  @override
+  String get hatCrown => 'Couronne';
+
+  @override
+  String get frameAlbumGold => 'Cadre d\'album doré';
+
+  @override
+  String get luckyNest => 'Nid chanceux';
+
+  @override
+  String get luckyFree => 'Gratuit !';
+
+  @override
+  String get luckyFreeEgg => 'Œuf gratuit';
+
+  @override
+  String get luckyTapEgg => 'Choisis un œuf !';
+
+  @override
+  String get luckyOdds => 'Probabilités';
+
+  @override
+  String get luckyOddsTitle => 'Que contient un œuf ?';
+
+  @override
+  String get luckyOddsNote =>
+      'Chaque œuf est tiré à part : les chances sont les mêmes pour chaque œuf.';
+
+  @override
+  String get luckyPrizeGolden => 'Capsule dorée';
+
+  @override
+  String get luckyPrizeCapsule => 'Capsule';
+
+  @override
+  String luckyPrizeCoins(int min, int max) {
+    return '$min à $max pièces';
+  }
+
+  @override
+  String get luckyPrizeHint => 'Indice gratuit';
+
+  @override
+  String get luckyPrizeFeather => 'Une plume';
+
+  @override
+  String get luckySoClose => 'Presque !';
+
+  @override
+  String get luckyWonHint => '+1 indice gratuit';
+
+  @override
+  String get luckyAnother => 'Un autre œuf';
+
+  @override
+  String get luckyTomorrow => 'Prochain œuf gratuit demain';
+
+  @override
+  String get luckyOpenCapsule => 'L\'ouvrir';
+
+  @override
+  String freeHintUsed(int n) {
+    return 'Indice gratuit utilisé (encore $n)';
+  }
+
+  @override
+  String get setCompleteTitle => 'Collection complète !';
+
+  @override
+  String get albumCompleteTitle => 'Album complet !';
+
+  @override
+  String setUnlockedItem(String item) {
+    return 'Débloqué : $item';
+  }
+
+  @override
+  String setRewardLabel(String item) {
+    return 'Récompense : $item';
+  }
+
+  @override
+  String get setUnlockedBadge => 'Débloqué !';
+
+  @override
+  String get later => 'Plus tard';
+
+  @override
+  String get nice => 'Super !';
+
+  @override
   String get settingSound => 'Effets sonores';
 
   @override

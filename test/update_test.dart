@@ -1,4 +1,5 @@
 import 'package:critter_logic/main.dart';
+import 'package:critter_logic/meta/progress_store.dart';
 import 'package:critter_logic/services/ad_service.dart';
 import 'package:critter_logic/services/sound_service.dart';
 import 'package:critter_logic/services/stats_store.dart';
@@ -26,6 +27,8 @@ void main() {
     setUp(() async {
       SharedPreferences.setMockInitialValues({});
       stats = await StatsStore.open();
+      // The once-a-day calendar popup was already seen today.
+      await stats.prefs.setInt('progress.cal.shownDay', localDay(DateTime(2026, 10, 25)));
       status = ValueNotifier(UpdateStatus.none);
       updates = 0;
     });

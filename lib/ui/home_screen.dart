@@ -1,8 +1,11 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
 import '../meta/album.dart';
 import '../meta/game_flow.dart';
+import '../meta/progress_store.dart';
 import '../puzzles/puzzle.dart';
 import '../services/share_text.dart';
 import '../services/stats_store.dart';
@@ -11,16 +14,21 @@ import 'album_screen.dart';
 import 'capsule_screen.dart';
 import 'critter_actor.dart';
 import 'critter_image.dart';
+import 'event_screen.dart';
 import 'game/game_screen.dart';
 import 'game/pairs_board.dart';
 import 'game/trail_board.dart';
 import 'level_path_screen.dart';
+import 'lucky_nest_screen.dart';
 import 'meadow.dart';
 import 'navigation.dart';
 import 'palette.dart';
 import 'remove_ads.dart';
+import 'retention_ui.dart';
 import 'services.dart';
 import 'settings_screen.dart';
+import 'shop_screen.dart';
+import 'trophies_screen.dart';
 import 'widgets.dart';
 
 /// Home: today's dailies, streak, coins, levels, album and capsules, with critters playing on the grass.
@@ -31,7 +39,44 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
+  final _coinTarget = GlobalKey();
+  bool _calendarOpen = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _maybeCalendar());
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) _maybeCalendar();
+  }
+
+  /// The login calendar pops up on the first visit of the local day (app open or resume, home on screen).
+  Future<void> _maybeCalendar() async {
+    if (!mounted || _calendarOpen || !(ModalRoute.of(context)?.isCurrent ?? false)) return;
+    final services = Services.of(context);
+    if (!await services.retention.shouldShowCalendar(services.today())) return;
+    if (mounted) await _openCalendar();
+  }
+
+  Future<void> _openCalendar() async {
+    if (_calendarOpen) return;
+    _calendarOpen = true;
+    await showCalendarPopup(context, coinTarget: _coinTarget);
+    _calendarOpen = false;
+    if (mounted) setState(() {});
+  }
+
   Future<void> _open(Widget screen) async {
     await Navigator.of(context).push(softRoute(screen));
     if (mounted) setState(() {});
@@ -68,6 +113,12 @@ class _HomeScreenState extends State<HomeScreen> {
     final streak = stats.streak(today);
     final waiting = stats.capsules + stats.goldenCapsules;
     final owned = stats.owned;
+    final retention = services.retention;
+    final now = services.today();
+    final calendar = retention.calendar.state(now);
+    final trophyBadge = retention.achievements.badgeCount;
+    final event = retention.event.current(now);
+    final luckyFree = retention.luckyNest.state(localDay(now)).freeAvailable;
     var order = 0;
     Widget enter(Widget child) => SlideIn(
       delay: Duration(milliseconds: 70 * order++),
@@ -82,19 +133,52 @@ class _HomeScreenState extends State<HomeScreen> {
             padding: const EdgeInsets.fromLTRB(12, 10, 12, 0),
             child: Row(
               children: [
-                StatPill(
-                  key: const Key('streak'),
-                  icon: FlameIcon(lit: streak > 0),
-                  text: l10n.streakDays(streak),
-                  color: streak > 0 ? goldSoft : paper,
+                Flexible(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Row(children: [
+                      StatPill(
+                        key: const Key('streak'),
+                        icon: FlameIcon(lit: streak > 0),
+                        text: l10n.streakDays(streak),
+                        color: streak > 0 ? goldSoft : paper,
+                      ),
+                      const SizedBox(width: 8),
+                      CoinCounter(key: const Key('homeCoins'), value: stats.coins, iconKey: _coinTarget),
+                    ]),
+                  ),
                 ),
-                const SizedBox(width: 8),
-                CoinCounter(key: const Key('homeCoins'), value: stats.coins),
-                const Spacer(),
+                const SizedBox(width: 6),
+                _BadgedButton(
+                  badge: calendar.available ? const _Dot() : null,
+                  child: RoundIconButton(
+                    key: const Key('calendarButton'),
+                    icon: Icons.calendar_month_rounded,
+                    color: coral,
+                    size: 44,
+                    tooltip: l10n.calendarTitle,
+                    onPressed: _openCalendar,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                _BadgedButton(
+                  badge: trophyBadge > 0 ? CountBadge(key: const Key('trophyBadge'), count: trophyBadge) : null,
+                  child: RoundIconButton(
+                    key: const Key('trophies'),
+                    icon: Icons.emoji_events_rounded,
+                    color: gold,
+                    size: 44,
+                    tooltip: l10n.trophies,
+                    onPressed: () => _open(const TrophiesScreen()),
+                  ),
+                ),
+                const SizedBox(width: 6),
                 RoundIconButton(
                   key: const Key('settings'),
                   icon: Icons.settings_rounded,
                   color: woodButton,
+                  size: 44,
                   tooltip: l10n.settings,
                   onPressed: () => _open(const SettingsScreen()),
                 ),
@@ -119,6 +203,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   const SizedBox(height: 14),
+                  if (event != null) ...[
+                    enter(EventBanner(state: event, onTap: () => _open(const EventScreen()))),
+                    const SizedBox(height: 14),
+                  ],
                   if (stats.canRepair(today)) ...[
                     enter(_RepairCard(onRepair: () => _repair(today))),
                     const SizedBox(height: 14),
@@ -290,7 +378,12 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
-          _Mascots(ids: buddyCritters(stats, 4)),
+          _Foreground(
+            mascots: buddyCritters(stats, 3),
+            luckyFree: luckyFree,
+            onShop: () => _open(const ShopScreen()),
+            onNest: () => _open(const LuckyNestScreen()),
+          ),
         ],
       ),
     );
@@ -328,37 +421,187 @@ class _SectionTitle extends StatelessWidget {
   );
 }
 
-/// Critters playing on the grass at the bottom of the home screen.
-class _Mascots extends StatelessWidget {
-  const _Mascots({required this.ids});
+/// The grass at the bottom of the home screen: the market stall, critters playing, and the Lucky Nest.
+class _Foreground extends StatelessWidget {
+  const _Foreground({required this.mascots, required this.luckyFree, required this.onShop, required this.onNest});
 
-  final List<String> ids;
+  final List<String> mascots;
+  final bool luckyFree;
+  final VoidCallback onShop;
+  final VoidCallback onNest;
 
-  static const _sizes = [66.0, 84.0, 74.0, 62.0];
+  static const _sizes = [70.0, 84.0, 66.0];
 
   @override
   Widget build(BuildContext context) {
     // Short phones get smaller critters, so the list keeps its room.
     final k = (MediaQuery.sizeOf(context).height / 820).clamp(0.72, 1.0);
     return SizedBox(
-      height: 104 * k,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          for (final (i, id) in ids.indexed)
-            Padding(
-              padding: EdgeInsets.only(bottom: (i.isEven ? 4 : 12) * k),
-              child: PopIn(
-                delay: Duration(milliseconds: 350 + 120 * i),
-                duration: const Duration(milliseconds: 650),
-                child: CritterBuddy(id, key: Key('mascot-$i'), size: _sizes[i % _sizes.length] * k, seed: i),
-              ),
+      height: 108 * k,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        child: Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
+          Padding(
+            padding: EdgeInsets.only(bottom: 4 * k),
+            child: PopIn(
+              delay: const Duration(milliseconds: 300),
+              child: ShopStall(key: const Key('shopStall'), size: 92 * k, onTap: onShop),
             ),
-        ],
+          ),
+          Expanded(
+            // Scales down on narrow phones instead of overflowing.
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.bottomCenter,
+              child: Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
+                for (final (i, id) in mascots.indexed)
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(4, 0, 4, (i.isEven ? 4 : 12) * k),
+                    child: PopIn(
+                      delay: Duration(milliseconds: 350 + 120 * i),
+                      duration: const Duration(milliseconds: 650),
+                      child: CritterBuddy(id, key: Key('mascot-$i'), size: _sizes[i % _sizes.length] * k, seed: i),
+                    ),
+                  ),
+              ]),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.only(bottom: 6 * k),
+            child: PopIn(
+              delay: const Duration(milliseconds: 750),
+              child: LuckyNestProp(key: const Key('luckyNest'), free: luckyFree, size: 84 * k, onTap: onNest),
+            ),
+          ),
+        ]),
       ),
     );
   }
+}
+
+/// A round button with a badge on its top-right corner.
+class _BadgedButton extends StatelessWidget {
+  const _BadgedButton({required this.child, this.badge});
+
+  final Widget child;
+  final Widget? badge;
+
+  @override
+  Widget build(BuildContext context) => Stack(clipBehavior: Clip.none, children: [
+        child,
+        if (badge != null) Positioned(right: -6, top: -6, child: badge!),
+      ]);
+}
+
+class _Dot extends StatelessWidget {
+  const _Dot();
+
+  @override
+  Widget build(BuildContext context) => Container(
+        key: const Key('calendarDot'),
+        width: 16,
+        height: 16,
+        decoration: BoxDecoration(color: bad, shape: BoxShape.circle, border: Border.all(color: Colors.white, width: 2.5)),
+      );
+}
+
+/// A little market stall with a striped awning: the way into the shop.
+class ShopStall extends StatelessWidget {
+  const ShopStall({super.key, required this.size, required this.onTap});
+
+  final double size;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Bouncy(
+      onTap: onTap,
+      child: Semantics(
+        button: true,
+        label: l10n.shop,
+        child: SizedBox(
+          width: size,
+          height: size,
+          child: CustomPaint(
+            painter: const _StallPainter(),
+            child: Align(
+              alignment: const Alignment(0, 0.56),
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: size * 0.14),
+                child: FittedBox(
+                  child: Text(l10n.shop, style: outlinedText(15, color: const Color(0xFFFFF4D6), stroke: woodEdge, width: 1.4)),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _StallPainter extends CustomPainter {
+  const _StallPainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final w = size.width, h = size.height;
+    final post = Paint()..color = woodDark;
+    canvas.drawOval(Rect.fromLTWH(w * 0.04, h * 0.9, w * 0.92, h * 0.1), Paint()..color = const Color(0x2A000000));
+    // Posts.
+    canvas.drawRRect(RRect.fromRectAndRadius(Rect.fromLTWH(w * 0.12, h * 0.22, w * 0.07, h * 0.72), const Radius.circular(3)), post);
+    canvas.drawRRect(RRect.fromRectAndRadius(Rect.fromLTWH(w * 0.81, h * 0.22, w * 0.07, h * 0.72), const Radius.circular(3)), post);
+    // Goods on the counter: a capsule, a coin pile and a party hat.
+    canvas.drawCircle(Offset(w * 0.3, h * 0.53), w * 0.08, Paint()..color = coral);
+    canvas.drawCircle(Offset(w * 0.3, h * 0.58), w * 0.075, Paint()..color = const Color(0xFFFFFBF3));
+    canvas.drawRect(Rect.fromLTWH(w * 0.22, h * 0.545, w * 0.16, h * 0.022), Paint()..color = Colors.white);
+    for (final (x, y) in const [(0.64, 0.58), (0.74, 0.58), (0.69, 0.52)]) {
+      canvas.drawCircle(Offset(w * x, h * y), w * 0.055, Paint()..color = goldEdge);
+      canvas.drawCircle(Offset(w * x, h * y - 1), w * 0.05, Paint()..color = gold);
+    }
+    final cone = Path()
+      ..moveTo(w * 0.42, h * 0.63)
+      ..lineTo(w * 0.5, h * 0.42)
+      ..lineTo(w * 0.58, h * 0.63)
+      ..close();
+    canvas.drawPath(cone, Paint()..color = sky);
+    canvas.drawCircle(Offset(w * 0.5, h * 0.42), w * 0.035, Paint()..color = const Color(0xFFFFE066));
+    // Counter.
+    final counter = Rect.fromLTWH(w * 0.02, h * 0.62, w * 0.96, h * 0.32);
+    canvas.save();
+    canvas.translate(counter.left, counter.top);
+    WoodPainter(radius: 8, nails: false, plank: h * 0.16).paint(canvas, counter.size);
+    canvas.restore();
+    // Striped awning with a scalloped edge.
+    final top = h * 0.04, bottom = h * 0.28;
+    final awning = Path()
+      ..moveTo(w * 0.1, top)
+      ..lineTo(w * 0.9, top)
+      ..lineTo(w, bottom)
+      ..lineTo(0, bottom)
+      ..close();
+    canvas.drawPath(awning.shift(const Offset(0, 3)), Paint()..color = const Color(0x33000000));
+    const stripes = 6;
+    final cream = Paint()..color = const Color(0xFFFFF8E7);
+    final red = Paint()..color = bad;
+    canvas.save();
+    canvas.clipPath(awning);
+    for (var i = 0; i < stripes; i++) {
+      canvas.drawRect(Rect.fromLTWH(w * i / stripes, 0, w / stripes, h), i.isEven ? red : cream);
+    }
+    canvas.restore();
+    for (var i = 0; i < stripes; i++) {
+      canvas.drawArc(Rect.fromLTWH(w * i / stripes, bottom - h * 0.06, w / stripes, h * 0.12), 0, pi, true, i.isEven ? red : cream);
+    }
+    canvas.drawPath(awning, Paint()
+      ..color = const Color(0xFFA8323A)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2);
+  }
+
+  @override
+  bool shouldRepaint(_StallPainter old) => false;
 }
 
 class _DailyCard extends StatelessWidget {

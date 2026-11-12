@@ -4,19 +4,23 @@ import 'package:flutter/services.dart';
 
 import 'l10n/app_localizations.dart';
 
+import 'meta/progress_store.dart';
 import 'meta/reminders.dart';
+import 'meta/retention.dart';
 import 'puzzles/bundled_source.dart';
 import 'puzzles/source.dart';
 import 'services/ad_ids.dart';
 import 'services/ad_service.dart';
 import 'services/admob_ad_service.dart';
 import 'services/analytics_service.dart';
+import 'services/coin_store_service.dart';
 import 'services/crash_reporting.dart';
 import 'services/game_settings.dart';
 import 'services/leaderboard_service.dart';
 import 'services/music_service.dart';
 import 'services/premium_service.dart';
 import 'services/reminder_service.dart';
+import 'services/retention_settings.dart';
 import 'services/review_service.dart';
 import 'services/sound_service.dart';
 import 'services/stats_store.dart';
@@ -46,6 +50,7 @@ Future<void> main() async {
   LeaderboardService leaderboard = const NoLeaderboardService();
   AnalyticsService? analytics;
   ReminderService reminders = const NoReminders();
+  CoinStoreService coinStore = NoCoinStore();
   // Remote Config tuning; Android reads it with the update check, other platforms keep the defaults.
   ValueListenable<GameSettings> settings = ValueNotifier(const GameSettings());
   if (android) {
@@ -80,12 +85,26 @@ Future<void> main() async {
       showPrivacyOptions = admob.showPrivacyOptions;
       admob.init();
       store.init();
+      final coins = StoreCoinService(stats, stats.prefs, analytics: analytics);
+      coinStore = coins;
+      coins.init();
     }
     review = StoreReviewService();
     reminders = LocalReminderService();
     // Forced/recommended updates use Google Play's in-app update API; the App Store has no equivalent.
     updates?.check();
   }
+
+  // Calendar, trophies, weekly event, shop and Lucky Nest. Rebuilt with the new tuning when Remote Config loads.
+  final progress = await ProgressStore.open();
+  Retention makeRetention() => Retention(
+        stats: stats,
+        progress: progress,
+        settings: updates?.retention.value ?? const RetentionSettings(),
+        analytics: analytics,
+      );
+  final retention = ValueNotifier(makeRetention());
+  updates?.retention.addListener(() => retention.value = makeRetention());
 
   final music = kIsWeb ? NoMusic(enabled: stats.musicOn) : AudioMusicService(enabled: stats.musicOn, persist: stats.setMusicOn);
   final l10n = lookupAppLocalizations(
@@ -110,6 +129,8 @@ Future<void> main() async {
     settings: settings,
     music: music,
     reminders: reminders,
+    retention: retention,
+    coinStore: coinStore,
   ));
 }
 
@@ -134,6 +155,8 @@ class CritterLogicApp extends StatelessWidget {
     this.settings,
     this.music,
     this.reminders = const NoReminders(),
+    this.retention,
+    this.coinStore,
   });
 
   final StatsStore stats;
@@ -161,6 +184,12 @@ class CritterLogicApp extends StatelessWidget {
   final MusicService? music;
   final ReminderService reminders;
 
+  /// Retention systems; null builds one on [stats]' preferences with the default settings (web, tests).
+  final ValueListenable<Retention>? retention;
+
+  /// Coin packs; null = none (web, tests).
+  final CoinStoreService? coinStore;
+
   @override
   Widget build(BuildContext context) {
     return Services(
@@ -175,6 +204,8 @@ class CritterLogicApp extends StatelessWidget {
       settings: settings,
       music: music,
       reminders: reminders,
+      retention: retention,
+      coinStore: coinStore,
       banner: banner,
       privacyOptionsRequired: privacyOptionsRequired,
       showPrivacyOptions: showPrivacyOptions,

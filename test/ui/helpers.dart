@@ -1,4 +1,6 @@
 import 'package:critter_logic/main.dart';
+import 'package:critter_logic/meta/progress_store.dart';
+import 'package:critter_logic/meta/retention.dart';
 import 'package:critter_logic/puzzles/nests/nests.dart';
 import 'package:critter_logic/puzzles/pairs/pairs.dart';
 import 'package:critter_logic/puzzles/puzzle.dart';
@@ -6,9 +8,11 @@ import 'package:critter_logic/puzzles/source.dart';
 import 'package:critter_logic/puzzles/trail/trail.dart';
 import 'package:critter_logic/services/ad_service.dart';
 import 'package:critter_logic/services/analytics_service.dart';
+import 'package:critter_logic/services/coin_store_service.dart';
 import 'package:critter_logic/services/leaderboard_service.dart';
 import 'package:critter_logic/services/sound_service.dart';
 import 'package:critter_logic/services/stats_store.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -101,7 +105,14 @@ class TestApp {
   final sound = NoSound();
   DateTime now = DateTime(2026, 12, 12, 10);
 
-  Future<void> pump(WidgetTester tester, {Locale? locale, Size size = const Size(412, 915), bool motion = false}) async {
+  /// Retention systems with custom settings / random; null = the app default on [stats].
+  ValueListenable<Retention>? retention;
+  CoinStoreService? coinStore;
+
+  /// [calendar] lets the once-a-day calendar popup open; other tests start with it already seen today.
+  Future<void> pump(WidgetTester tester,
+      {Locale? locale, Size size = const Size(412, 915), bool motion = false, bool calendar = false}) async {
+    if (!calendar) await stats.prefs.setInt('progress.cal.shownDay', localDay(now));
     if (!motion) calmMotion(tester);
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
@@ -115,6 +126,8 @@ class TestApp {
       puzzles: FakePuzzleSource(),
       today: () => now,
       locale: locale,
+      retention: retention,
+      coinStore: coinStore,
     ));
     if (motion) {
       // Clouds drift and critters idle forever: pump frames instead of settling.

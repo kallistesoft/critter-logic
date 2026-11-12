@@ -238,6 +238,19 @@ void main() {
         await back();
         await visit(const Key('album'), settle: false);
         await back();
+        await visit(const Key('trophies'));
+        await back();
+        await visit(const Key('eventBanner'));
+        await back();
+        await visit(const Key('shopStall'));
+        await tester.tap(find.byKey(const Key('tab-hats')));
+        await tester.pumpAndSettle();
+        await back();
+        await visit(const Key('luckyNest'));
+        await back();
+        await visit(const Key('calendarButton'));
+        await tester.tap(find.byKey(const Key('calendarClaim')));
+        await tester.pumpAndSettle();
         expect(tester.takeException(), isNull);
       });
     }
