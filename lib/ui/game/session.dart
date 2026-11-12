@@ -350,6 +350,11 @@ class TrailSession extends GameSession<int> {
     }
     if (p.isEmpty) return cell == puzzle.stones.first ? _apply([cell]) : MoveOutcome.none;
     if (rules.canExtend(p, cell)) return _apply([...p, cell]);
+    // A tap far from the trail's end is a stray touch, not a wrong move: ignore it. Only a step the trail could
+    // reach (next to its end) but that breaks a rule (wall, revisit, stone order) counts as a mistake.
+    final end = p.last, n = puzzle.size;
+    final next = (end - cell).abs() == n || ((end - cell).abs() == 1 && end ~/ n == cell ~/ n);
+    if (!next) return MoveOutcome.none;
     _refuse(cell);
     return MoveOutcome.mistake;
   }

@@ -101,10 +101,11 @@ void main() {
     await tester.pump();
     expect(session(tester).path, [0, 1, 2, 6, 5]);
 
-    // A tap far from the trail's end is a jump: refused.
+    // A tap far from the trail's end is a stray touch: ignored, not a mistake.
     await tapCell(tester, 15);
-    expect(session(tester).mistakes, 4);
-    expect(find.text('+40s'), findsOneWidget);
+    expect(session(tester).path, [0, 1, 2, 6, 5]);
+    expect(session(tester).mistakes, 3);
+    expect(find.text('+30s'), findsOneWidget);
 
     // Restart clears the trail, and the game is saved and restored.
     await tester.tap(find.byKey(const Key('restart')));
@@ -113,10 +114,10 @@ void main() {
     await dragPath(tester, [0, 1, 2]);
     await tester.tap(find.byKey(const Key('back')));
     await tester.pumpAndSettle();
-    expect(stats.savedGame('trail.daily')!['mi'], 4);
+    expect(stats.savedGame('trail.daily')!['mi'], 3);
     await openTrailDaily(tester);
     expect(session(tester).path, [0, 1, 2]);
-    expect(session(tester).mistakes, 4);
+    expect(session(tester).mistakes, 3);
   });
 
   testWidgets('a hint draws the next cell, or takes the trail back to where it left the solution', (tester) async {

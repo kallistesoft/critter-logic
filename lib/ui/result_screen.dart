@@ -332,15 +332,17 @@ class _DailyResultScreenState extends State<DailyResultScreen> with SingleTicker
             }
             final faster = standing.fasterThan;
             final rank = standing.rank;
+            // The player's own time may not be on the server yet (offline, or still being written): count it.
+            final total = rank == null || standing.total >= rank ? standing.total : rank;
             return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
               if (faster != null)
                 Text(l10n.fasterThan((faster * 100).round()), textAlign: TextAlign.center,
                     style: outlinedText(22, color: const Color(0xFFFFE066)))
               else if (rank != null)
-                Text(l10n.rankOf(rank, standing.total), textAlign: TextAlign.center,
+                Text(l10n.rankOf(rank, total), textAlign: TextAlign.center,
                     style: outlinedText(22, color: const Color(0xFFFFE066))),
               if (faster != null && rank != null)
-                Text(l10n.rankOf(rank, standing.total), textAlign: TextAlign.center, style: outlinedText(15, color: light)),
+                Text(l10n.rankOf(rank, total), textAlign: TextAlign.center, style: outlinedText(15, color: light)),
               const SizedBox(height: 10),
               Text(l10n.topTimes, textAlign: TextAlign.center, style: outlinedText(16, color: light)),
               const SizedBox(height: 4),
