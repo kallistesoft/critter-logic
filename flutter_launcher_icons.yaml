@@ -1,5 +1,5 @@
 # App icons for every platform, from tools/make_icon.py.
-# Regenerate: dart pub global activate flutter_launcher_icons && dart pub global run flutter_launcher_icons
+# Regenerate: python3 -I tools/make_icon.py <Animal Pack Remastered dir> && dart pub global run flutter_launcher_icons (dart pub global activate flutter_launcher_icons first)
 flutter_launcher_icons:
   image_path: "assets/icon/icon.png"
   android: "ic_launcher"
@@ -11,5 +11,5 @@ flutter_launcher_icons:
   web:
     generate: true
     image_path: "assets/icon/icon.png"
-    background_color: "#16213E"
-    theme_color: "#16213E"
+    background_color: "#FFF6E9"
+    theme_color: "#FF9F7A"
