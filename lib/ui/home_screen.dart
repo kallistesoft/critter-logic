@@ -134,44 +134,49 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             padding: const EdgeInsets.fromLTRB(12, 10, 12, 0),
             child: Row(
               children: [
-                Flexible(
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
+                // Streak, coins, calendar and trophies on the left (shrinking together if the phone is narrow);
+                // settings alone in the top-right corner.
+                Expanded(
+                  child: Align(
                     alignment: Alignment.centerLeft,
-                    child: Row(children: [
-                      StatPill(
-                        key: const Key('streak'),
-                        icon: FlameIcon(lit: streak > 0),
-                        text: l10n.streakDays(streak),
-                        color: streak > 0 ? goldSoft : paper,
-                      ),
-                      const SizedBox(width: 8),
-                      CoinCounter(key: const Key('homeCoins'), value: stats.coins, iconKey: _coinTarget),
-                    ]),
-                  ),
-                ),
-                const SizedBox(width: 6),
-                _BadgedButton(
-                  badge: calendar.available ? const _Dot() : null,
-                  child: RoundIconButton(
-                    key: const Key('calendarButton'),
-                    icon: Icons.calendar_month_rounded,
-                    color: coral,
-                    size: 44,
-                    tooltip: l10n.calendarTitle,
-                    onPressed: _openCalendar,
-                  ),
-                ),
-                const SizedBox(width: 6),
-                _BadgedButton(
-                  badge: trophyBadge > 0 ? CountBadge(key: const Key('trophyBadge'), count: trophyBadge) : null,
-                  child: RoundIconButton(
-                    key: const Key('trophies'),
-                    icon: Icons.emoji_events_rounded,
-                    color: gold,
-                    size: 44,
-                    tooltip: l10n.trophies,
-                    onPressed: () => _open(const TrophiesScreen()),
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Row(children: [
+                        StatPill(
+                          key: const Key('streak'),
+                          icon: FlameIcon(lit: streak > 0),
+                          text: l10n.streakDays(streak),
+                          color: streak > 0 ? goldSoft : paper,
+                        ),
+                        const SizedBox(width: 8),
+                        CoinCounter(key: const Key('homeCoins'), value: stats.coins, iconKey: _coinTarget),
+                        const SizedBox(width: 6),
+                        _BadgedButton(
+                          badge: calendar.available ? const _Dot() : null,
+                          child: RoundIconButton(
+                            key: const Key('calendarButton'),
+                            icon: Icons.calendar_month_rounded,
+                            color: coral,
+                            size: 44,
+                            tooltip: l10n.calendarTitle,
+                            onPressed: _openCalendar,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        _BadgedButton(
+                          badge: trophyBadge > 0 ? CountBadge(key: const Key('trophyBadge'), count: trophyBadge) : null,
+                          child: RoundIconButton(
+                            key: const Key('trophies'),
+                            icon: Icons.emoji_events_rounded,
+                            color: gold,
+                            size: 44,
+                            tooltip: l10n.trophies,
+                            onPressed: () => _open(const TrophiesScreen()),
+                          ),
+                        ),
+                      ]),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 6),

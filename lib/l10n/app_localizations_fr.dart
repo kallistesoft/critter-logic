@@ -893,6 +893,15 @@ class AppLocalizationsFr extends AppLocalizations {
   String get settingReminders => 'Rappel quotidien';
 
   @override
+  String get settingLanguage => 'Langue';
+
+  @override
+  String get languageSystem => 'Langue du système';
+
+  @override
+  String get reminderChannel => 'Défi du jour';
+
+  @override
   String get credits => 'Dessins et sons : Kenney (kenney.nl), CC0';
 
   @override
@@ -1066,7 +1075,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get worldProBlurb =>
-      'Ardoise et or, sans fioritures. Juste vos temps.';
+      'Ardoise et or, sans fioritures. Juste tes temps.';
 
   @override
   String get worldFree => 'Gratuit';
@@ -1075,19 +1084,19 @@ class AppLocalizationsFr extends AppLocalizations {
   String get worldPreview => 'Aperçu';
 
   @override
-  String get worldPreviewNote => 'Aperçu : touchez pour fermer';
+  String get worldPreviewNote => 'Aperçu : touche pour fermer';
 
   @override
   String worldEquipped(String world) {
-    return 'Votre monde : $world';
+    return 'Ton monde : $world';
   }
 
   @override
-  String get welcomeWorldTitle => 'Choisissez votre monde';
+  String get welcomeWorldTitle => 'Choisis ton monde';
 
   @override
   String get welcomeWorldBody =>
-      'Les mêmes casse-têtes, à votre style. Vous pourrez changer à tout moment dans la boutique.';
+      'Les mêmes casse-têtes, à ton style. Tu pourras changer à tout moment dans la boutique.';
 
   @override
   String welcomeWorldGo(String world) {
@@ -1102,4 +1111,8 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get previewDaily => 'Aujourd’hui';
+
+  @override
+  String get coinsPreview =>
+      'Boutique indisponible dans la version de développement : ceci est un aperçu.';
 }

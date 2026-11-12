@@ -193,7 +193,7 @@ void main() {
     });
 
     for (final world in worlds) {
-      for (final locale in const [Locale('en'), Locale('fr')]) {
+      for (final locale in const [Locale('en'), Locale('fr'), Locale('es')]) {
         testWidgets('every screen fits a 360×640 phone (${world.id}, $locale)', (tester) async {
           addTearDown(() => activeWorld = worlds.first);
           app.world = world.id;
