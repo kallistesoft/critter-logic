@@ -48,6 +48,8 @@ void main() {
       Retention(stats: stats, progress: progress, settings: settings, analytics: app.analytics, random: Random(4));
 
   Future<void> open(WidgetTester tester, Key key) async {
+    await tester.ensureVisible(find.byKey(key));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(key));
     await tester.pumpAndSettle();
   }

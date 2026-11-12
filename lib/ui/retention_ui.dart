@@ -480,7 +480,7 @@ class _DayTileState extends State<_DayTile> with SingleTickerProviderStateMixin 
     final golden = widget.big || r.goldenCapsules > 0;
     final active = widget.today && !widget.claimed;
     final Widget icon = r.goldenCapsules > 0 || r.capsules > 0
-        ? CapsuleEgg(size: widget.big ? 52 : 38, golden: r.goldenCapsules > 0 || widget.big)
+        ? CapsuleEgg(size: widget.big ? 52 : 38, golden: r.goldenCapsules > 0)
         : Column(
             mainAxisSize: MainAxisSize.min,
             children: [

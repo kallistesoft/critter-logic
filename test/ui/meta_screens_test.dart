@@ -85,6 +85,8 @@ void main() {
       await stats.addCapsule();
       await app.pump(tester);
       expect(find.byKey(const Key('capsuleBadge')), findsOneWidget);
+      await tester.ensureVisible(find.byKey(const Key('capsules')));
+      await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('capsules')));
       await tester.pumpAndSettle();
       for (var i = 0; i < 3; i++) {
@@ -132,6 +134,8 @@ void main() {
       await stats.addCritter('chick');
       await stats.addCritter('cow');
       await app.pump(tester);
+      await tester.ensureVisible(find.byKey(const Key('album')));
+      await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('album')));
       // The golden shimmer loops: pump instead of settling.
       await tester.pump(const Duration(milliseconds: 500));

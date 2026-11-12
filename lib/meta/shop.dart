@@ -124,9 +124,10 @@ class Shop {
   /// midnight. Null when deals are off.
   ShopItem? dailyDeal(int today) {
     if (settings.dealPercent <= 0) return null;
+    // Board themes aren't on sale (Worlds will replace them), so deals pick from the hats.
     final pool = [
       for (final i in shopCatalog)
-        if (i.cosmetic && !owns(i)) i,
+        if (i.category == ShopCategory.hat && !owns(i)) i,
     ];
     if (pool.isEmpty) return shopItemById['capsule'];
     // A small integer hash, so the pick looks random but every device agrees on the day's deal.
