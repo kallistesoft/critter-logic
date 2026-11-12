@@ -16,21 +16,27 @@ void main() {
     progress = await ProgressStore.open();
   });
 
-  test('one free egg a day, then 3 paid, then none until tomorrow', () async {
+  test('one free egg a day, then paid eggs with no daily limit', () async {
     await stats.addCoins(1000);
     final nest = LuckyNest(stats, progress, random: Random(1));
-    final start = stats.coins;
-    final first = (await nest.draw(5))!;
-    expect(first.free, isTrue);
+    expect((await nest.draw(5))!.free, isTrue);
+    for (var i = 0; i < 10; i++) {
+      expect((await nest.draw(5))!.free, isFalse);
+    }
+    expect(nest.state(5).paidLeft, isNull);
+    expect(nest.state(6).freeAvailable, isTrue);
+  });
+
+  test('Remote Config can still cap paid eggs per day', () async {
+    await stats.addCoins(1000);
+    final nest = LuckyNest(stats, progress, settings: const LuckySettings(paidPerDay: 3), random: Random(1));
+    await nest.draw(5); // free
     for (var i = 0; i < 3; i++) {
       expect((await nest.draw(5))!.free, isFalse);
     }
     expect(await nest.draw(5), isNull);
     expect(nest.state(5).paidLeft, 0);
-    expect(nest.state(6).freeAvailable, isTrue);
     expect(nest.state(6).paidLeft, 3);
-    // 3 paid eggs cost 150; winnings can only add.
-    expect(stats.coins, greaterThanOrEqualTo(start - 150));
   });
 
   test('a paid egg needs the coins', () async {
@@ -38,7 +44,7 @@ void main() {
     await nest.draw(1); // free
     await stats.spendCoins(stats.coins);
     expect(await nest.draw(1), isNull);
-    expect(nest.state(1).paidLeft, 3, reason: 'nothing was used');
+    expect(stats.coins, 0, reason: 'nothing was charged');
   });
 
   test('odds match the settings over many draws, and average value stays under the price', () async {

@@ -198,7 +198,7 @@ The main coin sink. Prices are set against income (~45 coins/day from dailies, ~
 
 ## Lucky Nest (`lib/meta/lucky_nest.dart`, `retention.luckyNest`)
 A cozy egg draw (deliberately no casino look: no slots, chips or "bet" wording; odds always shown).
-- **1 free egg per day**, then **up to 3 paid eggs per day at 50 coins**.
+- **1 free egg per day**, then **paid eggs at 50 coins, no daily limit**.
 - Odds: golden capsule 1.5%, capsule 12%, 40–120 coins 20%, free hint 30%, feather (nothing) 36.5%.
   Average value per egg ≈ 49 coins for a 50-coin price: a sink that still feels generous.
 - Free hints won here live in `ProgressStore.freeHints`. **Hook:** the hint button must call
@@ -214,4 +214,4 @@ A cozy egg draw (deliberately no casino look: no slots, chips or "bet" wording; 
 |---|---|---|
 | `shop_prices` | String | empty (catalog prices); `id=price` pairs, 10–5000 |
 | `shop_deal_percent` | Number | `30` (0–90; 0 = no deal) |
-| `lucky_nest` | String | empty (defaults); `golden=15,capsule=120,coins=200,hint=300,price=50,paid_per_day=3,min_coins=40,max_coins=120` (odds in per mille) |
+| `lucky_nest` | String | empty (defaults); `golden=15,capsule=120,coins=200,hint=300,price=50,paid_per_day=0 (0 = no limit),min_coins=40,max_coins=120` (odds in per mille) |

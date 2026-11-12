@@ -16,13 +16,14 @@ class LuckySettings {
     this.coins = 200,
     this.hint = 300,
     this.price = 50,
-    this.paidPerDay = 3,
+    this.paidPerDay = 0,
     this.minCoins = 40,
     this.maxCoins = 120,
   });
 
   final int golden, capsule, coins, hint;
   final int price;
+  /// Paid eggs allowed per day; 0 = no limit (the default). Remote Config can set a cap.
   final int paidPerDay;
   final int minCoins, maxCoins;
 
@@ -61,7 +62,7 @@ class LuckySettings {
       coins: coins,
       hint: hint,
       price: pick('price', d.price, 1000) < 10 ? d.price : pick('price', d.price, 1000),
-      paidPerDay: pick('paid_per_day', d.paidPerDay, 20),
+      paidPerDay: pick('paid_per_day', d.paidPerDay, 100),
       minCoins: minCoins <= maxCoins ? minCoins : d.minCoins,
       maxCoins: minCoins <= maxCoins ? maxCoins : d.maxCoins,
     );
@@ -83,11 +84,12 @@ class LuckyState {
   const LuckyState({required this.freeAvailable, required this.paidLeft, required this.price});
 
   final bool freeAvailable;
-  final int paidLeft;
+  /// Paid eggs still allowed today; null = no limit.
+  final int? paidLeft;
   final int price;
 }
 
-/// The Lucky Nest: one free egg a day, then a few paid eggs, odds shown. Prizes are paid into [StatsStore]
+/// The Lucky Nest: one free egg a day, then paid eggs (no daily limit unless Remote Config sets one), odds shown. Prizes are paid into [StatsStore]
 /// (capsules, coins) and [ProgressStore] (free hints).
 class LuckyNest {
   LuckyNest(this.stats, this.progress, {this.settings = const LuckySettings(), AnalyticsService? analytics, Random? random})
@@ -102,7 +104,9 @@ class LuckyNest {
 
   LuckyState state(int today) => LuckyState(
         freeAvailable: progress.luckyFreeDay != today,
-        paidLeft: (settings.paidPerDay - progress.luckyPaid(today)).clamp(0, settings.paidPerDay),
+        paidLeft: settings.paidPerDay == 0
+            ? null
+            : (settings.paidPerDay - progress.luckyPaid(today)).clamp(0, settings.paidPerDay),
         price: settings.price,
       );
 
@@ -112,7 +116,7 @@ class LuckyNest {
     final s = state(today);
     final free = s.freeAvailable;
     if (!free) {
-      if (s.paidLeft <= 0 || !await stats.spendCoins(settings.price)) return null;
+      if ((s.paidLeft != null && s.paidLeft! <= 0) || !await stats.spendCoins(settings.price)) return null;
       await progress.addLuckyPaid(today);
     } else {
       await progress.setLuckyFreeDay(today);
