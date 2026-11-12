@@ -20,12 +20,15 @@ val keyProperties = Properties().apply {
 
 android {
     namespace = "ca.kallistesoft.critterlogic"
-    compileSdk = flutter.compileSdkVersion
+    // flutter_local_notifications 23 needs compile SDK 37 (Flutter defaults to 36).
+    compileSdk = 37
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+        // flutter_local_notifications (daily reminder) needs java.time on old Android versions.
+        isCoreLibraryDesugaringEnabled = true
     }
 
     defaultConfig {
@@ -75,4 +78,8 @@ kotlin {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }

@@ -34,7 +34,8 @@ class FrequencyCappedAdService implements AdService {
   final DateTime firstLaunch;
   final DateTime Function() clock;
   final Duration grace;
-  final Duration gap;
+  /// Updated from Remote Config once it has loaded.
+  Duration gap;
   DateTime? _last;
 
   @override
