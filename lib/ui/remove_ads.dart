@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../l10n/app_localizations.dart';
 import '../services/premium_service.dart';
 import 'palette.dart';
+import 'widgets.dart';
 
 /// "No ads" offer on the home screen, behind a grown-up check, plus Restore (required by Apple).
 class RemoveAdsButtons extends StatelessWidget {
@@ -27,13 +28,13 @@ class RemoveAdsButtons extends StatelessWidget {
             TextButton.icon(
               key: const Key('removeAds'),
               onPressed: () => _buy(context),
-              icon: const Icon(Icons.block_rounded, color: accent),
-              label: Text(l10n.noAdsPrice(premium.price ?? ''), style: const TextStyle(color: accent)),
+              icon: const Icon(Icons.block_rounded, color: Colors.white, shadows: [Shadow(color: coralEdge, offset: Offset(0, 2))]),
+              label: Text(l10n.noAdsPrice(premium.price ?? ''), style: outlinedText(15, stroke: coralEdge, width: 1.4)),
             ),
             TextButton(
               key: const Key('restore'),
               onPressed: premium.restore,
-              child: Text(l10n.restorePurchase, style: const TextStyle(color: inkSoft)),
+              child: Text(l10n.restorePurchase, style: outlinedText(15, stroke: woodEdge, width: 1.4)),
             ),
           ]);
         },

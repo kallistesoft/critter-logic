@@ -6,10 +6,12 @@ import '../puzzles/nests/nests.dart';
 import '../puzzles/pairs/pairs.dart';
 import '../puzzles/puzzle.dart';
 import '../services/sound_service.dart';
+import 'critter_actor.dart';
 import 'game/game_screen.dart';
 import 'game/nests_board.dart';
 import 'game/pairs_board.dart';
 import 'game/session.dart';
+import 'meadow.dart';
 import 'palette.dart';
 import 'services.dart';
 import 'widgets.dart';
@@ -146,135 +148,161 @@ class _TutorialScreenState extends State<TutorialScreen> {
     final l10n = AppLocalizations.of(context);
     final step = _steps[_step];
     final last = _step == _steps.length - 1;
-    return Scaffold(
-      backgroundColor: background,
-      body: ScreenFrame(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-          child: Column(
-            children: [
-              Row(
-                children: [
-                  RoundIconButton(
-                    icon: Icons.arrow_back_rounded,
-                    onPressed: () => Navigator.maybePop(context),
-                    tooltip: l10n.back,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(child: Text(l10n.howToPlay(gameName(l10n, widget.kind)), style: chunky(22))),
-                  TextButton(
-                    key: const Key('tutorialSkip'),
-                    onPressed: () => _finish(skipped: true),
-                    child: Text(
-                      l10n.skip,
-                      style: chunky(16, color: inkSoft, weight: FontWeight.w800),
-                    ),
-                  ),
-                ],
+    final oops = _session.conflicts.isNotEmpty;
+    return MeadowScaffold(
+      child: Column(children: [
+        MeadowTopBar(
+          title: l10n.howToPlay(gameName(l10n, widget.kind)),
+          backTooltip: l10n.back,
+          trailing: [
+            ChunkyButton(
+              key: const Key('tutorialSkip'),
+              label: l10n.skip,
+              small: true,
+              color: woodButton,
+              onPressed: () => _finish(skipped: true),
+            ),
+          ],
+        ),
+        const SizedBox(height: 14),
+        Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+          for (var i = 0; i < _steps.length; i++)
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 250),
+              margin: const EdgeInsets.symmetric(horizontal: 4),
+              width: i == _step ? 30 : 14,
+              height: 14,
+              decoration: BoxDecoration(
+                color: i <= _step ? leaf : paper,
+                borderRadius: BorderRadius.circular(7),
+                border: Border.all(color: i <= _step ? leafEdge : paperEdge, width: 2),
               ),
-              const SizedBox(height: 14),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  for (var i = 0; i < _steps.length; i++)
-                    AnimatedContainer(
-                      duration: const Duration(milliseconds: 250),
-                      margin: const EdgeInsets.symmetric(horizontal: 4),
-                      width: i == _step ? 26 : 10,
-                      height: 10,
-                      decoration: BoxDecoration(
-                        color: i <= _step ? accent : accentSoft,
-                        borderRadius: BorderRadius.circular(5),
-                      ),
-                    ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              PopIn(
+            ),
+        ]),
+        const SizedBox(height: 12),
+        // The mascot explains the rule in a speech bubble.
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14),
+          child: Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
+            CritterBuddy(widget.kind == GameKind.nests ? 'chick' : 'owl', size: 76, seed: 1),
+            const SizedBox(width: 4),
+            Expanded(
+              child: PopIn(
                 key: ValueKey(_step),
-                child: SoftCard(
-                  child: Row(
-                    children: [
-                      Text(widget.kind == GameKind.nests ? '🐤' : '☀️', style: const TextStyle(fontSize: 30)),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          step.text(l10n),
-                          key: const Key('tutorialText'),
-                          style: chunky(17, weight: FontWeight.w800, height: 1.25),
-                        ),
+                child: SpeechBubble(
+                  child: Text(
+                    step.text(l10n),
+                    key: const Key('tutorialText'),
+                    style: chunky(17, weight: FontWeight.w600, height: 1.25),
+                  ),
+                ),
+              ),
+            ),
+          ]),
+        ),
+        const SizedBox(height: 16),
+        Expanded(
+          child: LayoutBuilder(
+            builder: (context, box) => Align(
+              alignment: Alignment.topCenter,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Column(mainAxisSize: MainAxisSize.min, children: [
+                  ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: 330, maxHeight: (box.maxHeight - 84).clamp(120, 330)),
+                    child: switch (_session) {
+                      final NestsSession s => NestsBoard(
+                        key: ValueKey('tut$_step'),
+                        session: s,
+                        autoCross: false,
+                        readOnly: _stepDone,
+                        targets: _stepDone ? const {} : step.editable,
+                        onMove: _onMove,
                       ),
-                    ],
+                      final PairsSession s => PairsBoard(
+                        key: ValueKey('tut$_step'),
+                        session: s,
+                        readOnly: _stepDone,
+                        targets: _stepDone ? const {} : step.editable,
+                        onMove: _onMove,
+                      ),
+                      _ => const SizedBox.shrink(),
+                    },
                   ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              Expanded(
-                child: LayoutBuilder(
-                  builder: (context, box) => Align(
-                    alignment: Alignment.topCenter,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        ConstrainedBox(
-                          constraints: BoxConstraints(maxWidth: 320, maxHeight: (box.maxHeight - 80).clamp(120, 320)),
-                          child: switch (_session) {
-                            final NestsSession s => NestsBoard(
-                              key: ValueKey('tut$_step'),
-                              session: s,
-                              autoCross: false,
-                              readOnly: _stepDone,
-                              targets: _stepDone ? const {} : step.editable,
-                              onMove: _onMove,
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    height: 64,
+                    child: _stepDone
+                        ? PopIn(
+                            child: ChunkyButton(
+                              key: const Key('tutorialNext'),
+                              label: last ? l10n.tutorialLetsPlay : l10n.tutorialNice,
+                              color: leaf,
+                              expand: true,
+                              icon: Icon(last ? Icons.play_arrow_rounded : Icons.arrow_forward_rounded, color: Colors.white),
+                              onPressed: _next,
                             ),
-                            final PairsSession s => PairsBoard(
-                              key: ValueKey('tut$_step'),
-                              session: s,
-                              readOnly: _stepDone,
-                              targets: _stepDone ? const {} : step.editable,
-                              onMove: _onMove,
+                          )
+                        : Center(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                              decoration: BoxDecoration(
+                                color: oops ? accentSoft : paper.withValues(alpha: 0.92),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(color: oops ? bad : paperEdge, width: 2),
+                              ),
+                              child: Text(
+                                oops ? l10n.tutorialOops : l10n.tutorialTapHint,
+                                textAlign: TextAlign.center,
+                                style: chunky(15, color: oops ? bad : inkSoft, weight: FontWeight.w600),
+                              ),
                             ),
-                            _ => const SizedBox.shrink(),
-                          },
-                        ),
-                        const SizedBox(height: 20),
-                        SizedBox(
-                          height: 60,
-                          child: _stepDone
-                              ? PopIn(
-                                  child: ChunkyButton(
-                                    key: const Key('tutorialNext'),
-                                    label: last ? l10n.tutorialLetsPlay : l10n.tutorialNice,
-                                    color: good,
-                                    expand: true,
-                                    icon: Icon(
-                                      last ? Icons.play_arrow_rounded : Icons.arrow_forward_rounded,
-                                      color: Colors.white,
-                                    ),
-                                    onPressed: _next,
-                                  ),
-                                )
-                              : Center(
-                                  child: Text(
-                                    _session.conflicts.isNotEmpty ? l10n.tutorialOops : l10n.tutorialTapHint,
-                                    textAlign: TextAlign.center,
-                                    style: chunky(
-                                      15,
-                                      color: _session.conflicts.isNotEmpty ? bad : inkSoft,
-                                      weight: FontWeight.w700,
-                                    ),
-                                  ),
-                                ),
-                        ),
-                      ],
-                    ),
+                          ),
                   ),
-                ),
+                ]),
               ),
-            ],
+            ),
           ),
         ),
-      ),
+      ]),
     );
   }
+}
+
+/// A paper speech bubble with a tail pointing left (at the mascot).
+class SpeechBubble extends StatelessWidget {
+  const SpeechBubble({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => CustomPaint(
+        painter: const _BubblePainter(),
+        child: Padding(padding: const EdgeInsets.fromLTRB(26, 14, 16, 16), child: child),
+      );
+}
+
+class _BubblePainter extends CustomPainter {
+  const _BubblePainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    const tail = 12.0;
+    final body = RRect.fromLTRBR(tail, 0, size.width, size.height, const Radius.circular(20));
+    final path = Path()
+      ..addRRect(body)
+      ..moveTo(tail + 2, size.height - 34)
+      ..lineTo(0, size.height - 14)
+      ..lineTo(tail + 16, size.height - 18)
+      ..close();
+    canvas.drawPath(path.shift(const Offset(0, 4)), Paint()..color = paperEdge);
+    canvas.drawPath(path, Paint()..color = paper);
+    canvas.drawRRect(body, Paint()
+      ..color = paperEdge
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2);
+  }
+
+  @override
+  bool shouldRepaint(_BubblePainter old) => false;
 }

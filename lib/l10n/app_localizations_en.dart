@@ -522,4 +522,28 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get reminderDenied =>
       'Turn on notifications for Critter Logic in your phone settings.';
+
+  @override
+  String get levelMap => 'Map';
+
+  @override
+  String get tapToPlay => 'Tap to play!';
+
+  @override
+  String levelLocked(int level) {
+    return 'Finish level $level first';
+  }
+
+  @override
+  String levelPathTitle(String game) {
+    return '$game levels';
+  }
+
+  @override
+  String levelDone(int level, int stars) {
+    return 'Level $level: $stars/3 stars';
+  }
+
+  @override
+  String get fontCredit => 'Font: Fredoka (SIL Open Font License)';
 }

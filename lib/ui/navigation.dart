@@ -7,18 +7,21 @@ import 'result_screen.dart';
 import 'services.dart';
 import 'tutorial_screen.dart';
 
-/// Soft fade-and-rise page transition.
+/// Soft scale-and-fade page transition: the new page grows in gently over the meadow.
 Route<T> softRoute<T>(Widget screen) => PageRouteBuilder<T>(
-      transitionDuration: const Duration(milliseconds: 280),
-      reverseTransitionDuration: const Duration(milliseconds: 220),
+      transitionDuration: const Duration(milliseconds: 340),
+      reverseTransitionDuration: const Duration(milliseconds: 240),
       pageBuilder: (_, _, _) => screen,
-      transitionsBuilder: (_, animation, _, child) {
-        final curved = CurvedAnimation(parent: animation, curve: Curves.easeOutCubic);
+      transitionsBuilder: (_, animation, secondary, child) {
+        final curved = CurvedAnimation(parent: animation, curve: Curves.easeOutBack, reverseCurve: Curves.easeInCubic);
+        final fade = CurvedAnimation(parent: animation, curve: const Interval(0, 0.6, curve: Curves.easeOut));
+        // The page underneath fades out as the new one arrives (pages are see-through over the shared world).
+        final out = Tween(begin: 1.0, end: 0.0).animate(CurvedAnimation(parent: secondary, curve: const Interval(0, 0.5)));
         return FadeTransition(
-          opacity: curved,
-          child: SlideTransition(
-            position: Tween(begin: const Offset(0, 0.04), end: Offset.zero).animate(curved),
-            child: child,
+          opacity: out,
+          child: FadeTransition(
+            opacity: fade,
+            child: ScaleTransition(scale: Tween(begin: 0.92, end: 1.0).animate(curved), child: child),
           ),
         );
       },

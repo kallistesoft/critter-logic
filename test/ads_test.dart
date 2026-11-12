@@ -10,6 +10,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'ui/helpers.dart' show calmMotion;
+
 class CountingAds implements AdService {
   int interstitials = 0;
   int rewarded = 0;
@@ -105,6 +107,7 @@ void main() {
     });
 
     Future<void> pumpHome(WidgetTester tester, PremiumService premium, {Locale? locale}) async {
+      calmMotion(tester);
       tester.view.physicalSize = const Size(412, 880);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.reset);
@@ -115,6 +118,14 @@ void main() {
           premium: premium,
           today: () => DateTime(2026, 10, 25),
           locale: locale));
+      await tester.pumpAndSettle();
+      // The offer sits at the bottom of the home list.
+      final offer = find.byKey(const Key('restore'));
+      if (premium.available) {
+        await tester.scrollUntilVisible(offer, 150, scrollable: find.byType(Scrollable).first);
+        await tester.ensureVisible(offer);
+        await tester.pumpAndSettle();
+      }
     }
 
     testWidgets('No ads is hidden when the store has no product', (tester) async {
@@ -164,6 +175,7 @@ void main() {
     testWidgets('Privacy options shows only where consent rules require it', (tester) async {
       final required = ValueNotifier(false);
       var opened = 0;
+      calmMotion(tester);
       tester.view.physicalSize = const Size(412, 880);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.reset);
@@ -176,7 +188,10 @@ void main() {
           today: () => DateTime(2026, 10, 25)));
       expect(find.byKey(const Key('privacy')), findsNothing);
       required.value = true;
-      await tester.pump();
+      await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(find.byKey(const Key('privacy')), 150, scrollable: find.byType(Scrollable).first);
+      await tester.ensureVisible(find.byKey(const Key('privacy')));
+      await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('privacy')));
       expect(opened, 1);
     });

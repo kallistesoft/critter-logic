@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'ui/helpers.dart' show calmMotion;
+
 void main() {
   test('status from Remote Config versions', () {
     expect(updateStatusFor(build: 5, minVersion: 0, recommendedVersion: 0), UpdateStatus.none);
@@ -29,6 +31,7 @@ void main() {
     });
 
     Future<void> pumpApp(WidgetTester tester, {Locale? locale}) async {
+      calmMotion(tester);
       tester.view.physicalSize = const Size(412, 880);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.reset);

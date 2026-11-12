@@ -73,8 +73,7 @@ void main() {
 
     testWidgets('the tutorial can be skipped', (tester) async {
       await app.pump(tester);
-      await tester.tap(find.byKey(const Key('level-pairs')));
-      await tester.pumpAndSettle();
+      await playLevel(tester, GameKind.pairs);
       expect(find.text('How to play Pairs'), findsOneWidget);
       await tester.tap(find.byKey(const Key('tutorialSkip')));
       await tester.pumpAndSettle();

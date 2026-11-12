@@ -561,5 +561,47 @@
   "reminderDenied": "Turn on notifications for Critter Logic in your phone settings.",
   "@reminderDenied": {
     "description": "Snackbar when the notification permission is refused"
+  },
+  "levelMap": "Map",
+  "@levelMap": {
+    "description": "Win panel button: back to the level path map"
+  },
+  "tapToPlay": "Tap to play!",
+  "@tapToPlay": {
+    "description": "Bubble over the current level on the path map"
+  },
+  "levelLocked": "Finish level {level} first",
+  "@levelLocked": {
+    "description": "Tapping a locked level on the path map",
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "levelPathTitle": "{game} levels",
+  "@levelPathTitle": {
+    "description": "Title of a game's level path map",
+    "placeholders": {
+      "game": {
+        "type": "String"
+      }
+    }
+  },
+  "levelDone": "Level {level}: {stars}/3 stars",
+  "@levelDone": {
+    "description": "Tapping a finished level on the path map",
+    "placeholders": {
+      "level": {
+        "type": "int"
+      },
+      "stars": {
+        "type": "int"
+      }
+    }
+  },
+  "fontCredit": "Font: Fredoka (SIL Open Font License)",
+  "@fontCredit": {
+    "description": "Settings credits line for the bundled font"
   }
 }

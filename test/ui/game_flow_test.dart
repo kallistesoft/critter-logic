@@ -163,8 +163,7 @@ void main() {
 
   testWidgets('levels: win pays coins, next level, no penalty', (tester) async {
     await app.pump(tester);
-    await tester.tap(find.byKey(const Key('level-nests')));
-    await tester.pumpAndSettle();
+    await playLevel(tester, GameKind.nests);
     expect(find.text('Level 1'), findsOneWidget);
     await solveNests(tester);
     await tester.pumpAndSettle();
@@ -176,6 +175,13 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Level 2'), findsOneWidget);
     expect(app.ads.interstitials, 0, reason: 'none before 5 level wins');
+    expect(stats.levelStars(GameKind.nests, 1), 3, reason: 'no hint, no mistake');
+
+    // Back on the map: level 1 is done, level 2 is the one to play.
+    await tester.tap(find.byKey(const Key('back')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('playLevel')), findsOneWidget);
+    expect(find.text('Tap to play!'), findsOneWidget);
   });
 
   testWidgets('streak repair for a rewarded video', (tester) async {

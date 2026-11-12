@@ -2,10 +2,13 @@ import 'dart:math';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../puzzles/nests/nests.dart';
 import '../critter_image.dart';
 import '../palette.dart';
+import '../widgets.dart';
+import 'board_bits.dart';
 import 'session.dart';
 
 /// The Nests grid: colored zones with thick borders between them. Tap cycles empty → cross → critter; dragging
@@ -67,7 +70,10 @@ class _NestsBoardState extends State<NestsBoard> {
   void _dragTo(int? cell) {
     if (cell == null || _paint == null) return;
     final from = _paint == NestMark.cross ? NestMark.empty : NestMark.cross;
-    if (s.cells[cell] == from && s.paint(cell, _paint!)) _lastCell = cell;
+    if (s.cells[cell] == from && s.paint(cell, _paint!)) {
+      _lastCell = cell;
+      HapticFeedback.selectionClick();
+    }
   }
 
   void _dragEnd() {
@@ -97,11 +103,20 @@ class _NestsBoardState extends State<NestsBoard> {
 
   Widget _board(double side) {
     final n = s.size;
-    final cell = side / n;
+    final frame = max(6.0, side * 0.03);
+    final inner = side - 2 * frame;
+    final cell = inner / n;
     final excluded = widget.autoCross ? s.excluded() : const <int>{};
     final t = widget.celebrate?.value ?? 0;
     final grid = Stack(
+      clipBehavior: Clip.none,
       children: [
+        Positioned.fill(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(frame * 1.6),
+            child: RepaintBoundary(child: CustomPaint(painter: _BedsPainter(s.puzzle.regions, n))),
+          ),
+        ),
         for (var i = 0; i < n * n; i++)
           Positioned(
             left: (i % n) * cell,
@@ -110,7 +125,6 @@ class _NestsBoardState extends State<NestsBoard> {
             height: cell,
             child: _Cell(
               key: Key('cell-$i'),
-              color: zoneColors[s.puzzle.regions[i] % zoneColors.length],
               mark: s.cells[i],
               ruledOut: excluded.contains(i),
               conflict: s.conflicts.contains(i),
@@ -122,26 +136,34 @@ class _NestsBoardState extends State<NestsBoard> {
             ),
           ),
         Positioned.fill(
-          child: IgnorePointer(child: CustomPaint(painter: _ZonePainter(s.puzzle.regions, n))),
+          child: IgnorePointer(child: RepaintBoundary(child: CustomPaint(painter: _ZonePainter(s.puzzle.regions, n)))),
         ),
+        if (widget.targets.isNotEmpty)
+          Positioned(
+            left: (widget.targets.first % n) * cell + cell * 0.45,
+            top: (widget.targets.first ~/ n) * cell + cell * 0.5,
+            child: IgnorePointer(child: PointingHand(size: cell * 0.7)),
+          ),
       ],
     );
-    final board = Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: const [BoxShadow(color: shadow, blurRadius: 18, offset: Offset(0, 6))],
+    // A wooden fence frame around the garden.
+    final board = CustomPaint(
+      painter: WoodPainter(radius: frame * 2.6, nails: false, plank: side),
+      child: Padding(
+        padding: EdgeInsets.all(frame),
+        child: grid,
       ),
-      child: ClipRRect(borderRadius: BorderRadius.circular(18), child: grid),
     );
     if (widget.readOnly) return board;
+    Offset local(Offset p) => p - Offset(frame, frame);
     return GestureDetector(
       dragStartBehavior: DragStartBehavior.down,
       onTapUp: (d) {
-        final c = _cellAt(d.localPosition, side);
+        final c = _cellAt(local(d.localPosition), inner);
         if (c != null) _tap(c);
       },
-      onPanStart: (d) => _dragStart(_cellAt(d.localPosition, side)),
-      onPanUpdate: (d) => _dragTo(_cellAt(d.localPosition, side)),
+      onPanStart: (d) => _dragStart(_cellAt(local(d.localPosition), inner)),
+      onPanUpdate: (d) => _dragTo(_cellAt(local(d.localPosition), inner)),
       onPanEnd: (_) => _dragEnd(),
       onPanCancel: _dragEnd,
       child: board,
@@ -160,7 +182,6 @@ class _NestsBoardState extends State<NestsBoard> {
 class _Cell extends StatelessWidget {
   const _Cell({
     super.key,
-    required this.color,
     required this.mark,
     required this.ruledOut,
     required this.conflict,
@@ -171,7 +192,6 @@ class _Cell extends StatelessWidget {
     required this.hop,
   });
 
-  final Color color;
   final NestMark mark;
   final bool ruledOut;
   final bool conflict;
@@ -184,34 +204,35 @@ class _Cell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget content = switch (mark) {
-      NestMark.cross => _Pop(
-        key: const ValueKey('x'),
-        child: Icon(Icons.close_rounded, size: size * 0.42, color: ink.withValues(alpha: 0.42)),
-      ),
-      NestMark.critter => _Pop(
+      NestMark.cross => SquashPop(key: const ValueKey('x'), soft: true, child: LeafMark(size: size * 0.5)),
+      NestMark.critter => SquashPop(
         key: const ValueKey('c'),
-        elastic: true,
         child: Transform.translate(
-          offset: Offset(0, -hop * size * 0.28),
-          child: CritterImage(critter, size: size * 0.78),
+          offset: Offset(0, -hop * size * 0.32),
+          child: CritterImage(critter, size: size * 0.8),
         ),
       ),
       NestMark.empty =>
         ruledOut
-            ? Icon(
-                Icons.close_rounded,
+            ? Container(
                 key: const ValueKey('auto'),
-                size: size * 0.26,
-                color: ink.withValues(alpha: 0.16),
+                width: size * 0.16,
+                height: size * 0.13,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF8C7360).withValues(alpha: 0.28),
+                  borderRadius: BorderRadius.all(Radius.elliptical(size * 0.08, size * 0.065)),
+                ),
               )
             : const SizedBox.shrink(key: ValueKey('e')),
     };
+    if (conflict) content = Wobble(key: const ValueKey('wobble'), child: content);
     return AnimatedContainer(
       duration: const Duration(milliseconds: 160),
       decoration: BoxDecoration(
-        color: conflict ? Color.alphaBlend(bad.withValues(alpha: 0.42), color) : color,
+        color: conflict ? bad.withValues(alpha: 0.38) : Colors.transparent,
+        borderRadius: BorderRadius.circular(conflict || hint || target ? size * 0.16 : 0),
         border: conflict || hint || target
-            ? Border.all(color: conflict ? bad : (hint ? gold : accent), width: max(2.5, size * 0.07))
+            ? Border.all(color: conflict ? bad : (hint ? gold : coral), width: max(2.5, size * 0.07))
             : null,
       ),
       child: Center(child: content),
@@ -219,24 +240,35 @@ class _Cell extends StatelessWidget {
   }
 }
 
-/// Scales its child in when it appears.
-class _Pop extends StatelessWidget {
-  const _Pop({super.key, required this.child, this.elastic = false});
+/// Soft pastel flower beds: each zone's color, with little speckles of soil and petals.
+class _BedsPainter extends CustomPainter {
+  _BedsPainter(this.regions, this.n);
 
-  final Widget child;
-  final bool elastic;
+  final List<int> regions;
+  final int n;
 
   @override
-  Widget build(BuildContext context) => TweenAnimationBuilder<double>(
-    tween: Tween(begin: 0.3, end: 1),
-    duration: Duration(milliseconds: elastic ? 380 : 160),
-    curve: elastic ? Curves.elasticOut : Curves.easeOutBack,
-    builder: (_, v, child) => Transform.scale(scale: v, child: child),
-    child: child,
-  );
+  void paint(Canvas canvas, Size size) {
+    final c = size.width / n;
+    final r = Random(n * 977 + regions.length);
+    for (var i = 0; i < n * n; i++) {
+      final rect = Rect.fromLTWH((i % n) * c, (i ~/ n) * c, c, c);
+      final base = zoneColors[regions[i] % zoneColors.length];
+      canvas.drawRect(rect.inflate(0.5), Paint()..color = base);
+      // A lighter top-left glow per cell, and two speckles.
+      canvas.drawCircle(rect.topLeft + Offset(c * 0.3, c * 0.3), c * 0.32, Paint()..color = Colors.white.withValues(alpha: 0.22));
+      final dark = Paint()..color = Color.lerp(base, woodDark, 0.25)!.withValues(alpha: 0.45);
+      for (var k = 0; k < 2; k++) {
+        canvas.drawCircle(rect.topLeft + Offset(c * (0.15 + r.nextDouble() * 0.7), c * (0.15 + r.nextDouble() * 0.7)), c * 0.025, dark);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(_BedsPainter old) => old.regions != regions || old.n != n;
 }
 
-/// Thin white grid lines, thick ink lines between zones.
+/// Thin soft lines between cells, leafy hedges between zones.
 class _ZonePainter extends CustomPainter {
   _ZonePainter(this.regions, this.n);
 
@@ -247,33 +279,53 @@ class _ZonePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final c = size.width / n;
     final thin = Paint()
-      ..color = Colors.white.withValues(alpha: 0.75)
-      ..strokeWidth = 1.5;
-    final thick = Paint()
-      ..color = ink.withValues(alpha: 0.78)
-      ..strokeWidth = max(2.5, c * 0.06)
-      ..strokeCap = StrokeCap.square;
+      ..color = Colors.white.withValues(alpha: 0.55)
+      ..strokeWidth = 1.2;
+    final hedges = Path();
     for (var r = 0; r < n; r++) {
       for (var col = 0; col < n; col++) {
         final i = r * n + col;
         if (col < n - 1) {
           final p1 = Offset((col + 1) * c, r * c), p2 = Offset((col + 1) * c, (r + 1) * c);
-          canvas.drawLine(p1, p2, regions[i] != regions[i + 1] ? thick : thin);
+          if (regions[i] != regions[i + 1]) {
+            hedges
+              ..moveTo(p1.dx, p1.dy)
+              ..lineTo(p2.dx, p2.dy);
+          } else {
+            canvas.drawLine(p1, p2, thin);
+          }
         }
         if (r < n - 1) {
           final p1 = Offset(col * c, (r + 1) * c), p2 = Offset((col + 1) * c, (r + 1) * c);
-          canvas.drawLine(p1, p2, regions[i] != regions[i + n] ? thick : thin);
+          if (regions[i] != regions[i + n]) {
+            hedges
+              ..moveTo(p1.dx, p1.dy)
+              ..lineTo(p2.dx, p2.dy);
+          } else {
+            canvas.drawLine(p1, p2, thin);
+          }
         }
       }
     }
-    final rect = RRect.fromRectAndRadius(Offset.zero & size, const Radius.circular(18)).deflate(thick.strokeWidth / 2);
-    canvas.drawRRect(
-      rect,
-      Paint()
-        ..color = thick.color
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = thick.strokeWidth * 1.4,
-    );
+    final w = max(4.0, c * 0.12);
+    canvas.drawPath(hedges, Paint()
+      ..color = const Color(0xFF2F7A26)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = w
+      ..strokeCap = StrokeCap.round);
+    canvas.drawPath(hedges, Paint()
+      ..color = const Color(0xFF55AD3C)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = w * 0.5
+      ..strokeCap = StrokeCap.round);
+    // Leafy bumps along the hedges.
+    final leafDot = Paint()..color = const Color(0xFF7FCB5E);
+    for (final m in hedges.computeMetrics()) {
+      for (var d = w; d < m.length; d += w * 1.6) {
+        final t = m.getTangentForOffset(d);
+        if (t != null) canvas.drawCircle(t.position, w * 0.2, leafDot);
+      }
+    }
   }
 
   @override

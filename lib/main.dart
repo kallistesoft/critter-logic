@@ -22,6 +22,7 @@ import 'services/sound_service.dart';
 import 'services/stats_store.dart';
 import 'services/update_service.dart';
 import 'ui/home_screen.dart';
+import 'ui/meadow.dart';
 import 'ui/palette.dart';
 import 'ui/services.dart';
 import 'ui/update_gate.dart';
@@ -187,13 +188,22 @@ class CritterLogicApp extends StatelessWidget {
         theme: ThemeData(
           useMaterial3: true,
           brightness: Brightness.light,
-          colorSchemeSeed: accent,
-          scaffoldBackgroundColor: background,
+          colorSchemeSeed: leaf,
+          fontFamily: displayFont,
+          scaffoldBackgroundColor: Colors.transparent,
+          snackBarTheme: SnackBarThemeData(
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: woodEdge,
+            contentTextStyle: const TextStyle(fontFamily: displayFont, fontSize: 16, color: Colors.white),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          ),
         ),
         navigatorKey: _navigator,
-        builder: (context, child) => updateStatus == null
-            ? child!
-            : UpdateGate(status: updateStatus!, onUpdate: onUpdate!, navigatorKey: _navigator, child: child!),
+        builder: (context, child) => MeadowWorld(
+          child: updateStatus == null
+              ? child!
+              : UpdateGate(status: updateStatus!, onUpdate: onUpdate!, navigatorKey: _navigator, child: child!),
+        ),
         home: const HomeScreen(),
       ),
     );

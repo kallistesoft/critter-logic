@@ -87,4 +87,13 @@ void main() {
     expect(text, contains('7-day streak'));
     expect(text, endsWith(playStoreUrl));
   });
+
+  test('level stars keep the best result', () async {
+    expect(stats.levelStars(GameKind.nests, 3), 0);
+    expect(await stats.recordLevelStars(GameKind.nests, 3, 2), 2);
+    expect(await stats.recordLevelStars(GameKind.nests, 3, 1), 2, reason: 'a worse replay does not lower it');
+    expect(await stats.recordLevelStars(GameKind.nests, 3, 3), 3);
+    expect(stats.levelStars(GameKind.nests, 3), 3);
+    expect(stats.levelStars(GameKind.pairs, 3), 0, reason: 'per game');
+  });
 }

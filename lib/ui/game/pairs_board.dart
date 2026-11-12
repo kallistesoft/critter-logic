@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../puzzles/pairs/pairs.dart';
 import '../palette.dart';
+import 'board_bits.dart';
 import 'session.dart';
 
 /// The Pairs grid: tap cycles empty → sun → moon. Givens are locked and darker; =/× links sit on the edges.
@@ -35,17 +36,13 @@ class PairsBoard extends StatelessWidget {
   Widget _board(double side) {
     final s = session;
     final n = s.size;
-    final pad = side * 0.025;
+    final pad = side * 0.035;
     final cell = (side - 2 * pad) / n;
-    final gap = cell * 0.07;
+    final gap = cell * 0.09;
     final t = celebrate?.value ?? 0;
     Offset topLeft(int i) => Offset(pad + (i % n) * cell, pad + (i ~/ n) * cell);
-    return Container(
-      decoration: BoxDecoration(
-        color: surface,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: const [BoxShadow(color: shadow, blurRadius: 18, offset: Offset(0, 6))],
-      ),
+    return CustomPaint(
+      painter: _LawnPainter(),
       child: Stack(clipBehavior: Clip.none, children: [
         for (var i = 0; i < n * n; i++)
           Positioned(
@@ -71,6 +68,12 @@ class PairsBoard extends StatelessWidget {
             ),
           ),
         for (final link in s.puzzle.links) _linkMarker(link, topLeft, cell, n),
+        if (targets.isNotEmpty)
+          Positioned(
+            left: topLeft(targets.first).dx + cell * 0.5,
+            top: topLeft(targets.first).dy + cell * 0.55,
+            child: IgnorePointer(child: PointingHand(size: cell * 0.62)),
+          ),
       ]),
     );
   }
@@ -80,7 +83,7 @@ class PairsBoard extends StatelessWidget {
     final horizontal = b == a + 1;
     final o = topLeft(a);
     final center = horizontal ? Offset(o.dx + cell, o.dy + cell / 2) : Offset(o.dx + cell / 2, o.dy + cell);
-    final d = cell * 0.3;
+    final d = cell * 0.32;
     return Positioned(
       left: center.dx - d / 2,
       top: center.dy - d / 2,
@@ -89,12 +92,14 @@ class PairsBoard extends StatelessWidget {
       child: IgnorePointer(
         child: Container(
           decoration: BoxDecoration(
-            color: surface,
+            color: woodLight,
             shape: BoxShape.circle,
-            border: Border.all(color: ink.withValues(alpha: 0.18), width: 1.5),
+            border: Border.all(color: woodEdge, width: max(1.5, d * 0.09)),
+            boxShadow: const [BoxShadow(color: Color(0x55000000), offset: Offset(0, 2))],
           ),
           alignment: Alignment.center,
-          child: Text(link.same ? '=' : '×', style: TextStyle(color: ink, fontSize: d * 0.62, fontWeight: FontWeight.w900, height: 1)),
+          child: Text(link.same ? '=' : '×',
+              style: TextStyle(fontFamily: displayFont, color: woodEdge, fontSize: d * 0.66, fontWeight: FontWeight.w700, height: 1)),
         ),
       ),
     );
@@ -132,37 +137,128 @@ class _Tile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final base = given ? tileGiven : tileEmpty;
-    final ring = conflict ? bad : (hint ? gold : (target ? accent : null));
+    final ring = conflict ? bad : (hint ? gold : (target ? coral : null));
+    final depth = size * 0.08;
+    Widget token = value == null
+        ? const SizedBox.expand()
+        : TweenAnimationBuilder<double>(
+            key: ValueKey(value),
+            tween: Tween(begin: given ? 1 : 0, end: 1),
+            duration: const Duration(milliseconds: 420),
+            builder: (_, v, child) {
+              // A coin flip: turns edge-on to face, then settles with a little bounce.
+              final turn = (1 - Curves.easeOut.transform(v)) * pi / 2;
+              final bounce = 1 + sin(v * pi) * 0.12;
+              return Transform(
+                alignment: Alignment.center,
+                transform: Matrix4.identity()
+                  ..setEntry(3, 2, 0.002)
+                  ..rotateY(turn)
+                  ..scaleByDouble(bounce, bounce, 1, 1),
+                child: child,
+              );
+            },
+            child: Padding(padding: EdgeInsets.all(size * 0.15), child: SymbolIcon(value!, faded: given)),
+          );
+    if (conflict) token = Wobble(key: const ValueKey('wobble'), child: token);
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
-      child: Transform.scale(
-        scale: 1 + wave * 0.14,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 160),
-          decoration: BoxDecoration(
-            color: conflict ? Color.alphaBlend(bad.withValues(alpha: 0.22), base) : base,
-            borderRadius: BorderRadius.circular(size * 0.22),
-            border: ring == null ? null : Border.all(color: ring, width: max(2.5, size * 0.06)),
+      child: Transform.translate(
+        offset: Offset(0, -wave * size * 0.22),
+        child: Transform.scale(
+          scale: 1 + wave * 0.1,
+          child: CustomPaint(
+            painter: _StonePainter(given: given, conflict: conflict, ring: ring, depth: depth),
+            child: Padding(padding: EdgeInsets.only(bottom: depth), child: token),
           ),
-          child: value == null
-              ? null
-              : TweenAnimationBuilder<double>(
-                  key: ValueKey(value),
-                  tween: Tween(begin: given ? 1 : 0.3, end: 1),
-                  duration: const Duration(milliseconds: 360),
-                  curve: Curves.elasticOut,
-                  builder: (_, v, child) => Transform.scale(scale: v, child: child),
-                  child: Padding(
-                    padding: EdgeInsets.all(size * 0.16),
-                    child: SymbolIcon(value!, faded: given),
-                  ),
-                ),
         ),
       ),
     );
   }
+}
+
+/// A grassy lawn under the stepping stones.
+class _LawnPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rr = RRect.fromRectAndRadius(Offset.zero & size, Radius.circular(size.width * 0.06));
+    canvas.drawRRect(rr.shift(const Offset(0, 6)), Paint()..color = const Color(0xFF2F7A26));
+    canvas.drawRRect(
+      rr,
+      Paint()
+        ..shader = const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xFF8ED46B), Color(0xFF6CC04A)],
+        ).createShader(Offset.zero & size),
+    );
+    final r = Random(3);
+    final tuft = Paint()
+      ..color = const Color(0xFF4FA238)
+      ..strokeWidth = 1.6
+      ..strokeCap = StrokeCap.round;
+    for (var i = 0; i < 40; i++) {
+      final p = Offset(r.nextDouble() * size.width, r.nextDouble() * size.height);
+      canvas.drawLine(p, p + const Offset(-3, -6), tuft);
+      canvas.drawLine(p, p + const Offset(2, -7), tuft);
+    }
+    canvas.drawRRect(rr.deflate(1.5), Paint()
+      ..color = const Color(0xFF2F7A26)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3);
+  }
+
+  @override
+  bool shouldRepaint(_LawnPainter old) => false;
+}
+
+/// A rounded stepping stone with a thick bottom edge; givens are mossy and darker.
+class _StonePainter extends CustomPainter {
+  _StonePainter({required this.given, required this.conflict, required this.ring, required this.depth});
+
+  final bool given;
+  final bool conflict;
+  final Color? ring;
+  final double depth;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final r = Radius.circular(size.width * 0.26);
+    final outer = RRect.fromRectAndRadius(Offset.zero & size, r);
+    final face = RRect.fromLTRBR(0, 0, size.width, size.height - depth, r);
+    final top = given ? const Color(0xFFD9CCB2) : const Color(0xFFF7F0E2);
+    final low = given ? const Color(0xFFC2B292) : const Color(0xFFE4D8C2);
+    final edge = given ? const Color(0xFF94836A) : const Color(0xFFB3A285);
+    canvas.drawRRect(outer, Paint()..color = edge);
+    canvas.drawRRect(
+      face,
+      Paint()
+        ..shader = LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [top, low])
+            .createShader(face.outerRect),
+    );
+    if (given) {
+      final moss = Paint()..color = const Color(0xFF8DBF5A).withValues(alpha: 0.8);
+      canvas.drawCircle(Offset(size.width * 0.18, size.height * 0.2), size.width * 0.07, moss);
+      canvas.drawCircle(Offset(size.width * 0.28, size.height * 0.13), size.width * 0.05, moss);
+    } else {
+      canvas.drawOval(
+        Rect.fromLTWH(size.width * 0.14, size.height * 0.08, size.width * 0.36, size.height * 0.14),
+        Paint()..color = Colors.white.withValues(alpha: 0.6),
+      );
+    }
+    if (conflict) canvas.drawRRect(face, Paint()..color = bad.withValues(alpha: 0.28));
+    if (ring != null) {
+      canvas.drawRRect(face.deflate(size.width * 0.03), Paint()
+        ..color = ring!
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = max(2.5, size.width * 0.07));
+    }
+  }
+
+  @override
+  bool shouldRepaint(_StonePainter old) =>
+      old.given != given || old.conflict != conflict || old.ring != ring || old.depth != depth;
 }
 
 /// A painted sun or moon.
