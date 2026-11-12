@@ -192,7 +192,8 @@ class _ShopScreenState extends State<ShopScreen> {
                   const SizedBox(height: 12),
                   for (final (pack, price) in services.coinStore.packs) ...[
                     _PackRow(pack: pack, price: price, onBuy: () => _buyPack(pack)),
-                    const SizedBox(height: 14),
+                    // Room for the next card's ribbon, which sticks out above it.
+                    const SizedBox(height: 28),
                   ],
                 ],
               },
@@ -530,8 +531,8 @@ class _PackRow extends StatelessWidget {
               children: [
                 for (var i = 0; i < pile; i++)
                   Positioned(
-                    left: 4.0 + (i % 3) * 14,
-                    bottom: (i ~/ 3) * 14.0 + (i.isOdd ? 6 : 0),
+                    left: pile == 1 ? 18 : 4.0 + (i % 3) * 14,
+                    bottom: pile == 1 ? 10 : (i ~/ 3) * 14.0 + (i.isOdd ? 6 : 0),
                     child: const CoinIcon(size: 34),
                   ),
               ],
@@ -563,14 +564,7 @@ class _PackRow extends StatelessWidget {
       clipBehavior: Clip.none,
       children: [
         card,
-        if (pack.bestValue)
-          Positioned(left: -4, top: -10, child: Ribbon(text: l10n.coinPackBest))
-        else if (pack.bonusPercent > 0)
-          Positioned(
-            left: -4,
-            top: -10,
-            child: Ribbon(text: l10n.coinPackBonus(pack.bonusPercent), color: leaf),
-          ),
+        if (pack.bestValue) Positioned(left: -4, top: -10, child: Ribbon(text: l10n.coinPackBest)),
       ],
     );
   }
