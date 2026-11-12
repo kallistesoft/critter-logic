@@ -1,6 +1,6 @@
 // Writes the bundled dailies: dart run tools/gen_dailies.dart
 //
-// assets/dailies/{nests,pairs}.json = {"first": 1, "puzzles": [compact puzzle JSON, ...]} for dailies 1..730.
+// assets/dailies/{nests,pairs,trail}.json = {"first": 1, "puzzles": [compact puzzle JSON, ...]} for dailies 1..730.
 // Rerunning gives the same files as long as the generators are unchanged.
 import 'dart:convert';
 import 'dart:io';
@@ -13,6 +13,7 @@ void main() {
   final sw = Stopwatch()..start();
   _write('assets/dailies/nests.json', [for (var n = 1; n <= dailyCount; n++) generateNestsDaily(n).toJson()]);
   _write('assets/dailies/pairs.json', [for (var n = 1; n <= dailyCount; n++) generatePairsDaily(n).toJson()]);
+  _write('assets/dailies/trail.json', [for (var n = 1; n <= dailyCount; n++) generateTrailDaily(n).toJson()]);
   stdout.writeln('done in ${sw.elapsedMilliseconds} ms');
 }
 
