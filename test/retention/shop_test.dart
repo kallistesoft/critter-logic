@@ -38,14 +38,56 @@ void main() {
     expect(stats.capsules, 0);
   });
 
+  test('the catalog sells Worlds, not the old board themes', () {
+    expect(shopCatalog.where((i) => i.id.startsWith('theme.')), isEmpty);
+    expect(
+      {for (final i in shopCatalog.where((i) => i.category == ShopCategory.world)) i.id: i.price},
+      {'world.meadow': 0, 'world.lodge': 0, 'world.neon': 1500, 'world.winter': 2000, 'world.pro': 1500},
+    );
+  });
+
+  test('Worlds: Meadow and Lodge are free and owned, paid ones are bought once and equipped', () async {
+    expect(shop.equippedWorld, defaultWorld);
+    expect(shop.owns(shopItemById['world.lodge']!), isTrue);
+    expect(shop.owns(shopItemById['world.neon']!), isFalse);
+    expect(await shop.buy('world.lodge', 10), PurchaseResult.alreadyOwned);
+    expect(await shop.equip('world.lodge'), isTrue);
+    expect(shop.equippedWorld, 'world.lodge');
+    expect(progress.equipped('world'), 'world.lodge');
+    expect(analytics.events.last.$1, 'world_equip');
+    expect(analytics.events.last.$2, {'world': 'world.lodge'});
+    expect(await shop.equip('world.neon'), isFalse, reason: 'not owned');
+    expect(await shop.buy('world.neon', 10), PurchaseResult.notEnoughCoins);
+    await stats.addCoins(2000);
+    final deal = shop.dailyDeal(10)?.id == 'world.neon';
+    expect(await shop.buy('world.neon', 10), PurchaseResult.bought);
+    expect(shop.equippedWorld, 'world.neon');
+    expect(stats.coins, 2090 - (deal ? 1050 : 1500));
+    expect(await shop.buy('world.neon', 10), PurchaseResult.alreadyOwned);
+    expect(await shop.equip(defaultWorld), isTrue, reason: 'the Meadow is always owned');
+    expect(shop.equippedWorld, defaultWorld);
+    expect(shop.offers(10).firstWhere((o) => o.item.id == 'world.meadow').equipped, isTrue);
+  });
+
+  test('an unknown or old equipped world falls back to the Meadow', () async {
+    await progress.setEquipped('world', 'theme.snowy');
+    expect(shop.equippedWorld, defaultWorld);
+  });
+
+  test('the daily deal can be a World at -30%', () {
+    final worldDays = [
+      for (var d = 1; d < 200; d++)
+        if (shop.dailyDeal(d)!.category == ShopCategory.world) d,
+    ];
+    expect(worldDays, isNotEmpty);
+    final d = worldDays.first;
+    final item = shop.dailyDeal(d)!;
+    expect(freeWorlds, isNot(contains(item.id)), reason: 'free Worlds are owned, never on sale');
+    expect(shop.priceToday(item, d), (item.price * 0.7).round());
+  });
+
   test('cosmetics are bought once, equipped, and the hat can be taken off', () async {
     await stats.addCoins(2000);
-    expect(shop.equippedTheme, defaultTheme);
-    expect(await shop.buy('theme.snowy', 10), PurchaseResult.bought);
-    expect(shop.equippedTheme, 'theme.snowy');
-    expect(await shop.buy('theme.snowy', 10), PurchaseResult.alreadyOwned);
-    expect(await shop.equip(defaultTheme), isTrue, reason: 'the default theme is always owned');
-    expect(shop.equippedTheme, defaultTheme);
 
     expect(await shop.buy('hat.party', 10), PurchaseResult.bought);
     expect(shop.equippedHat, 'hat.party');
@@ -78,8 +120,10 @@ void main() {
   });
 
   test('Remote Config prices: valid overrides only', () {
-    final p = ShopSettings.parsePrices('capsule=200, hat.crown=9000, nope=50, theme.snowy=x, hat.party = 120');
-    expect(p, {'capsule': 200, 'hat.party': 120});
+    final p = ShopSettings.parsePrices(
+      'capsule=200, hat.crown=9000, nope=50, world.neon=x, hat.party = 120, world.pro=1200',
+    );
+    expect(p, {'capsule': 200, 'hat.party': 120, 'world.pro': 1200});
     expect(ShopSettings(prices: p).priceOf(shopItemById['capsule']!), 200);
   });
 }

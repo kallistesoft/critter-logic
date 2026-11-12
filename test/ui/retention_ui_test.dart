@@ -274,13 +274,15 @@ void main() {
     expect(Shop(stats, progress).equippedHat, 'hat.flowers');
   });
 
-  testWidgets('a set that unlocks a board theme shows no extra celebration', (tester) async {
+  testWidgets('a set that pays bonus coins celebrates them', (tester) async {
     await app.pump(tester);
     final context = tester.element(find.byKey(const Key('settings')));
-    const update = RetentionUpdate(setUnlocks: [SetUnlock(set: 'polar', cosmetics: ['theme.snowy'])]);
+    const update = RetentionUpdate(setUnlocks: [SetUnlock(set: 'polar', cosmetics: [], coins: 300)]);
     showRetentionUpdate(context, update);
     await tester.pumpAndSettle();
-    expect(find.byKey(const Key('setUnlock')), findsNothing);
+    expect(find.byKey(const Key('setUnlock')), findsOneWidget);
+    expect(find.text('+300 coins'), findsOneWidget);
+    expect(find.byKey(const Key('equipUnlock')), findsNothing);
   });
 
   testWidgets('French strings', (tester) async {

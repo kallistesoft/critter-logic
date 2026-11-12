@@ -17,4 +17,4 @@ Daily logic puzzles with cute critters, for Android (iOS later), free with ads. 
 - Release: `tools/build_release.sh` on a clean main.
 
 ## Credits
-Art and sounds from Kenney (kenney.nl), CC0.
+Art and sounds from Kenney (kenney.nl), CC0; Wild Lodge silhouettes from PhyloPic (CC0 / public domain); fonts under the SIL OFL. Details: `assets/CREDITS.md`.

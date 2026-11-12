@@ -7,6 +7,7 @@ import 'l10n/app_localizations.dart';
 import 'meta/progress_store.dart';
 import 'meta/reminders.dart';
 import 'meta/retention.dart';
+import 'meta/shop.dart';
 import 'puzzles/bundled_source.dart';
 import 'puzzles/source.dart';
 import 'services/ad_ids.dart';
@@ -27,9 +28,10 @@ import 'services/stats_store.dart';
 import 'services/update_service.dart';
 import 'ui/home_screen.dart';
 import 'ui/meadow.dart';
-import 'ui/palette.dart';
 import 'ui/services.dart';
 import 'ui/update_gate.dart';
+import 'ui/worlds/welcome_world_screen.dart';
+import 'ui/worlds/world.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -192,6 +194,7 @@ class CritterLogicApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final progress = retention?.value.progress ?? ProgressStore(stats.prefs);
     return Services(
       stats: stats,
       ads: ads,
@@ -210,32 +213,36 @@ class CritterLogicApp extends StatelessWidget {
       privacyOptionsRequired: privacyOptionsRequired,
       showPrivacyOptions: showPrivacyOptions,
       today: today,
-      child: MaterialApp(
-        title: 'Critter Logic',
-        debugShowCheckedModeBanner: false,
-        locale: locale,
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        theme: ThemeData(
-          useMaterial3: true,
-          brightness: Brightness.light,
-          colorSchemeSeed: leaf,
-          fontFamily: displayFont,
-          scaffoldBackgroundColor: Colors.transparent,
-          snackBarTheme: SnackBarThemeData(
-            behavior: SnackBarBehavior.floating,
-            backgroundColor: woodEdge,
-            contentTextStyle: const TextStyle(fontFamily: displayFont, fontSize: 16, color: Colors.white),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: WorldHost(
+        initial: worldById(Shop(stats, progress).equippedWorld),
+        builder: (context, world) => MaterialApp(
+          title: 'Critter Logic',
+          debugShowCheckedModeBanner: false,
+          locale: locale,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          theme: ThemeData(
+            useMaterial3: true,
+            brightness: world.brightness,
+            colorSchemeSeed: world.palette.leaf,
+            fontFamily: world.font,
+            scaffoldBackgroundColor: Colors.transparent,
+            snackBarTheme: SnackBarThemeData(
+              behavior: SnackBarBehavior.floating,
+              backgroundColor: world.palette.woodEdge,
+              contentTextStyle: TextStyle(fontFamily: world.font, fontSize: 16, color: Colors.white),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            ),
           ),
+          navigatorKey: _navigator,
+          builder: (context, child) => WorldBackdrop(
+            child: updateStatus == null
+                ? child!
+                : UpdateGate(status: updateStatus!, onUpdate: onUpdate!, navigatorKey: _navigator, child: child!),
+          ),
+          // The World picker greets new players once (and players updating to the version with Worlds).
+          home: progress.worldChosen ? const HomeScreen() : const WelcomeWorldScreen(),
         ),
-        navigatorKey: _navigator,
-        builder: (context, child) => MeadowWorld(
-          child: updateStatus == null
-              ? child!
-              : UpdateGate(status: updateStatus!, onUpdate: onUpdate!, navigatorKey: _navigator, child: child!),
-        ),
-        home: const HomeScreen(),
       ),
     );
   }

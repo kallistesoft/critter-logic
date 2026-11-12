@@ -60,7 +60,7 @@ class LuckyNestProp extends StatelessWidget {
                       color: leaf,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: Colors.white, width: 2.5),
-                      boxShadow: const [BoxShadow(color: shadow, offset: Offset(0, 2))],
+                      boxShadow: [BoxShadow(color: shadow, offset: Offset(0, 2))],
                     ),
                     child: Text(l10n.luckyFree, style: outlinedText(13, stroke: leafEdge, width: 1.2)),
                   ),
@@ -418,7 +418,7 @@ class _LuckyNestScreenState extends State<LuckyNestScreen> with TickerProviderSt
             child: TextButton.icon(
               key: const Key('luckyOdds'),
               onPressed: _showOdds,
-              icon: const Icon(
+              icon: Icon(
                 Icons.info_outline_rounded,
                 color: Colors.white,
                 shadows: [Shadow(color: woodEdge, offset: Offset(0, 2))],
@@ -667,7 +667,7 @@ class _PrizeIcon extends StatelessWidget {
       Icons.lightbulb_rounded,
       size: size,
       color: gold,
-      shadows: const [Shadow(color: goldEdge, offset: Offset(0, 3))],
+      shadows: [Shadow(color: goldEdge, offset: Offset(0, 3))],
     ),
     LuckyPrize.feather => SizedBox.square(
       dimension: size,
@@ -740,7 +740,7 @@ class _Bubble extends StatelessWidget {
         color: paper,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: paperEdge, width: 2.5),
-        boxShadow: const [BoxShadow(color: paperEdge, offset: Offset(0, 4))],
+        boxShadow: [BoxShadow(color: paperEdge, offset: Offset(0, 4))],
       ),
       child: Text(text, style: chunky(20), textAlign: TextAlign.center),
     ),

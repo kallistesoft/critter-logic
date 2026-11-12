@@ -403,7 +403,7 @@ class _Bubble extends StatelessWidget {
             color: paper,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(color: paperEdge, width: 2.5),
-            boxShadow: const [BoxShadow(color: paperEdge, offset: Offset(0, 4))],
+            boxShadow: [BoxShadow(color: paperEdge, offset: Offset(0, 4))],
           ),
           child: Text(text, style: chunky(20), textAlign: TextAlign.center),
         ),

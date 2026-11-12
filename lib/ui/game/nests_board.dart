@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import '../worlds/world.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -209,7 +210,7 @@ class _Cell extends StatelessWidget {
         key: const ValueKey('c'),
         child: Transform.translate(
           offset: Offset(0, -hop * size * 0.32),
-          child: HattedCritter(critter, size: size * 0.8),
+          child: HattedCritter(critter, size: size * 0.8, role: CritterRole.piece),
         ),
       ),
       NestMark.empty =>
@@ -219,7 +220,7 @@ class _Cell extends StatelessWidget {
                 width: size * 0.16,
                 height: size * 0.13,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF8C7360).withValues(alpha: 0.28),
+                  color: activeWorld.board.ruledOut,
                   borderRadius: BorderRadius.all(Radius.elliptical(size * 0.08, size * 0.065)),
                 ),
               )
@@ -250,13 +251,17 @@ class _BedsPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final c = size.width / n;
+    final b = activeWorld.board;
     final r = Random(n * 977 + regions.length);
     for (var i = 0; i < n * n; i++) {
       final rect = Rect.fromLTWH((i % n) * c, (i ~/ n) * c, c, c);
-      final base = zoneColors[regions[i] % zoneColors.length];
+      final base = b.zones[regions[i] % b.zones.length];
       canvas.drawRect(rect.inflate(0.5), Paint()..color = base);
       // A lighter top-left glow per cell, and two speckles.
-      canvas.drawCircle(rect.topLeft + Offset(c * 0.3, c * 0.3), c * 0.32, Paint()..color = Colors.white.withValues(alpha: 0.22));
+      if (b.bedShine.a > 0) {
+        canvas.drawCircle(rect.topLeft + Offset(c * 0.3, c * 0.3), c * 0.32, Paint()..color = b.bedShine);
+      }
+      if (!b.speckles) continue;
       final dark = Paint()..color = Color.lerp(base, woodDark, 0.25)!.withValues(alpha: 0.45);
       for (var k = 0; k < 2; k++) {
         canvas.drawCircle(rect.topLeft + Offset(c * (0.15 + r.nextDouble() * 0.7), c * (0.15 + r.nextDouble() * 0.7)), c * 0.025, dark);
@@ -278,8 +283,9 @@ class _ZonePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final c = size.width / n;
+    final b = activeWorld.board;
     final thin = Paint()
-      ..color = Colors.white.withValues(alpha: 0.55)
+      ..color = b.cellLine
       ..strokeWidth = 1.2;
     final hedges = Path();
     for (var r = 0; r < n; r++) {
@@ -308,18 +314,21 @@ class _ZonePainter extends CustomPainter {
       }
     }
     final w = max(4.0, c * 0.12);
+    if (b.glow) paintGlow(canvas, hedges, b.zoneEdgeInner, w);
     canvas.drawPath(hedges, Paint()
-      ..color = const Color(0xFF2F7A26)
+      ..color = b.zoneEdge
       ..style = PaintingStyle.stroke
       ..strokeWidth = w
       ..strokeCap = StrokeCap.round);
     canvas.drawPath(hedges, Paint()
-      ..color = const Color(0xFF55AD3C)
+      ..color = b.zoneEdgeInner
       ..style = PaintingStyle.stroke
       ..strokeWidth = w * 0.5
       ..strokeCap = StrokeCap.round);
     // Leafy bumps along the hedges.
-    final leafDot = Paint()..color = const Color(0xFF7FCB5E);
+    final dots = b.zoneDots;
+    if (dots == null) return;
+    final leafDot = Paint()..color = dots;
     for (final m in hedges.computeMetrics()) {
       for (var d = w; d < m.length; d += w * 1.6) {
         final t = m.getTangentForOffset(d);

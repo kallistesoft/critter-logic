@@ -321,12 +321,12 @@ class _DailyResultScreenState extends State<DailyResultScreen> with SingleTicker
         child: FutureBuilder<DailyStanding?>(
           future: _standing,
           builder: (context, snap) {
-            const light = Color(0xFFFFF4D6);
+            final light = onWood;
             if (snap.connectionState != ConnectionState.done) {
               return Padding(
                 padding: const EdgeInsets.all(12),
                 child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                  const SizedBox.square(dimension: 18, child: CircularProgressIndicator(strokeWidth: 2.5, color: light)),
+                  SizedBox.square(dimension: 18, child: CircularProgressIndicator(strokeWidth: 2.5, color: light)),
                   const SizedBox(width: 10),
                   Text(l10n.leaderboardLoading, style: outlinedText(15, color: light)),
                 ]),
@@ -369,7 +369,7 @@ class _DailyResultScreenState extends State<DailyResultScreen> with SingleTicker
                       color: mine ? goldSoft : paper,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: mine ? gold : paperEdge, width: 2),
-                      boxShadow: const [BoxShadow(color: woodEdge, offset: Offset(0, 3))],
+                      boxShadow: [BoxShadow(color: woodEdge, offset: Offset(0, 3))],
                     ),
                     child: Row(children: [
                       SizedBox(

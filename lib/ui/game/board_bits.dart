@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../meadow.dart';
 import '../palette.dart';
+import '../worlds/world.dart';
 
 /// Pops its child in with a squash and stretch when it appears.
 class SquashPop extends StatelessWidget {
@@ -46,47 +47,36 @@ class Wobble extends StatelessWidget {
       );
 }
 
-/// A little green leaf: the Nests "not here" mark.
+/// The Nests "not here" mark: a little leaf in the Meadow, the World's own mark elsewhere.
 class LeafMark extends StatelessWidget {
   const LeafMark({super.key, required this.size});
 
   final double size;
 
   @override
-  Widget build(BuildContext context) => SizedBox.square(dimension: size, child: const CustomPaint(painter: _LeafPainter()));
+  Widget build(BuildContext context) =>
+      SizedBox.square(dimension: size, child: CustomPaint(painter: _CrossPainter(worldOf(context))));
 }
 
-class _LeafPainter extends CustomPainter {
-  const _LeafPainter();
+class _CrossPainter extends CustomPainter {
+  const _CrossPainter(this.world);
+
+  final GameWorld world;
 
   @override
-  void paint(Canvas canvas, Size size) {
-    final w = size.width, h = size.height;
-    canvas.save();
-    canvas.translate(w / 2, h / 2);
-    canvas.rotate(-0.6);
-    final leaf = Path()
-      ..moveTo(0, -h * 0.46)
-      ..quadraticBezierTo(w * 0.42, -h * 0.1, 0, h * 0.42)
-      ..quadraticBezierTo(-w * 0.42, -h * 0.1, 0, -h * 0.46)
-      ..close();
-    canvas.drawPath(leaf.shift(const Offset(0, 2)), Paint()..color = const Color(0x33000000));
-    canvas.drawPath(leaf, Paint()..color = const Color(0xFF5DB043));
-    canvas.drawPath(leaf, Paint()
-      ..color = const Color(0xFF2F7A26)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = max(1, w * 0.06));
-    canvas.drawLine(Offset(0, -h * 0.34), Offset(0, h * 0.5), Paint()
-      ..color = const Color(0xFF2F7A26)
-      ..strokeWidth = max(1, w * 0.06)
-      ..strokeCap = StrokeCap.round);
-    canvas.drawCircle(Offset(-w * 0.1, -h * 0.12), w * 0.06, Paint()..color = Colors.white.withValues(alpha: 0.5));
-    canvas.restore();
-  }
+  void paint(Canvas canvas, Size size) => world.paintCross(canvas, size);
 
   @override
-  bool shouldRepaint(_LeafPainter old) => false;
+  bool shouldRepaint(_CrossPainter old) => old.world.id != world.id;
 }
+
+/// A blurred copy under glowing borders (Neon).
+void paintGlow(Canvas canvas, Path path, Color color, double width) => canvas.drawPath(path, Paint()
+  ..color = color.withValues(alpha: 0.85)
+  ..style = PaintingStyle.stroke
+  ..strokeWidth = width * 1.6
+  ..strokeCap = StrokeCap.round
+  ..maskFilter = MaskFilter.blur(BlurStyle.normal, width * 0.9));
 
 /// A pointing hand that taps at a spot (tutorial). Its fingertip is at the widget's top-left.
 class PointingHand extends StatefulWidget {

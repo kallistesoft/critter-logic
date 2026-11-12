@@ -13,6 +13,8 @@ import 'navigation.dart';
 import 'palette.dart';
 import 'services.dart';
 import 'widgets.dart';
+import 'worlds/lodge_journal.dart';
+import 'worlds/world.dart';
 
 const setEmoji = {'farm': '🌾', 'friends': '🏡', 'savanna': '🌍', 'jungle': '🌴', 'polar': '❄️'};
 
@@ -24,6 +26,21 @@ const _pageTint = {
   'jungle': Color(0xFFF0F8E4),
   'polar': Color(0xFFEFF6FC),
 };
+
+/// Strong hue of each set, for the dark scrapbook pages of dark Worlds.
+const _pageHue = {
+  'farm': Color(0xFFE0A030),
+  'friends': Color(0xFFE07A8A),
+  'savanna': Color(0xFFE08A40),
+  'jungle': Color(0xFF6CC04A),
+  'polar': Color(0xFF6AA8E0),
+};
+
+/// Dark Worlds get dark scrapbook pages (light pages would carry their light ink).
+bool _darkPages() => activeWorld.brightness == Brightness.dark;
+
+Color _pageColor(String set) =>
+    _darkPages() ? Color.lerp(paper, _pageHue[set] ?? paper, 0.1)! : (_pageTint[set] ?? paper);
 
 /// The collection as a scrapbook: one paper page per set, critters as taped photos; missing ones as silhouettes.
 class AlbumScreen extends StatefulWidget {
@@ -49,12 +66,12 @@ class _AlbumScreenState extends State<AlbumScreen> {
     return MeadowScaffold(
       child: Column(children: [
         MeadowTopBar(
-          title: l10n.album,
+          title: worldOf(context).albumTitle(l10n),
           backTooltip: l10n.back,
           trailing: [
             StatPill(
               key: const Key('albumCount'),
-              icon: const Icon(Icons.menu_book_rounded, color: woodDark),
+              icon: Icon(Icons.menu_book_rounded, color: woodDark),
               text: '${album.where((c) => owned.contains(c.id)).length}/${album.length}',
             ),
           ],
@@ -73,7 +90,7 @@ class _AlbumScreenState extends State<AlbumScreen> {
                 Expanded(
                   child: Text(waiting > 0 ? l10n.capsulesWaiting(waiting) : l10n.capsulesHowTo, style: chunky(16)),
                 ),
-                const Icon(Icons.chevron_right_rounded, color: woodDark, size: 30),
+                Icon(Icons.chevron_right_rounded, color: woodDark, size: 30),
               ]),
             ),
             if (goldFrame) ...[
@@ -89,7 +106,7 @@ class _AlbumScreenState extends State<AlbumScreen> {
                       borderRadius: BorderRadius.circular(18),
                       border: Border.all(color: gold, width: 6),
                       gradient: const LinearGradient(colors: [Color(0x33FFE47A), Color(0x22FFC23D)]),
-                      boxShadow: const [BoxShadow(color: goldEdge, offset: Offset(0, 4))],
+                      boxShadow: [BoxShadow(color: goldEdge, offset: Offset(0, 4))],
                     )
                   : null,
               child: Column(children: [
@@ -122,6 +139,9 @@ class _SetPage extends StatelessWidget {
     final critters = album.where((c) => c.set == set).toList();
     final have = critters.where((c) => owned.contains(c.id)).length;
     final complete = have == critters.length;
+    if (worldOf(context).journal) {
+      return _JournalPage(set: set, owned: owned, critters: critters, have: have, complete: complete, tilt: tilt);
+    }
     return Transform.rotate(
       angle: tilt,
       child: Stack(clipBehavior: Clip.none, children: [
@@ -129,10 +149,10 @@ class _SetPage extends StatelessWidget {
           key: Key('set-$set'),
           padding: const EdgeInsets.fromLTRB(14, 30, 14, 14),
           decoration: BoxDecoration(
-            color: _pageTint[set] ?? paper,
+            color: _pageColor(set),
             borderRadius: BorderRadius.circular(6),
             border: Border.all(color: complete ? gold : paperEdge, width: complete ? 3.5 : 1.5),
-            boxShadow: const [
+            boxShadow: [
               BoxShadow(color: Color(0x22000000), offset: Offset(2, 6), blurRadius: 8),
               BoxShadow(color: paperEdge, offset: Offset(3, 3)),
             ],
@@ -164,7 +184,7 @@ class _SetPage extends StatelessWidget {
               child: Row(mainAxisSize: MainAxisSize.min, children: [
                 Text(setEmoji[set] ?? '', style: const TextStyle(fontSize: 18)),
                 const SizedBox(width: 6),
-                Text(setName(l10n, set), style: outlinedText(18, color: const Color(0xFFFFF4D6))),
+                Text(setName(l10n, set), style: outlinedText(18, color: onWood)),
               ]),
             ),
           ),
@@ -197,12 +217,89 @@ class _SetPage extends StatelessWidget {
   }
 }
 
+/// A set as a field-journal page (Worlds with [GameWorld.journal]): lined parchment, pencil sketches of the
+/// critters still to find, their badges once found.
+class _JournalPage extends StatelessWidget {
+  const _JournalPage({
+    required this.set,
+    required this.owned,
+    required this.critters,
+    required this.have,
+    required this.complete,
+    required this.tilt,
+  });
+
+  final String set;
+  final Set<String> owned;
+  final List<Critter> critters;
+  final int have;
+  final bool complete;
+  final double tilt;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Transform.rotate(
+      angle: tilt * 0.6,
+      child: Stack(clipBehavior: Clip.none, children: [
+        Container(
+          key: Key('set-$set'),
+          padding: const EdgeInsets.fromLTRB(28, 12, 14, 14),
+          decoration: journalPage(complete: complete),
+          child: CustomPaint(
+            painter: const JournalPagePainter(),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+              Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
+                Expanded(
+                  child: Text(setName(l10n, set),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(fontFamily: activeWorld.titleFont, fontWeight: FontWeight.w700, fontSize: 19, color: journalInk)),
+                ),
+                if (complete)
+                  JournalStamp(text: l10n.setComplete)
+                else
+                  Text('$have/${critters.length}', style: chunky(15, color: journalPencil)),
+              ]),
+              Container(height: 1.4, margin: const EdgeInsets.only(top: 2, bottom: 10), color: journalInk.withValues(alpha: 0.55)),
+              LayoutBuilder(builder: (context, constraints) {
+                const gap = 8.0;
+                final w = (constraints.maxWidth - 2 * gap) / 3;
+                return Wrap(spacing: gap, runSpacing: 6, children: [
+                  for (final c in critters)
+                    SizedBox(
+                      width: w,
+                      child: JournalEntry(
+                        id: c.id,
+                        owned: owned.contains(c.id),
+                        name: critterName(l10n, c.id),
+                        golden: c.rarity == Rarity.golden,
+                        rare: c.rarity == Rarity.rare,
+                      ),
+                    ),
+                ]);
+              }),
+              const SizedBox(height: 12),
+              _SetReward(set: set, complete: complete, journal: true),
+            ]),
+          ),
+        ),
+        const Positioned(left: -10, top: -6, child: JournalTape(angle: -0.6)),
+        const Positioned(right: -10, top: -6, child: JournalTape(angle: 0.6)),
+      ]),
+    );
+  }
+}
+
 /// What finishing the set gives: its coins and its hat; "Unlocked!" once done.
 class _SetReward extends StatelessWidget {
-  const _SetReward({required this.set, required this.complete});
+  const _SetReward({required this.set, required this.complete, this.journal = false});
 
   final String set;
   final bool complete;
+
+  /// Pencilled on a field-journal page (dark inks on parchment).
+  final bool journal;
 
   @override
   Widget build(BuildContext context) {
@@ -212,13 +309,19 @@ class _SetReward extends StatelessWidget {
     return Container(
       key: Key('setReward-$set'),
       padding: const EdgeInsets.fromLTRB(8, 6, 10, 6),
-      decoration: BoxDecoration(
-        color: complete ? goldSoft : Colors.white.withValues(alpha: 0.6),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: complete ? gold : paperEdge, width: 2),
-      ),
+      decoration: journal
+          ? BoxDecoration(
+              color: complete ? const Color(0x22C9A04E) : const Color(0x14000000),
+              borderRadius: BorderRadius.circular(4),
+              border: Border.all(color: complete ? journalBrass : journalPencil.withValues(alpha: 0.5), width: 1.2),
+            )
+          : BoxDecoration(
+              color: complete ? goldSoft : (_darkPages() ? const Color(0x14FFFFFF) : Colors.white.withValues(alpha: 0.6)),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: complete ? gold : paperEdge, width: 2),
+            ),
       child: Row(children: [
-        if (shownHat != null)
+        if (shownHat != null && !journal)
           SizedBox(width: 40, height: 32, child: CustomPaint(painter: HatPainter(shownHat)))
         else
           const CoinIcon(size: 28),
@@ -226,13 +329,13 @@ class _SetReward extends StatelessWidget {
         Expanded(
           child: Text(
             l10n.setRewardLabel([
-              l10n.rewardCoins(Economy.setComplete),
+              l10n.rewardCoins(Economy.setComplete + (setBonusCoins[set] ?? 0)),
               if (shownHat != null) cosmeticName(l10n, shownHat),
             ].join(' · ')),
-            style: chunky(14, color: woodDark, weight: FontWeight.w600),
+            style: chunky(14, color: journal ? journalInk : (_darkPages() ? ink : woodDark), weight: FontWeight.w600),
           ),
         ),
-        if (complete) Text(l10n.setUnlockedBadge, style: chunky(14, color: leafEdge)),
+        if (complete) Text(l10n.setUnlockedBadge, style: chunky(14, color: journal ? journalGreen : leafEdge)),
       ]),
     );
   }
@@ -248,10 +351,10 @@ class _GoldBanner extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
           decoration: BoxDecoration(
-            gradient: const LinearGradient(colors: [Color(0xFFFFE47A), gold]),
+            gradient: LinearGradient(colors: [Color(0xFFFFE47A), gold]),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(color: goldEdge, width: 2.5),
-            boxShadow: const [BoxShadow(color: goldEdge, offset: Offset(0, 3))],
+            boxShadow: [BoxShadow(color: goldEdge, offset: Offset(0, 3))],
           ),
           child: Text('👑 $text', style: outlinedText(18, stroke: goldEdge, width: 1.4)),
         ),
@@ -265,7 +368,7 @@ class _RuledPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final line = Paint()
-      ..color = const Color(0x147A5235)
+      ..color = _darkPages() ? const Color(0x10FFFFFF) : const Color(0x147A5235)
       ..strokeWidth = 1;
     for (var y = 18.0; y < size.height; y += 22) {
       canvas.drawLine(Offset(-8, y), Offset(size.width + 8, y), line);
@@ -290,14 +393,14 @@ class _Photo extends StatelessWidget {
     final (bg, frame) = switch (critter.rarity) {
       Rarity.golden => (goldSoft, gold),
       Rarity.rare => (rareSoft, rareBlue),
-      Rarity.common => (const Color(0xFFF1EADB), null),
+      Rarity.common => (_darkPages() ? tileEmpty : const Color(0xFFF1EADB), null),
     };
     Widget image = CritterImage(critter.id, size: 58);
-    if (!owned) image = Silhouette(color: const Color(0x404A3426), child: image);
+    if (!owned) image = Silhouette(color: _darkPages() ? const Color(0x33FFFFFF) : const Color(0x404A3426), child: image);
     Widget photo = Container(
       padding: const EdgeInsets.fromLTRB(5, 5, 5, 4),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: _darkPages() ? surface : Colors.white,
         borderRadius: BorderRadius.circular(4),
         border: frame == null ? null : Border.all(color: owned ? frame : frame.withValues(alpha: 0.3), width: 2.5),
         boxShadow: const [BoxShadow(color: Color(0x2A000000), offset: Offset(1, 3), blurRadius: 3)],
@@ -305,7 +408,10 @@ class _Photo extends StatelessWidget {
       child: Column(children: [
         Container(
           height: 70,
-          decoration: BoxDecoration(color: owned ? bg : const Color(0xFFE8E2D6), borderRadius: BorderRadius.circular(2)),
+          decoration: BoxDecoration(
+            color: owned ? bg : (_darkPages() ? tileGiven : const Color(0xFFE8E2D6)),
+            borderRadius: BorderRadius.circular(2),
+          ),
           child: Center(child: image),
         ),
         const SizedBox(height: 3),

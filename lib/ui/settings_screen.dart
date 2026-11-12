@@ -250,9 +250,9 @@ class CandySwitch extends StatelessWidget {
         height: 34,
         padding: const EdgeInsets.all(3),
         decoration: BoxDecoration(
-          color: value ? leaf : const Color(0xFFD9CFC0),
+          color: value ? leaf : tileGiven,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: value ? leafEdge : const Color(0xFFAFA393), width: 2.5),
+          border: Border.all(color: value ? leafEdge : inkSoft.withValues(alpha: 0.6), width: 2.5),
         ),
         child: AnimatedAlign(
           duration: const Duration(milliseconds: 260),
@@ -264,7 +264,7 @@ class CandySwitch extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.white,
               shape: BoxShape.circle,
-              boxShadow: [BoxShadow(color: value ? leafEdge : const Color(0xFFAFA393), offset: const Offset(0, 2))],
+              boxShadow: [BoxShadow(color: value ? leafEdge : inkSoft.withValues(alpha: 0.6), offset: const Offset(0, 2))],
             ),
           ),
         ),
@@ -289,7 +289,7 @@ class _Link extends StatelessWidget {
             _Badge(icon: icon, tint: tint),
             const SizedBox(width: 12),
             Expanded(child: Text(label, style: chunky(17))),
-            const Icon(Icons.chevron_right_rounded, color: woodDark, size: 28),
+            Icon(Icons.chevron_right_rounded, color: woodDark, size: 28),
           ]),
         ),
       );

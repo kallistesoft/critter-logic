@@ -19,10 +19,12 @@ import 'remove_ads.dart';
 import 'retention_ui.dart';
 import 'services.dart';
 import 'widgets.dart';
+import 'worlds/world.dart';
+import 'worlds/world_preview.dart';
 
-enum ShopTab { capsules, hats, coins }
+enum ShopTab { capsules, hats, worlds, coins }
 
-/// The market stall: capsules and streak repairs, hats, and coin packs (behind the grown-up check).
+/// The market stall: capsules and streak repairs, hats, Worlds, and coin packs (behind the grown-up check).
 class ShopScreen extends StatefulWidget {
   const ShopScreen({super.key, this.random, this.initialTab = ShopTab.capsules});
 
@@ -37,9 +39,6 @@ class ShopScreen extends StatefulWidget {
 class _ShopScreenState extends State<ShopScreen> {
   late ShopTab _tab = widget.initialTab;
 
-  /// Shop items as the player sees them: board themes come later (as Worlds), so they're left out for now.
-  static bool _visible(ShopItem i) => i.category != ShopCategory.theme;
-
   Future<void> _buy(ShopOffer offer) async {
     final services = Services.of(context);
     final l10n = AppLocalizations.of(context);
@@ -51,7 +50,10 @@ class _ShopScreenState extends State<ShopScreen> {
         services.sound.play(offer.item.category == ShopCategory.capsule ? Sfx.chest : Sfx.coin);
         HapticFeedback.mediumImpact();
         setState(() {});
-        if (offer.item.category == ShopCategory.capsule) {
+        if (offer.item.category == ShopCategory.world) {
+          // Bought Worlds are equipped right away: the whole app changes.
+          _applyWorld(offer.item.id);
+        } else if (offer.item.category == ShopCategory.capsule) {
           showToast(context, [l10n.shopBought, l10n.rewardCapsule], icon: const CapsuleEgg(size: 28));
         } else if (offer.item.category == ShopCategory.streakRepair) {
           showToast(context, [l10n.streakRepaired], icon: const FlameIcon(size: 26));
@@ -90,8 +92,18 @@ class _ShopScreenState extends State<ShopScreen> {
   }
 
   Future<void> _equip(String id) async {
-    await Services.of(context).retention.shop.equip(id);
-    if (mounted) setState(() {});
+    final shop = Services.of(context).retention.shop;
+    await shop.equip(id);
+    if (!mounted) return;
+    setState(() {});
+    if (shopItemById[id]?.category == ShopCategory.world) _applyWorld(id);
+  }
+
+  void _applyWorld(String id) {
+    final l10n = AppLocalizations.of(context);
+    final world = worldById(id);
+    WorldHost.maybeOf(context)?.switchTo(world);
+    showToast(context, [l10n.worldEquipped(world.name(l10n))], icon: const Icon(Icons.public_rounded, size: 24));
   }
 
   Future<void> _buyPack(CoinPack pack) async {
@@ -111,10 +123,10 @@ class _ShopScreenState extends State<ShopScreen> {
     final l10n = AppLocalizations.of(context);
     final shop = services.retention.shop;
     final today = todayNumber(services.today());
-    final offers = shop.offers(today).where((o) => _visible(o.item)).toList();
+    final offers = shop.offers(today);
     final coinsTab = _coinsTabShown(services);
     if (_tab == ShopTab.coins && !coinsTab) _tab = ShopTab.capsules;
-    final tabs = [ShopTab.capsules, ShopTab.hats, if (coinsTab) ShopTab.coins];
+    final tabs = [ShopTab.capsules, ShopTab.hats, ShopTab.worlds, if (coinsTab) ShopTab.coins];
     final deal = offers.where((o) => o.deal).firstOrNull;
     return MeadowScaffold(
       child: Column(
@@ -137,6 +149,7 @@ class _ShopScreenState extends State<ShopScreen> {
                       label: switch (t) {
                         ShopTab.capsules => l10n.shopCapsules,
                         ShopTab.hats => l10n.shopHats,
+                        ShopTab.worlds => l10n.shopWorlds,
                         ShopTab.coins => l10n.shopCoins,
                       },
                       selected: _tab == t,
@@ -154,7 +167,13 @@ class _ShopScreenState extends State<ShopScreen> {
               children: switch (_tab) {
                 ShopTab.capsules => [
                   if (deal != null && deal.item.category != ShopCategory.capsule) ...[
-                    _DealCard(offer: deal, onBuy: () => _buy(deal), onTap: () => setState(() => _tab = ShopTab.hats)),
+                    _DealCard(
+                      offer: deal,
+                      onBuy: () => _buy(deal),
+                      onTap: () => setState(
+                        () => _tab = deal.item.category == ShopCategory.world ? ShopTab.worlds : ShopTab.hats,
+                      ),
+                    ),
                     const SizedBox(height: 14),
                   ],
                   for (final o in offers.where((o) => !o.item.cosmetic)) ...[
@@ -180,6 +199,12 @@ class _ShopScreenState extends State<ShopScreen> {
                       );
                     },
                   ),
+                ],
+                ShopTab.worlds => [
+                  for (final o in offers.where((o) => o.item.category == ShopCategory.world)) ...[
+                    _WorldCard(offer: o, onBuy: () => _buy(o), onEquip: () => _equip(o.item.id)),
+                    const SizedBox(height: 14),
+                  ],
                 ],
                 ShopTab.coins => [
                   Text(
@@ -222,23 +247,27 @@ class _TabChip extends StatelessWidget {
         boxShadow: [BoxShadow(color: selected ? woodEdge : paperEdge, offset: const Offset(0, 3))],
       ),
       alignment: Alignment.center,
-      child: FittedBox(fit: BoxFit.scaleDown, alignment: AlignmentDirectional.centerStart, child: Text(
-        label,
-        maxLines: 1,
-        style: selected ? outlinedText(16, stroke: woodEdge, width: 1.4) : chunky(16, color: woodDark),
-      )),
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        alignment: AlignmentDirectional.centerStart,
+        child: Text(
+          label,
+          maxLines: 1,
+          style: selected ? outlinedText(16, stroke: woodEdge, width: 1.4) : chunky(16, color: woodDark),
+        ),
+      ),
     ),
   );
 }
 
 /// A coin price on a candy button; a deal shows the old price struck through above it.
 class PriceButton extends StatelessWidget {
-  const PriceButton({super.key, required this.price, this.oldPrice, required this.onPressed, this.color = leaf});
+  const PriceButton({super.key, required this.price, this.oldPrice, required this.onPressed, this.color});
 
   final int price;
   final int? oldPrice;
   final VoidCallback? onPressed;
-  final Color color;
+  final Color? color;
 
   @override
   Widget build(BuildContext context) => Column(
@@ -259,27 +288,30 @@ class PriceButton extends StatelessWidget {
 
 /// A ribbon across a card's corner ("Daily deal", "Best value").
 class Ribbon extends StatelessWidget {
-  const Ribbon({super.key, required this.text, this.color = bad});
+  const Ribbon({super.key, required this.text, this.color});
 
   final String text;
-  final Color color;
+  final Color? color;
 
   @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.fromLTRB(10, 3, 12, 4),
-    decoration: BoxDecoration(
-      color: color,
-      borderRadius: const BorderRadius.only(
-        topLeft: Radius.circular(10),
-        bottomRight: Radius.circular(12),
-        topRight: Radius.circular(4),
-        bottomLeft: Radius.circular(4),
+  Widget build(BuildContext context) {
+    final color = this.color ?? bad;
+    return Container(
+      padding: const EdgeInsets.fromLTRB(10, 3, 12, 4),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(10),
+          bottomRight: Radius.circular(12),
+          topRight: Radius.circular(4),
+          bottomLeft: Radius.circular(4),
+        ),
+        border: Border.all(color: edgeOf(color), width: 2),
+        boxShadow: [BoxShadow(color: edgeOf(color), offset: const Offset(0, 2))],
       ),
-      border: Border.all(color: edgeOf(color), width: 2),
-      boxShadow: [BoxShadow(color: edgeOf(color), offset: const Offset(0, 2))],
-    ),
-    child: Text(text, style: outlinedText(13, stroke: edgeOf(color), width: 1.2)),
-  );
+      child: Text(text, style: outlinedText(13, stroke: edgeOf(color), width: 1.2)),
+    );
+  }
 }
 
 class _DealCard extends StatelessWidget {
@@ -305,7 +337,10 @@ class _DealCard extends StatelessWidget {
           onTap: onTap,
           child: Row(
             children: [
-              _HatShowcase(hat: offer.item.id, size: 70),
+              if (offer.item.category == ShopCategory.world)
+                SizedBox(width: 62, height: 84, child: WorldMiniPreview(world: worldById(offer.item.id), borderRadius: 10))
+              else
+                _HatShowcase(hat: offer.item.id, size: 70),
               const SizedBox(width: 12),
               Expanded(child: Text(cosmeticName(l10n, offer.item.id), style: chunky(19))),
               PriceButton(price: offer.price, oldPrice: base, onPressed: offer.available ? onBuy : null, color: coral),
@@ -473,7 +508,11 @@ class _HatCard extends StatelessWidget {
         children: [
           _HatShowcase(hat: offer.item.id),
           const SizedBox(height: 6),
-          FittedBox(fit: BoxFit.scaleDown, alignment: AlignmentDirectional.centerStart, child: Text(cosmeticName(l10n, offer.item.id), maxLines: 1, style: chunky(17))),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: AlignmentDirectional.centerStart,
+            child: Text(cosmeticName(l10n, offer.item.id), maxLines: 1, style: chunky(17)),
+          ),
           if (offer.equipped)
             Text(l10n.shopEquipped, style: chunky(13, color: leafEdge))
           else if (!offer.owned && set != null)
@@ -575,3 +614,114 @@ class _PackRow extends StatelessWidget {
 /// Opens the shop on a tab.
 Future<void> openShop(BuildContext context, {ShopTab tab = ShopTab.capsules}) =>
     Navigator.of(context).push(softRoute(ShopScreen(initialTab: tab)));
+
+/// A World for sale or owned: a live mini preview (tap = full screen), its name and blurb, and Buy / Equip.
+class _WorldCard extends StatelessWidget {
+  const _WorldCard({required this.offer, required this.onBuy, required this.onEquip});
+
+  final ShopOffer offer;
+  final VoidCallback onBuy;
+  final VoidCallback onEquip;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final services = Services.of(context);
+    final world = worldById(offer.item.id);
+    final base = services.retention.settings.shop.priceOf(offer.item);
+    final Widget action;
+    if (offer.equipped) {
+      action = Container(
+        key: Key('equipped-${offer.item.id}'),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(color: goodSoft, borderRadius: BorderRadius.circular(14)),
+        child: Row(mainAxisSize: MainAxisSize.min, children: [
+          Icon(Icons.check_circle_rounded, color: leafEdge, size: 20),
+          const SizedBox(width: 4),
+          Flexible(child: Text(l10n.shopEquipped, maxLines: 1, style: chunky(15, color: leafEdge))),
+        ]),
+      );
+    } else if (offer.owned) {
+      action = ChunkyButton(
+        key: Key('equip-${offer.item.id}'),
+        label: l10n.shopEquip,
+        small: true,
+        color: sky,
+        onPressed: onEquip,
+      );
+    } else {
+      action = PriceButton(
+        key: Key('buy-${offer.item.id}'),
+        price: offer.price,
+        oldPrice: offer.deal ? base : null,
+        onPressed: onBuy,
+      );
+    }
+    final card = SoftCard(
+      key: Key('item-${offer.item.id}'),
+      color: offer.equipped ? goodSoft : (offer.deal ? goldSoft : paper),
+      border: offer.equipped ? leaf : (offer.deal ? gold : null),
+      padding: EdgeInsets.fromLTRB(10, offer.deal ? 20 : 10, 12, 10),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Semantics(
+            button: true,
+            label: l10n.worldPreview,
+            child: Bouncy(
+              key: Key('preview-${offer.item.id}'),
+              onTap: () => showWorldPreview(context, world),
+              child: Stack(children: [
+                SizedBox(width: 96, height: 136, child: WorldMiniPreview(world: world, borderRadius: 12)),
+                Positioned(
+                  right: 4,
+                  bottom: 4,
+                  child: Container(
+                    padding: const EdgeInsets.all(3),
+                    decoration: const BoxDecoration(color: Color(0x99000000), shape: BoxShape.circle),
+                    child: const Icon(Icons.fullscreen_rounded, color: Colors.white, size: 18),
+                  ),
+                ),
+              ]),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: AlignmentDirectional.centerStart,
+                  child: Text(world.name(l10n), maxLines: 1, style: chunky(20)),
+                ),
+                const SizedBox(height: 2),
+                Text(world.blurb(l10n), maxLines: 3, style: chunky(13.5, color: inkSoft, weight: FontWeight.w500)),
+                const SizedBox(height: 8),
+                Row(children: [
+                  if (offer.item.price == 0 && !offer.equipped) ...[
+                    Text(l10n.worldFree, style: chunky(14, color: leafEdge)),
+                    const SizedBox(width: 8),
+                  ],
+                  Flexible(child: action),
+                ]),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+    if (!offer.deal) return card;
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        card,
+        Positioned(
+          left: -4,
+          top: -10,
+          child: Ribbon(text: '${l10n.shopDeal} −${services.retention.settings.shop.dealPercent}%'),
+        ),
+      ],
+    );
+  }
+}

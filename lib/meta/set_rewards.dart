@@ -2,18 +2,22 @@ import '../services/stats_store.dart';
 import 'album.dart';
 import 'progress_store.dart';
 
-/// The cosmetic each completed album set unlocks (also sold in the shop, for players who don't want to wait).
+/// The cosmetic some completed album sets unlock (also sold in the shop, for players who don't want to wait).
 const setUnlocks = <String, String>{
   'farm': 'hat.flowers',
-  'friends': 'theme.sunset',
   'savanna': 'hat.party',
-  'jungle': 'theme.autumn',
-  'polar': 'theme.snowy',
+};
+
+/// Bonus coins for the other sets (on top of the 200 coins every completed set pays).
+const setBonusCoins = <String, int>{
+  'friends': 300,
+  'jungle': 300,
+  'polar': 300,
 };
 
 /// Completing the whole album (all 30 critters) unlocks these, plus [fullAlbumCoins].
-const fullAlbumUnlocks = ['hat.crown', 'theme.starry', 'frame.album_gold'];
-const fullAlbumCoins = 500;
+const fullAlbumUnlocks = ['hat.crown', 'frame.album_gold'];
+const fullAlbumCoins = 1000;
 
 /// What [grantSetUnlocks] gave, for the "Set complete!" celebration.
 class SetUnlock {
@@ -23,7 +27,7 @@ class SetUnlock {
   final String set;
   final List<String> cosmetics;
 
-  /// Bonus coins (the full album only; the per-set 200 coins are paid where the critter is granted).
+  /// Bonus coins ([setBonusCoins] or [fullAlbumCoins]; the per-set 200 coins are paid where the critter is granted).
   final int coins;
 }
 
@@ -37,8 +41,10 @@ Future<List<SetUnlock>> grantSetUnlocks(StatsStore stats, ProgressStore progress
     if (!album.where((c) => c.set == set).every((c) => owned.contains(c.id))) continue;
     final cosmetic = setUnlocks[set];
     if (cosmetic != null) await progress.addCosmetic(cosmetic);
+    final coins = setBonusCoins[set] ?? 0;
+    if (coins > 0) await stats.addCoins(coins);
     await progress.setSetRewarded(set);
-    given.add(SetUnlock(set: set, cosmetics: [?cosmetic]));
+    given.add(SetUnlock(set: set, cosmetics: [?cosmetic], coins: coins));
   }
   if (!progress.setRewarded('all') && album.every((c) => owned.contains(c.id))) {
     for (final c in fullAlbumUnlocks) {

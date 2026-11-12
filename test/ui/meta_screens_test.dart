@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:critter_logic/ui/worlds/world.dart';
 import 'package:critter_logic/meta/album.dart';
 import 'package:critter_logic/meta/economy.dart';
 import 'package:critter_logic/meta/level_ad_pacer.dart';
@@ -15,7 +16,10 @@ import 'helpers.dart';
 void main() {
   test('level interstitials: none before 5 wins, then every 3rd', () {
     const pacer = LevelAdPacer();
-    final shown = [for (var w = 1; w <= 15; w++) if (pacer.shouldShow(w)) w];
+    final shown = [
+      for (var w = 1; w <= 15; w++)
+        if (pacer.shouldShow(w)) w,
+    ];
     expect(shown, [5, 8, 11, 14]);
     const custom = LevelAdPacer(firstAfter: 2, every: 1);
     expect([for (var w = 1; w <= 4; w++) custom.shouldShow(w)], [false, true, true, true]);
@@ -188,75 +192,83 @@ void main() {
       expect(find.text('Turn on notifications for Critter Logic in your phone settings.'), findsOneWidget);
     });
 
-    for (final locale in const [Locale('en'), Locale('fr')]) {
-      testWidgets('every screen fits a 360×640 phone ($locale)', (tester) async {
-        await stats.addCapsule();
-        await app.pump(tester, locale: locale, size: const Size(360, 640));
-        Future<void> visit(Key key, {bool settle = true}) async {
-          final list = find.byType(Scrollable).first;
-          if (find.byKey(key).evaluate().isEmpty) {
-            // Back to the top, then down to the target.
-            await tester.drag(list, const Offset(0, 2000));
-            await tester.pumpAndSettle();
+    for (final world in worlds) {
+      for (final locale in const [Locale('en'), Locale('fr')]) {
+        testWidgets('every screen fits a 360×640 phone (${world.id}, $locale)', (tester) async {
+          addTearDown(() => activeWorld = worlds.first);
+          app.world = world.id;
+          await stats.addCapsule();
+          await app.pump(tester, locale: locale, size: const Size(360, 640));
+          Future<void> visit(Key key, {bool settle = true}) async {
+            final list = find.byType(Scrollable).first;
+            if (find.byKey(key).evaluate().isEmpty) {
+              // Back to the top, then down to the target.
+              await tester.drag(list, const Offset(0, 2000));
+              await tester.pumpAndSettle();
+            }
+            if (find.byKey(key).evaluate().isEmpty) {
+              await tester.scrollUntilVisible(find.byKey(key), 100, scrollable: list);
+            }
+            await tester.ensureVisible(find.byKey(key));
+            await tester.pump();
+            await tester.tap(find.byKey(key));
+            settle ? await tester.pumpAndSettle() : await tester.pump(const Duration(seconds: 1));
           }
-          if (find.byKey(key).evaluate().isEmpty) await tester.scrollUntilVisible(find.byKey(key), 100, scrollable: list);
-          await tester.ensureVisible(find.byKey(key));
-          await tester.pump();
-          await tester.tap(find.byKey(key));
-          settle ? await tester.pumpAndSettle() : await tester.pump(const Duration(seconds: 1));
-        }
 
-        Future<void> back() async {
-          tester.state<NavigatorState>(find.byType(Navigator)).pop();
-          await tester.pump(const Duration(seconds: 1));
-        }
+          Future<void> back() async {
+            tester.state<NavigatorState>(find.byType(Navigator)).pop();
+            await tester.pump(const Duration(seconds: 1));
+          }
 
-        await visit(const Key('daily-nests')); // tutorial
-        await tester.tap(find.byKey(const Key('tutorialSkip')));
-        await tester.pumpAndSettle();
-        await solveNests(tester);
-        await tester.pumpAndSettle(); // result
-        await tester.tap(find.byKey(const Key('resultHome')));
-        await tester.pumpAndSettle();
-        await visit(const Key('daily-pairs'));
-        await tester.tap(find.byKey(const Key('tutorialSkip')));
-        await tester.pumpAndSettle();
-        await tapCell(tester, 1);
-        await back();
-        await visit(const Key('daily-trail')); // tutorial
-        expect(tester.takeException(), isNull);
-        await tester.tap(find.byKey(const Key('tutorialSkip')));
-        await tester.pumpAndSettle();
-        await dragPath(tester, [0, 1, 2]);
-        await back();
-        await visit(const Key('level-trail'));
-        await back();
-        await visit(const Key('settings'));
-        await back();
-        await visit(const Key('capsules'));
-        for (var i = 0; i < 3; i++) {
-          await tester.tap(find.byKey(const Key('capsule')));
-          await tester.pump(const Duration(milliseconds: 500));
-        }
-        await tester.pumpAndSettle();
-        await back();
-        await visit(const Key('album'), settle: false);
-        await back();
-        await visit(const Key('trophies'));
-        await back();
-        await visit(const Key('eventBanner'));
-        await back();
-        await visit(const Key('shopStall'));
-        await tester.tap(find.byKey(const Key('tab-hats')));
-        await tester.pumpAndSettle();
-        await back();
-        await visit(const Key('luckyNest'));
-        await back();
-        await visit(const Key('calendarButton'));
-        await tester.tap(find.byKey(const Key('calendarClaim')));
-        await tester.pumpAndSettle();
-        expect(tester.takeException(), isNull);
-      });
+          await visit(const Key('daily-nests')); // tutorial
+          await tester.tap(find.byKey(const Key('tutorialSkip')));
+          await tester.pumpAndSettle();
+          await solveNests(tester);
+          await tester.pumpAndSettle(); // result
+          await tester.tap(find.byKey(const Key('resultHome')));
+          await tester.pumpAndSettle();
+          await visit(const Key('daily-pairs'));
+          await tester.tap(find.byKey(const Key('tutorialSkip')));
+          await tester.pumpAndSettle();
+          await tapCell(tester, 1);
+          await back();
+          await visit(const Key('daily-trail')); // tutorial
+          expect(tester.takeException(), isNull);
+          await tester.tap(find.byKey(const Key('tutorialSkip')));
+          await tester.pumpAndSettle();
+          await dragPath(tester, [0, 1, 2]);
+          await back();
+          await visit(const Key('level-trail'));
+          await back();
+          await visit(const Key('settings'));
+          await back();
+          await visit(const Key('capsules'));
+          for (var i = 0; i < 3; i++) {
+            await tester.tap(find.byKey(const Key('capsule')));
+            await tester.pump(const Duration(milliseconds: 500));
+          }
+          await tester.pumpAndSettle();
+          await back();
+          await visit(const Key('album'), settle: false);
+          await back();
+          await visit(const Key('trophies'));
+          await back();
+          await visit(const Key('eventBanner'));
+          await back();
+          await visit(const Key('shopStall'));
+          await tester.tap(find.byKey(const Key('tab-hats')));
+          await tester.pumpAndSettle();
+          await tester.tap(find.byKey(const Key('tab-worlds')));
+          await tester.pumpAndSettle();
+          await back();
+          await visit(const Key('luckyNest'));
+          await back();
+          await visit(const Key('calendarButton'));
+          await tester.tap(find.byKey(const Key('calendarClaim')));
+          await tester.pumpAndSettle();
+          expect(tester.takeException(), isNull);
+        });
+      }
     }
   });
 }

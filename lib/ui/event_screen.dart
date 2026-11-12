@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'worlds/world.dart';
 import '../l10n/app_localizations.dart';
 import '../meta/album.dart';
 import '../meta/weekly_event.dart';
@@ -52,7 +53,7 @@ class EventBanner extends StatelessWidget {
       children: [
         SoftCard(
           key: const Key('eventBanner'),
-          color: ready ? goldSoft : const Color(0xFFFFF3E6),
+          color: ready ? goldSoft : accentSoft,
           border: ready ? gold : coral,
           padding: const EdgeInsets.fromLTRB(8, 8, 14, 10),
           onTap: onTap,
@@ -157,7 +158,7 @@ class EventProgress extends StatelessWidget {
               width: w,
               height: height,
               decoration: BoxDecoration(
-                color: const Color(0xFFEFE3CC),
+                color: tileEmpty,
                 borderRadius: BorderRadius.circular(height),
                 border: Border.all(color: paperEdge, width: 1.5),
               ),
@@ -168,7 +169,7 @@ class EventProgress extends StatelessWidget {
                   heightFactor: 1,
                   child: Container(
                     decoration: BoxDecoration(
-                      gradient: const LinearGradient(colors: [Color(0xFFFFB38A), coral]),
+                      gradient: LinearGradient(colors: [Color.lerp(coral, Colors.white, 0.3)!, coral]),
                       borderRadius: BorderRadius.circular(height),
                     ),
                   ),
@@ -196,7 +197,7 @@ class _Gift extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = claimed ? const Color(0xFFCFC4B2) : (reached ? gold : const Color(0xFFFFB38A));
+    final c = claimed ? tileGiven : (reached ? gold : Color.lerp(coral, Colors.white, 0.3)!);
     return Container(
       width: size,
       height: size,
@@ -296,7 +297,7 @@ class _EventScreenState extends State<EventScreen> {
               padding: EdgeInsets.fromLTRB(16, 14, 16, 24 + MediaQuery.viewPaddingOf(context).bottom),
               children: [
                 SoftCard(
-                  color: const Color(0xFFFFF3E6),
+                  color: accentSoft,
                   border: coral,
                   child: Column(
                     children: [
@@ -378,6 +379,9 @@ class _EventScreenState extends State<EventScreen> {
                       for (final c in critters)
                         owned.contains(c.id)
                             ? CritterImage(c.id, size: 80)
+                            : worldOf(context).journal
+                            // A badge flattened to a grey disc says nothing: show it faded instead.
+                            ? Opacity(opacity: 0.3, child: CritterImage(c.id, size: 80))
                             : Silhouette(child: CritterImage(c.id, size: 80)),
                     ],
                   ),
@@ -451,7 +455,7 @@ class _PrizeCard extends StatelessWidget {
               onPressed: onClaim,
             )
           else
-            const Icon(Icons.lock_rounded, color: paperEdge, size: 28),
+            Icon(Icons.lock_rounded, color: paperEdge, size: 28),
         ],
       ),
     );

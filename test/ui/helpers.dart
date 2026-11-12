@@ -105,6 +105,12 @@ class TestApp {
   final sound = NoSound();
   DateTime now = DateTime(2026, 12, 12, 10);
 
+  /// The equipped World (a `world.*` id); null = the Meadow.
+  String? world;
+
+  /// Shows the first-launch World picker (other tests start past it).
+  bool welcome = false;
+
   /// Retention systems with custom settings / random; null = the app default on [stats].
   ValueListenable<Retention>? retention;
   CoinStoreService? coinStore;
@@ -113,6 +119,11 @@ class TestApp {
   Future<void> pump(WidgetTester tester,
       {Locale? locale, Size size = const Size(412, 915), bool motion = false, bool calendar = false}) async {
     if (!calendar) await stats.prefs.setInt('progress.cal.shownDay', localDay(now));
+    if (!welcome) await stats.prefs.setBool('progress.world.chosen', true);
+    if (world != null) {
+      await stats.prefs.setString('progress.equipped.world', world!);
+      await stats.prefs.setStringList('progress.cosmetics', {...?stats.prefs.getStringList('progress.cosmetics'), world!}.toList());
+    }
     if (!motion) calmMotion(tester);
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;

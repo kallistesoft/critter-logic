@@ -186,15 +186,32 @@ The main coin sink. Prices are set against income (~45 coins/day from dailies, ~
 |---|---|---|
 | Capsule | 150 | always available |
 | Streak repair | 100 | only when yesterday can be repaired (same once-a-week rule as the ad repair) |
-| Board themes: snowy, sunset, autumn, starry | 300 / 300 / 400 / 600 | owned forever, one equipped; `theme.meadow` is free and default |
+| Worlds: Night Neon, Winter Cabin, Clean Pro (`world.neon`, `world.winter`, `world.pro`) | 1 500 / 2 000 / 1 500 | owned forever, one equipped; Meadow (`world.meadow`, default) and Wild Lodge (`world.lodge`) are free |
 | Critter hats: flowers, party, beanie, crown | 200 / 200 / 250 / 500 | owned forever, one equipped, can be taken off |
 
-- **Daily deal:** one unowned cosmetic per day at −30% (the capsule once every cosmetic is owned), the same on every
-  device for a given day.
-- API: `offers(today)`, `buy(id, today)` → `PurchaseResult`, `equip(id)`, `equippedTheme`, `equippedHat`.
-- Analytics: `shop_purchase` (`item`, `price`, `deal`).
-- UI (after the meadow redesign): a shop stall on the home screen; the board reads `equippedTheme`, the critters wear
-  `equippedHat` (art needed for 4 themes and 4 hats).
+- **Daily deal:** one unowned hat or paid World per day at −30% (the capsule once everything is owned), the same on
+  every device for a given day.
+- API: `offers(today)`, `buy(id, today)` → `PurchaseResult`, `equip(id)`, `equippedWorld`, `equippedHat`.
+- Analytics: `shop_purchase` (`item`, `price`, `deal`), `world_equip` (`world`).
+- UI: a shop stall on the home screen with Capsules / Hats / Worlds (/ Coins) tabs. Each World card shows a live
+  mini preview; tapping it opens a full-screen preview before buying. The critters wear `equippedHat`.
+
+## Worlds (`lib/ui/worlds/`)
+A World is a full-app theme: background, palette, fonts, panels, buttons, title sign, board palettes, the way
+critters are drawn and the streak icon. Same game, progress and rewards underneath.
+
+| World | Price | Look |
+|---|---|---|
+| Meadow (`world.meadow`) | free, default | sky, sun, clouds, hills, wooden signs, candy buttons, Kenney critters |
+| Wild Lodge (`world.lodge`) | free | dusk sky, pine forest, mountains, campfire glow, dark wood + brass, slab type; critters as wildlife badges; album = field journal; streak = campfire |
+| Night Neon (`world.neon`) | 1 500 | dark synthwave grid, glowing cyan/magenta/lime outlines, glowing critters |
+| Winter Cabin (`world.winter`) | 2 000 | snowy pines at night, northern lights, warm cabin windows, gentle snow, knit panels; critters wear scarves |
+| Clean Pro (`world.pro`) | 1 500 | minimal slate + gold, flat cards, no decorations; critters only in the album and rewards |
+
+- The equipped World is `progress.equipped('world')` (via `shop.equippedWorld`). On first launch a welcome screen
+  shows Meadow and Wild Lodge with live previews (skippable → Meadow); `progress.worldChosen` remembers it was seen.
+- Adding a World: a `GameWorld` subclass (palette, fonts, painters, critter renderer) in `lib/ui/worlds/`, its entry
+  in `worlds` (`world.dart`), a `world.<id>` shop item, its l10n name, and any OFL/CC0 assets in `assets/CREDITS.md`.
 
 ## Lucky Nest (`lib/meta/lucky_nest.dart`, `retention.luckyNest`)
 A cozy egg draw (deliberately no casino look: no slots, chips or "bet" wording; odds always shown).
@@ -218,17 +235,17 @@ A cozy egg draw (deliberately no casino look: no slots, chips or "bet" wording; 
 | `lucky_nest` | String | empty (defaults); `golden=15,capsule=120,coins=200,hint=300,price=60,paid_per_day=3,min_coins=50,max_coins=150` (odds in per mille) |
 
 ## Album set unlocks (`lib/meta/set_rewards.dart`)
-Completing a set still pays `Economy.setComplete` (200 coins) and now also unlocks a cosmetic (owned forever, so it
-disappears from the shop's for-sale list):
+Completing a set still pays `Economy.setComplete` (200 coins) and also unlocks a hat (owned forever, so it
+disappears from the shop's for-sale list) or bonus coins:
 
 | Set | Unlock |
 |---|---|
 | Farm | Flower crown hat (`hat.flowers`) |
-| Friends | Sunset board (`theme.sunset`) |
+| Friends | +300 coins |
 | Savanna | Party hat (`hat.party`) |
-| Jungle | Autumn board (`theme.autumn`) |
-| Polar | Snowy board (`theme.snowy`) |
-| All 30 critters | Crown hat, Starry board, gold album frame (`frame.album_gold`) + 500 coins |
+| Jungle | +300 coins |
+| Polar | +300 coins |
+| All 30 critters | Crown hat, gold album frame (`frame.album_gold`) + 1 000 coins |
 
 - `grantSetUnlocks(stats, progress)` gives every pending unlock once; `Retention.recordEvent(CapsuleOpened())` calls it
   and returns them in `RetentionUpdate.setUnlocks`; event prizes queue theirs in `takePendingSetUnlocks()`.

@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
-import '../palette.dart';
+import '../worlds/world.dart';
 
 /// A burst of soft confetti driven by [animation] (0→1).
 class Confetti extends StatelessWidget {
@@ -29,13 +29,13 @@ class _Piece {
         spin = (r.nextDouble() - 0.5) * 14,
         size = 6 + r.nextDouble() * 7,
         round = r.nextBool(),
-        color = _colors[r.nextInt(_colors.length)];
+        color = r.nextInt(1 << 20);
 
   final double x, vx, vy, spin, size;
   final bool round;
-  final Color color;
+  /// Picks a color of the World's celebration set.
+  final int color;
 
-  static const _colors = [accent, gold, good, sunColor, moonColor, Color(0xFFFFADAD), Color(0xFF9BF6FF), Color(0xFFBDB2FF)];
 }
 
 class _ConfettiPainter extends CustomPainter {
@@ -50,13 +50,14 @@ class _ConfettiPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    final colors = activeWorld.celebration;
     if (t <= 0 || t >= 1) return;
     final fade = t < 0.75 ? 1.0 : (1 - t) / 0.25;
     for (final p in pieces) {
       // Thrown up from the bottom middle, then falling with gravity.
       final x = size.width * (0.5 + (p.x - 0.5) * 0.3 + p.vx * t);
       final y = size.height * (0.85 + p.vy * t + 1.6 * t * t);
-      final paint = Paint()..color = p.color.withValues(alpha: fade);
+      final paint = Paint()..color = colors[p.color % colors.length].withValues(alpha: fade);
       canvas.save();
       canvas.translate(x, y);
       canvas.rotate(p.spin * t);

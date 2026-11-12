@@ -98,7 +98,11 @@ class ProgressStore {
     return true;
   }
 
-  /// The cosmetic worn in a slot ('theme', 'hat'); null = the default look / no hat.
+  /// The player saw the first-launch World picker (picked one or skipped it).
+  bool get worldChosen => _prefs.getBool('${prefix}world.chosen') ?? false;
+  Future<void> setWorldChosen() => _prefs.setBool('${prefix}world.chosen', true);
+
+  /// The cosmetic worn in a slot ('world', 'hat'); null = the default World / no hat.
   String? equipped(String slot) => _prefs.getString('${prefix}equipped.$slot');
   Future<void> setEquipped(String slot, String? id) =>
       id == null ? _prefs.remove('${prefix}equipped.$slot') : _prefs.setString('${prefix}equipped.$slot', id);

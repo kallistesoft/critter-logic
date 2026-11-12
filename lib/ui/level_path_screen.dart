@@ -12,6 +12,7 @@ import 'navigation.dart';
 import 'palette.dart';
 import 'services.dart';
 import 'widgets.dart';
+import 'worlds/world.dart';
 
 /// A game's levels as a winding trail through the meadow: finished levels with their stars, the current one with
 /// the player's critter on it (tap to play), the next ones locked.
@@ -73,7 +74,7 @@ class _LevelPathScreenState extends State<LevelPathScreen> {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(28),
                 border: Border.all(color: woodEdge, width: 4),
-                boxShadow: const [BoxShadow(color: woodEdge, offset: Offset(0, 6)), BoxShadow(color: shadow, blurRadius: 16, offset: Offset(0, 10))],
+                boxShadow: [BoxShadow(color: woodEdge, offset: Offset(0, 6)), BoxShadow(color: shadow, blurRadius: 16, offset: Offset(0, 10))],
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(24),
@@ -152,11 +153,11 @@ class _DoneNode extends StatelessWidget {
         onTap: onTap,
         child: Stack(clipBehavior: Clip.none, alignment: Alignment.center, children: [
           Positioned.fill(
-            child: CustomPaint(painter: const CandyPainter(face: woodButton, edge: woodEdge, depth: 6, circle: true)),
+            child: CustomPaint(painter: CandyPainter(face: woodButton, edge: woodEdge, depth: 6, circle: true)),
           ),
           Padding(
             padding: const EdgeInsets.only(bottom: 6),
-            child: Text('$level', style: outlinedText(24, color: const Color(0xFFFFF4D6))),
+            child: Text('$level', style: outlinedText(24, color: onWood)),
           ),
           Positioned(
             bottom: -16,
@@ -184,13 +185,20 @@ class _LockedNode extends StatelessWidget {
         sound: false,
         child: Stack(alignment: Alignment.center, children: [
           Positioned.fill(
-            child: CustomPaint(painter: const CandyPainter(face: Color(0xFFC9C3B8), edge: Color(0xFF8F877A), depth: 5, circle: true)),
+            child: CustomPaint(
+              painter: CandyPainter(
+                face: activeWorld.disabledButton,
+                edge: activeWorld.edgeOf(activeWorld.disabledButton),
+                depth: activeWorld.buttonDepth(true) == 0 ? 0 : 5,
+                circle: true,
+              ),
+            ),
           ),
           Padding(
             padding: const EdgeInsets.only(bottom: 5),
             child: Column(mainAxisSize: MainAxisSize.min, children: [
-              const Icon(Icons.lock_rounded, color: Color(0xFF7D7569), size: 18),
-              Text('$level', style: chunky(15, color: const Color(0xFF6E665B), height: 1)),
+              Icon(Icons.lock_rounded, color: inkSoft, size: 18),
+              Text('$level', style: chunky(15, color: inkSoft, height: 1)),
             ]),
           ),
         ]),
@@ -247,7 +255,7 @@ class _CurrentNodeState extends State<_CurrentNode> with SingleTickerProviderSta
                 boxShadow: [BoxShadow(color: const Color(0xFFFFF59D).withValues(alpha: 0.9), blurRadius: 22, spreadRadius: 4)],
               ),
             ),
-            const Positioned.fill(child: CustomPaint(painter: CandyPainter(face: leaf, edge: leafEdge, depth: 7, circle: true))),
+            Positioned.fill(child: CustomPaint(painter: CandyPainter(face: leaf, edge: leafEdge, depth: 7, circle: true))),
             Padding(
               padding: const EdgeInsets.only(bottom: 7),
               child: Text('${widget.level}', style: outlinedText(30, stroke: leafEdge)),
@@ -291,10 +299,10 @@ class _TrailPainter extends CustomPainter {
     canvas.drawRect(
       rect,
       Paint()
-        ..shader = const LinearGradient(
+        ..shader = LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [Color(0xFF9ED97A), grass, Color(0xFF8BD26A)],
+          colors: activeWorld.mapGround,
           stops: [0, 0.5, 1],
         ).createShader(rect),
     );
@@ -314,17 +322,17 @@ class _TrailPainter extends CustomPainter {
       path.cubicTo(a.dx, mid, b.dx, mid, b.dx, b.dy);
     }
     canvas.drawPath(path, Paint()
-      ..color = const Color(0xFFB98A55)
+      ..color = activeWorld.board.dirtEdge
       ..style = PaintingStyle.stroke
       ..strokeWidth = 34
       ..strokeCap = StrokeCap.round);
     canvas.drawPath(path, Paint()
-      ..color = const Color(0xFFE8C994)
+      ..color = activeWorld.board.dirtFill
       ..style = PaintingStyle.stroke
       ..strokeWidth = 26
       ..strokeCap = StrokeCap.round);
     // Pebbles along the trail.
-    final pebble = Paint()..color = const Color(0xFFCFAE78);
+    final pebble = Paint()..color = activeWorld.board.dirtPrint;
     for (final m in path.computeMetrics()) {
       for (var d = 20.0; d < m.length; d += 26) {
         final t = m.getTangentForOffset(d);
@@ -334,6 +342,7 @@ class _TrailPainter extends CustomPainter {
       }
     }
     // Decorations beside each stone, on the side away from the trail's swing.
+    if (!activeWorld.mapProps) return;
     for (var i = 0; i < points.length; i++) {
       final rr = Random((firstLevel + i) * 131);
       final p = points[i];

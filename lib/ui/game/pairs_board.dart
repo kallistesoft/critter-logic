@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import '../worlds/world.dart';
 import 'package:flutter/material.dart';
 
 import '../../puzzles/pairs/pairs.dart';
@@ -92,14 +93,14 @@ class PairsBoard extends StatelessWidget {
       child: IgnorePointer(
         child: Container(
           decoration: BoxDecoration(
-            color: woodLight,
+            color: activeWorld.board.linkFill,
             shape: BoxShape.circle,
-            border: Border.all(color: woodEdge, width: max(1.5, d * 0.09)),
+            border: Border.all(color: activeWorld.board.linkEdge, width: max(1.5, d * 0.09)),
             boxShadow: const [BoxShadow(color: Color(0x55000000), offset: Offset(0, 2))],
           ),
           alignment: Alignment.center,
           child: Text(link.same ? '=' : '×',
-              style: TextStyle(fontFamily: displayFont, color: woodEdge, fontSize: d * 0.66, fontWeight: FontWeight.w700, height: 1)),
+              style: TextStyle(fontFamily: displayFont, color: activeWorld.board.linkEdge, fontSize: d * 0.66, fontWeight: FontWeight.w700, height: 1)),
         ),
       ),
     );
@@ -182,20 +183,21 @@ class _Tile extends StatelessWidget {
 class _LawnPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
+    final b = activeWorld.board;
     final rr = RRect.fromRectAndRadius(Offset.zero & size, Radius.circular(size.width * 0.06));
-    canvas.drawRRect(rr.shift(const Offset(0, 6)), Paint()..color = const Color(0xFF2F7A26));
+    canvas.drawRRect(rr.shift(const Offset(0, 6)), Paint()..color = b.lawnEdge);
     canvas.drawRRect(
       rr,
       Paint()
-        ..shader = const LinearGradient(
+        ..shader = LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [Color(0xFF8ED46B), Color(0xFF6CC04A)],
+          colors: [b.lawnTop, b.lawnBottom],
         ).createShader(Offset.zero & size),
     );
     final r = Random(3);
     final tuft = Paint()
-      ..color = const Color(0xFF4FA238)
+      ..color = b.lawnTuft
       ..strokeWidth = 1.6
       ..strokeCap = StrokeCap.round;
     for (var i = 0; i < 40; i++) {
@@ -203,8 +205,9 @@ class _LawnPainter extends CustomPainter {
       canvas.drawLine(p, p + const Offset(-3, -6), tuft);
       canvas.drawLine(p, p + const Offset(2, -7), tuft);
     }
+    if (b.glow) paintGlow(canvas, Path()..addRRect(rr.deflate(1.5)), b.lawnEdge, 3);
     canvas.drawRRect(rr.deflate(1.5), Paint()
-      ..color = const Color(0xFF2F7A26)
+      ..color = b.lawnEdge
       ..style = PaintingStyle.stroke
       ..strokeWidth = 3);
   }
@@ -227,9 +230,10 @@ class _StonePainter extends CustomPainter {
     final r = Radius.circular(size.width * 0.26);
     final outer = RRect.fromRectAndRadius(Offset.zero & size, r);
     final face = RRect.fromLTRBR(0, 0, size.width, size.height - depth, r);
-    final top = given ? const Color(0xFFD9CCB2) : const Color(0xFFF7F0E2);
-    final low = given ? const Color(0xFFC2B292) : const Color(0xFFE4D8C2);
-    final edge = given ? const Color(0xFF94836A) : const Color(0xFFB3A285);
+    final b = activeWorld.board;
+    final top = given ? b.givenTop : b.stoneTop;
+    final low = given ? b.givenLow : b.stoneLow;
+    final edge = given ? b.givenEdge : b.stoneEdge;
     canvas.drawRRect(outer, Paint()..color = edge);
     canvas.drawRRect(
       face,
@@ -237,14 +241,14 @@ class _StonePainter extends CustomPainter {
         ..shader = LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [top, low])
             .createShader(face.outerRect),
     );
-    if (given) {
-      final moss = Paint()..color = const Color(0xFF8DBF5A).withValues(alpha: 0.8);
+    if (given && b.moss != null) {
+      final moss = Paint()..color = b.moss!;
       canvas.drawCircle(Offset(size.width * 0.18, size.height * 0.2), size.width * 0.07, moss);
       canvas.drawCircle(Offset(size.width * 0.28, size.height * 0.13), size.width * 0.05, moss);
-    } else {
+    } else if (!given) {
       canvas.drawOval(
         Rect.fromLTWH(size.width * 0.14, size.height * 0.08, size.width * 0.36, size.height * 0.14),
-        Paint()..color = Colors.white.withValues(alpha: 0.6),
+        Paint()..color = b.stoneShine,
       );
     }
     if (conflict) canvas.drawRRect(face, Paint()..color = bad.withValues(alpha: 0.28));

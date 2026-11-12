@@ -1751,8 +1751,134 @@ abstract class AppLocalizations {
   /// Settings credits line for the bundled font
   ///
   /// In en, this message translates to:
-  /// **'Font: Fredoka (SIL Open Font License)'**
+  /// **'Fonts: Fredoka, Zilla Slab, Bevan, Exo 2, Inter (SIL Open Font License)'**
   String get fontCredit;
+
+  /// Shop tab with the app themes (Worlds)
+  ///
+  /// In en, this message translates to:
+  /// **'Worlds'**
+  String get shopWorlds;
+
+  /// World name: the default sunny meadow look
+  ///
+  /// In en, this message translates to:
+  /// **'Meadow'**
+  String get worldMeadow;
+
+  /// World name: rugged outdoors look (dusk, pine forest, campfire)
+  ///
+  /// In en, this message translates to:
+  /// **'Wild Lodge'**
+  String get worldLodge;
+
+  /// World name: dark synthwave look with glowing outlines
+  ///
+  /// In en, this message translates to:
+  /// **'Night Neon'**
+  String get worldNeon;
+
+  /// World name: snowy cabin at night with northern lights
+  ///
+  /// In en, this message translates to:
+  /// **'Winter Cabin'**
+  String get worldWinter;
+
+  /// World name: minimal slate and gold look
+  ///
+  /// In en, this message translates to:
+  /// **'Clean Pro'**
+  String get worldPro;
+
+  /// One-line description of the Meadow world
+  ///
+  /// In en, this message translates to:
+  /// **'Sunny hills, wooden signs and cute critters.'**
+  String get worldMeadowBlurb;
+
+  /// One-line description of the Wild Lodge world
+  ///
+  /// In en, this message translates to:
+  /// **'Dusk in the pines, campfire glow and wildlife badges.'**
+  String get worldLodgeBlurb;
+
+  /// One-line description of the Night Neon world
+  ///
+  /// In en, this message translates to:
+  /// **'Glowing grids and synthwave nights.'**
+  String get worldNeonBlurb;
+
+  /// One-line description of the Winter Cabin world
+  ///
+  /// In en, this message translates to:
+  /// **'Snowy pines, warm windows and northern lights.'**
+  String get worldWinterBlurb;
+
+  /// One-line description of the Clean Pro world
+  ///
+  /// In en, this message translates to:
+  /// **'Minimal slate and gold. Just your times.'**
+  String get worldProBlurb;
+
+  /// Price label of a free World
+  ///
+  /// In en, this message translates to:
+  /// **'Free'**
+  String get worldFree;
+
+  /// Button: see a World full screen before buying it
+  ///
+  /// In en, this message translates to:
+  /// **'Preview'**
+  String get worldPreview;
+
+  /// Small label on the full-screen World preview
+  ///
+  /// In en, this message translates to:
+  /// **'Preview: tap to close'**
+  String get worldPreviewNote;
+
+  /// Toast after switching World
+  ///
+  /// In en, this message translates to:
+  /// **'Your world is now {world}'**
+  String worldEquipped(String world);
+
+  /// First-launch screen title: choose the app's look
+  ///
+  /// In en, this message translates to:
+  /// **'Pick your world'**
+  String get welcomeWorldTitle;
+
+  /// First-launch screen subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Same puzzles, your style. You can switch anytime in the shop.'**
+  String get welcomeWorldBody;
+
+  /// First-launch screen button
+  ///
+  /// In en, this message translates to:
+  /// **'Play in {world}'**
+  String welcomeWorldGo(String world);
+
+  /// First-launch World picker: skip (keeps Meadow)
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get welcomeWorldSkip;
+
+  /// Album title in the Wild Lodge world
+  ///
+  /// In en, this message translates to:
+  /// **'Field journal'**
+  String get fieldJournal;
+
+  /// Sample label inside a small World preview
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get previewDaily;
 }
 
 class _AppLocalizationsDelegate

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'worlds/world.dart';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -117,7 +118,11 @@ class _CritterBuddyState extends State<CritterBuddy> with TickerProviderStateMix
   @override
   Widget build(BuildContext context) {
     final s = widget.size;
-    final image = RepaintBoundary(child: widget.hat ? HattedCritter(widget.id, size: s) : CritterImage(widget.id, size: s));
+    final image = RepaintBoundary(
+      child: widget.hat
+          ? HattedCritter(widget.id, size: s, role: CritterRole.decoration)
+          : CritterImage(widget.id, size: s, role: CritterRole.decoration),
+    );
     final body = AnimatedBuilder(
       animation: Listenable.merge([_breath, _act]),
       child: image,
