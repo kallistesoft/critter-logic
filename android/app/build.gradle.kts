@@ -44,6 +44,7 @@ android {
         // flag during build.
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        resValue("string", "app_name", "Critter Logic")
         // AdMob app ID; debug builds use Google's sample app so test ads are served.
         manifestPlaceholders["admobAppId"] = "ca-app-pub-7557144664039757~1213786880"
     }
@@ -59,9 +60,23 @@ android {
         }
     }
 
+    buildFeatures {
+        resValues = true
+    }
+
     buildTypes {
         debug {
+            applicationIdSuffix = ".dev"
+            resValue("string", "app_name", "Critter Logic Dev")
             manifestPlaceholders["admobAppId"] = "ca-app-pub-3940256099942544~3347511713"
+        }
+        // Dev build for the owner's devices: `flutter build apk --profile`. Fast (AOT) like a release, but test ads
+        // (kReleaseMode is false), its own app ID next to the store app, and the debug signing key.
+        maybeCreate("profile").apply {
+            applicationIdSuffix = ".dev"
+            resValue("string", "app_name", "Critter Logic Dev")
+            manifestPlaceholders["admobAppId"] = "ca-app-pub-3940256099942544~3347511713"
+            signingConfig = signingConfigs.getByName("debug")
         }
         release {
             signingConfig = signingConfigs.findByName("upload") ?: signingConfigs.getByName("debug")
