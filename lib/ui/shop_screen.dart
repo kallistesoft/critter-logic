@@ -163,23 +163,20 @@ class _ShopScreenState extends State<ShopScreen> {
                   ],
                 ],
                 ShopTab.hats => [
-                  LayoutBuilder(
-                    builder: (context, box) {
-                      const gap = 12.0;
-                      final w = (box.maxWidth - gap) / 2;
-                      return Wrap(
-                        spacing: gap,
-                        runSpacing: gap,
-                        children: [
-                          for (final o in offers.where((o) => o.item.category == ShopCategory.hat))
-                            SizedBox(
-                              width: w,
-                              child: _HatCard(offer: o, onBuy: () => _buy(o), onEquip: () => _equip(o.item.id)),
-                            ),
-                        ],
-                      );
-                    },
-                  ),
+                  // Rows of two cards of equal height, so names, notes and buttons line up.
+                  for (final row in _pairs(offers.where((o) => o.item.category == ShopCategory.hat).toList()))
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 14),
+                      child: IntrinsicHeight(
+                        child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                          for (final (i, o) in row.indexed) ...[
+                            if (i > 0) const SizedBox(width: 12),
+                            Expanded(child: _HatCard(offer: o, onBuy: () => _buy(o), onEquip: () => _equip(o.item.id))),
+                          ],
+                          if (row.length == 1) ...[const SizedBox(width: 12), const Expanded(child: SizedBox())],
+                        ]),
+                      ),
+                    ),
                 ],
                 ShopTab.coins => [
                   Text(
@@ -486,6 +483,7 @@ class _HatCard extends StatelessWidget {
           else
             const SizedBox(height: 15),
           const SizedBox(height: 8),
+          const Spacer(),
           action,
         ],
       ),
@@ -493,6 +491,7 @@ class _HatCard extends StatelessWidget {
     if (!offer.deal) return card;
     return Stack(
       clipBehavior: Clip.none,
+      fit: StackFit.expand,
       children: [
         card,
         Positioned(left: -4, top: -10, child: Ribbon(text: l10n.shopDeal)),
@@ -575,3 +574,8 @@ class _PackRow extends StatelessWidget {
 /// Opens the shop on a tab.
 Future<void> openShop(BuildContext context, {ShopTab tab = ShopTab.capsules}) =>
     Navigator.of(context).push(softRoute(ShopScreen(initialTab: tab)));
+
+/// [items] two by two (the last row may hold one).
+List<List<T>> _pairs<T>(List<T> items) => [
+      for (var i = 0; i < items.length; i += 2) items.sublist(i, i + 2 > items.length ? items.length : i + 2),
+    ];
