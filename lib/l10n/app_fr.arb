@@ -141,5 +141,15 @@
   "critterWalrus": "Morse",
   "critterWhale": "Baleine",
   "critterPenguin": "Pingouin",
-  "critterNarwhal": "Narval"
+  "critterNarwhal": "Narval",
+  "reminderTitle": "Tes bestioles t’attendent 🐣",
+  "reminderBody": "Les Nids et les Paires du jour sont prêts.",
+  "reminderStreak": "{count, plural, one{Garde ta série 🔥 de {count} jour : joue aujourd’hui !} other{Garde ta série 🔥 de {count} jours : joue aujourd’hui !}}",
+  "reminderDenied": "Active les notifications de Critter Logic dans les réglages du téléphone.",
+  "levelMap": "Carte",
+  "tapToPlay": "Touche pour jouer !",
+  "levelLocked": "Termine d’abord le niveau {level}",
+  "levelPathTitle": "Niveaux {game}",
+  "levelDone": "Niveau {level} : {stars}/3 étoiles",
+  "fontCredit": "Police : Fredoka (licence SIL Open Font)"
 }

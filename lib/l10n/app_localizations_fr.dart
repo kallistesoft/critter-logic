@@ -505,4 +505,49 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get critterNarwhal => 'Narval';
+
+  @override
+  String get reminderTitle => 'Tes bestioles t’attendent 🐣';
+
+  @override
+  String get reminderBody => 'Les Nids et les Paires du jour sont prêts.';
+
+  @override
+  String reminderStreak(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Garde ta série 🔥 de $count jours : joue aujourd’hui !',
+      one: 'Garde ta série 🔥 de $count jour : joue aujourd’hui !',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get reminderDenied =>
+      'Active les notifications de Critter Logic dans les réglages du téléphone.';
+
+  @override
+  String get levelMap => 'Carte';
+
+  @override
+  String get tapToPlay => 'Touche pour jouer !';
+
+  @override
+  String levelLocked(int level) {
+    return 'Termine d’abord le niveau $level';
+  }
+
+  @override
+  String levelPathTitle(String game) {
+    return 'Niveaux $game';
+  }
+
+  @override
+  String levelDone(int level, int stars) {
+    return 'Niveau $level : $stars/3 étoiles';
+  }
+
+  @override
+  String get fontCredit => 'Police : Fredoka (licence SIL Open Font)';
 }

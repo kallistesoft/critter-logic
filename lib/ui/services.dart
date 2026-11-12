@@ -3,7 +3,10 @@ import 'package:flutter/widgets.dart';
 
 import '../services/ad_service.dart';
 import '../services/analytics_service.dart';
+import '../services/game_settings.dart';
 import '../services/leaderboard_service.dart';
+import '../services/music_service.dart';
+import '../services/reminder_service.dart';
 import '../services/premium_service.dart';
 import '../services/review_service.dart';
 import '../services/sound_service.dart';
@@ -22,6 +25,9 @@ class Services extends InheritedWidget {
     PremiumService? premium,
     PuzzleSource? puzzles,
     AnalyticsService? analytics,
+    ValueListenable<GameSettings>? settings,
+    MusicService? music,
+    this.reminders = const NoReminders(),
     this.review = const NoReviewService(),
     this.leaderboard = const NoLeaderboardService(),
     this.banner,
@@ -30,7 +36,9 @@ class Services extends InheritedWidget {
     required super.child,
   })  : premium = premium ?? NoPremiumService(),
         analytics = analytics ?? NoAnalytics(),
-        puzzles = puzzles ?? const DevPuzzleSource();
+        puzzles = puzzles ?? const DevPuzzleSource(),
+        settings = settings ?? ValueNotifier(const GameSettings()),
+        music = music ?? NoMusic();
 
   final StatsStore stats;
   final AdService ads;
@@ -39,6 +47,11 @@ class Services extends InheritedWidget {
   final AnalyticsService analytics;
   final ReviewService review;
   final LeaderboardService leaderboard;
+
+  /// Remote Config tuning (ad pacing, capsule odds); the shipped defaults until it loads.
+  final ValueListenable<GameSettings> settings;
+  final MusicService music;
+  final ReminderService reminders;
 
   /// Dailies and level tracks.
   final PuzzleSource puzzles;
@@ -65,5 +78,8 @@ class Services extends InheritedWidget {
       old.leaderboard != leaderboard ||
       old.analytics != analytics ||
       old.puzzles != puzzles ||
+      old.settings != settings ||
+      old.music != music ||
+      old.reminders != reminders ||
       old.banner != banner;
 }

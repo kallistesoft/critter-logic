@@ -949,6 +949,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Narwhal'**
   String get critterNarwhal;
+
+  /// Daily reminder notification
+  ///
+  /// In en, this message translates to:
+  /// **'Your critters are waiting 🐣'**
+  String get reminderTitle;
+
+  /// Daily reminder notification
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s Nests and Pairs are ready.'**
+  String get reminderBody;
+
+  /// Daily reminder notification
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{Keep your 🔥 {count}-day streak: play today!} other{Keep your 🔥 {count}-day streak: play today!}}'**
+  String reminderStreak(int count);
+
+  /// Snackbar when the notification permission is refused
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on notifications for Critter Logic in your phone settings.'**
+  String get reminderDenied;
+
+  /// Win panel button: back to the level path map
+  ///
+  /// In en, this message translates to:
+  /// **'Map'**
+  String get levelMap;
+
+  /// Bubble over the current level on the path map
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to play!'**
+  String get tapToPlay;
+
+  /// Tapping a locked level on the path map
+  ///
+  /// In en, this message translates to:
+  /// **'Finish level {level} first'**
+  String levelLocked(int level);
+
+  /// Title of a game's level path map
+  ///
+  /// In en, this message translates to:
+  /// **'{game} levels'**
+  String levelPathTitle(String game);
+
+  /// Tapping a finished level on the path map
+  ///
+  /// In en, this message translates to:
+  /// **'Level {level}: {stars}/3 stars'**
+  String levelDone(int level, int stars);
+
+  /// Settings credits line for the bundled font
+  ///
+  /// In en, this message translates to:
+  /// **'Font: Fredoka (SIL Open Font License)'**
+  String get fontCredit;
 }
 
 class _AppLocalizationsDelegate

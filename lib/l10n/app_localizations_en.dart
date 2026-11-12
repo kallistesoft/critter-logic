@@ -501,4 +501,49 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get critterNarwhal => 'Narwhal';
+
+  @override
+  String get reminderTitle => 'Your critters are waiting 🐣';
+
+  @override
+  String get reminderBody => 'Today\'s Nests and Pairs are ready.';
+
+  @override
+  String reminderStreak(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Keep your 🔥 $count-day streak: play today!',
+      one: 'Keep your 🔥 $count-day streak: play today!',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get reminderDenied =>
+      'Turn on notifications for Critter Logic in your phone settings.';
+
+  @override
+  String get levelMap => 'Map';
+
+  @override
+  String get tapToPlay => 'Tap to play!';
+
+  @override
+  String levelLocked(int level) {
+    return 'Finish level $level first';
+  }
+
+  @override
+  String levelPathTitle(String game) {
+    return '$game levels';
+  }
+
+  @override
+  String levelDone(int level, int stars) {
+    return 'Level $level: $stars/3 stars';
+  }
+
+  @override
+  String get fontCredit => 'Font: Fredoka (SIL Open Font License)';
 }

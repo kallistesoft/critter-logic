@@ -4,19 +4,25 @@ import 'package:flutter/services.dart';
 
 import 'l10n/app_localizations.dart';
 
+import 'meta/reminders.dart';
+import 'puzzles/bundled_source.dart';
 import 'puzzles/source.dart';
 import 'services/ad_ids.dart';
 import 'services/ad_service.dart';
 import 'services/admob_ad_service.dart';
 import 'services/analytics_service.dart';
 import 'services/crash_reporting.dart';
+import 'services/game_settings.dart';
 import 'services/leaderboard_service.dart';
+import 'services/music_service.dart';
 import 'services/premium_service.dart';
+import 'services/reminder_service.dart';
 import 'services/review_service.dart';
 import 'services/sound_service.dart';
 import 'services/stats_store.dart';
 import 'services/update_service.dart';
 import 'ui/home_screen.dart';
+import 'ui/meadow.dart';
 import 'ui/palette.dart';
 import 'ui/services.dart';
 import 'ui/update_gate.dart';
@@ -39,6 +45,13 @@ Future<void> main() async {
   ReviewService review = const NoReviewService();
   LeaderboardService leaderboard = const NoLeaderboardService();
   AnalyticsService? analytics;
+  ReminderService reminders = const NoReminders();
+  // Remote Config tuning; Android reads it with the update check, other platforms keep the defaults.
+  ValueListenable<GameSettings> settings = ValueNotifier(const GameSettings());
+  if (android) {
+    updates = UpdateService();
+    settings = updates.settings;
+  }
   if (mobile) {
     try {
       await initCrashReporting();
@@ -53,20 +66,32 @@ Future<void> main() async {
       final admob = AdMobAdService();
       final store = StorePremiumService(stats);
       premium = store;
-      ads = PremiumAwareAdService(FrequencyCappedAdService(admob, firstLaunch: firstLaunch), () => store.isPremium);
-      banner = (_) => admob.banner();
+      final capped = FrequencyCappedAdService(admob, firstLaunch: firstLaunch);
+      void applySettings() => capped.gap = Duration(seconds: settings.value.interstitialGapSeconds);
+      applySettings();
+      settings.addListener(applySettings);
+      // Remove Ads, or the Remote Config kill switch, stops interstitials and banners; rewarded ads stay.
+      ads = PremiumAwareAdService(capped, () => store.isPremium || !settings.value.adsEnabled);
+      banner = (_) => ValueListenableBuilder(
+            valueListenable: settings,
+            builder: (_, s, _) => s.adsEnabled ? admob.banner() : const SizedBox.shrink(),
+          );
       privacyOptionsRequired = admob.privacyOptionsRequired;
       showPrivacyOptions = admob.showPrivacyOptions;
       admob.init();
       store.init();
     }
     review = StoreReviewService();
+    reminders = LocalReminderService();
     // Forced/recommended updates use Google Play's in-app update API; the App Store has no equivalent.
-    if (android) {
-      updates = UpdateService();
-      updates.check();
-    }
+    updates?.check();
   }
+
+  final music = kIsWeb ? NoMusic(enabled: stats.musicOn) : AudioMusicService(enabled: stats.musicOn, persist: stats.setMusicOn);
+  final l10n = lookupAppLocalizations(
+      basicLocaleListResolution(PlatformDispatcher.instance.locales, AppLocalizations.supportedLocales));
+  planReminders(stats, reminders, l10n, DateTime.now());
+  music.start();
 
   runApp(CritterLogicApp(
     stats: stats,
@@ -81,6 +106,10 @@ Future<void> main() async {
     updateStatus: updates?.status,
     onUpdate: updates?.update,
     sound: AudioSoundService(muted: stats.muted, persist: stats.setMuted),
+    puzzles: BundledPuzzleSource(),
+    settings: settings,
+    music: music,
+    reminders: reminders,
   ));
 }
 
@@ -102,6 +131,9 @@ class CritterLogicApp extends StatelessWidget {
     this.today = DateTime.now,
     this.locale,
     this.puzzles,
+    this.settings,
+    this.music,
+    this.reminders = const NoReminders(),
   });
 
   final StatsStore stats;
@@ -125,6 +157,9 @@ class CritterLogicApp extends StatelessWidget {
 
   /// Dailies and levels; null uses the built-in development puzzles.
   final PuzzleSource? puzzles;
+  final ValueListenable<GameSettings>? settings;
+  final MusicService? music;
+  final ReminderService reminders;
 
   @override
   Widget build(BuildContext context) {
@@ -137,6 +172,9 @@ class CritterLogicApp extends StatelessWidget {
       review: review,
       leaderboard: leaderboard,
       puzzles: puzzles,
+      settings: settings,
+      music: music,
+      reminders: reminders,
       banner: banner,
       privacyOptionsRequired: privacyOptionsRequired,
       showPrivacyOptions: showPrivacyOptions,
@@ -150,13 +188,22 @@ class CritterLogicApp extends StatelessWidget {
         theme: ThemeData(
           useMaterial3: true,
           brightness: Brightness.light,
-          colorSchemeSeed: accent,
-          scaffoldBackgroundColor: background,
+          colorSchemeSeed: leaf,
+          fontFamily: displayFont,
+          scaffoldBackgroundColor: Colors.transparent,
+          snackBarTheme: SnackBarThemeData(
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: woodEdge,
+            contentTextStyle: const TextStyle(fontFamily: displayFont, fontSize: 16, color: Colors.white),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          ),
         ),
         navigatorKey: _navigator,
-        builder: (context, child) => updateStatus == null
-            ? child!
-            : UpdateGate(status: updateStatus!, onUpdate: onUpdate!, navigatorKey: _navigator, child: child!),
+        builder: (context, child) => MeadowWorld(
+          child: updateStatus == null
+              ? child!
+              : UpdateGate(status: updateStatus!, onUpdate: onUpdate!, navigatorKey: _navigator, child: child!),
+        ),
         home: const HomeScreen(),
       ),
     );

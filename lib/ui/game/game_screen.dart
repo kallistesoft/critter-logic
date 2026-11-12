@@ -12,8 +12,9 @@ import '../../puzzles/puzzle.dart';
 import '../../services/share_text.dart';
 import '../../services/sound_service.dart';
 import '../../services/stats_store.dart';
-import '../banner_slot.dart';
-import '../critter_image.dart';
+import '../coin_fly.dart';
+import '../critter_actor.dart';
+import '../meadow.dart';
 import '../navigation.dart';
 import '../palette.dart';
 import '../result_screen.dart';
@@ -37,14 +38,15 @@ String boardCritter(StatsStore stats, int number) {
 
 /// One puzzle being played, daily or level: board, timer, undo, restart, hint.
 class GameScreen extends StatefulWidget {
-  const GameScreen({super.key, required this.kind, required this.mode, required this.number, this.pacer = const LevelAdPacer()});
+  const GameScreen({super.key, required this.kind, required this.mode, required this.number, this.pacer});
 
   final GameKind kind;
   final PlayMode mode;
 
   /// Daily number or level.
   final int number;
-  final LevelAdPacer pacer;
+  /// Interstitial pacing; null reads it from Remote Config ([Services.settings]).
+  final LevelAdPacer? pacer;
 
   @override
   State<GameScreen> createState() => _GameScreenState();
@@ -57,6 +59,12 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver, Ti
   bool _finishing = false;
   bool _levelWon = false;
   int _levelCoins = 0;
+  int _stars = 0;
+
+  /// Coins already paid but not landed on the counter yet (coin-fly).
+  int _coinsHeld = 0;
+  final _coinTarget = GlobalKey();
+  final _rewardKey = GlobalKey();
   int _elapsedBase = 0;
   DateTime? _runningSince;
   Timer? _ticker;
@@ -278,15 +286,31 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver, Ti
       )));
     } else {
       _levelCoins = levelReward(hints: s.hints);
+      _coinsHeld = _levelCoins;
+      _stars = starsFor(hints: s.hints, mistakes: s.mistakes);
+      await stats.recordLevelStars(widget.kind, widget.number, _stars);
       await stats.addCoins(_levelCoins);
       await stats.addLevelWon();
       if (stats.level(widget.kind) <= widget.number) await stats.setLevel(widget.kind, widget.number + 1);
       services.analytics.setUserState(levelsWon: stats.levelsWon, streak: stats.streak(todayNumber(services.today())));
       await celebration;
       if (!mounted) return;
-      services.sound.play(Sfx.coin);
       setState(() => _levelWon = true);
+      _flyRewardCoins();
     }
+  }
+
+  /// The win panel's coins fly up to the counter, which rolls up as they land.
+  Future<void> _flyRewardCoins() async {
+    final motion = ambientMotion(context);
+    if (motion) await Future<void>.delayed(const Duration(milliseconds: 1500));
+    if (!mounted) return;
+    final total = _levelCoins;
+    const pieces = 8;
+    await flyCoins(context, from: _rewardKey, to: _coinTarget, coins: pieces, onArrive: (n) {
+      if (mounted) setState(() => _coinsHeld = total - (total * n / pieces).round());
+    });
+    if (mounted) setState(() => _coinsHeld = 0);
   }
 
   bool _adShown = false;
@@ -294,7 +318,13 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver, Ti
   Future<void> _afterLevel({required bool next}) async {
     final services = _services;
     final nav = Navigator.of(context);
-    if (!_adShown && widget.pacer.shouldShow(services.stats.levelsWon)) {
+    final settings = services.settings.value;
+    final pacer = widget.pacer ??
+        LevelAdPacer(
+          firstAfter: settings.interstitialFirstLevel < 1 ? 1 : settings.interstitialFirstLevel,
+          every: settings.interstitialEvery,
+        );
+    if (!_adShown && pacer.shouldShow(services.stats.levelsWon)) {
       _adShown = true;
       await services.ads.showInterstitial();
     }
@@ -312,47 +342,62 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver, Ti
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final s = _session;
-    return Scaffold(
-      backgroundColor: background,
-      body: Stack(children: [
-        ScreenFrame(
-          child: Column(children: [
-            _topBar(l10n),
-            const SizedBox(height: 8),
-            _clockRow(l10n),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
-                child: s == null ? const Center(child: CircularProgressIndicator(color: accent)) : _board(s),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Text(
-                widget.kind == GameKind.nests ? l10n.nestsRulesShort : l10n.pairsRulesShort,
-                textAlign: TextAlign.center,
-                style: chunky(14, color: inkSoft, weight: FontWeight.w700),
-              ),
-            ),
-            const SizedBox(height: 12),
-            _toolbar(l10n),
-            const SizedBox(height: 8),
-            const BannerSlot(),
-          ]),
-        ),
+    return MeadowScaffold(
+      banner: true,
+      overlays: [
         Positioned.fill(child: Confetti(animation: _celebrate)),
         if (_finishing && !_levelWon)
           Positioned.fill(
             child: IgnorePointer(
               child: Center(
                 child: PopIn(
-                  child: Text(l10n.solved,
-                      style: chunky(54, color: accent).copyWith(shadows: const [Shadow(color: Colors.white, blurRadius: 18)])),
+                  child: Transform.rotate(
+                    angle: -0.06,
+                    child: Text(l10n.solved, style: outlinedText(60, color: const Color(0xFFFFE066), stroke: woodEdge, width: 4)),
+                  ),
                 ),
               ),
             ),
           ),
         if (_levelWon) _levelWinPanel(l10n),
+      ],
+      child: Column(children: [
+        _topBar(l10n),
+        const SizedBox(height: 8),
+        _clockRow(l10n),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(12, 4, 12, 6),
+            child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+              Flexible(
+                child: s == null
+                    ? const Center(child: CircularProgressIndicator(color: leaf))
+                    : BoardStage(
+                        critters: buddyCritters(_services.stats, 2, seed: widget.number),
+                        cheer: _finishing,
+                        child: _board(s),
+                      ),
+              ),
+              const SizedBox(height: 14),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                decoration: BoxDecoration(
+                  color: paper.withValues(alpha: 0.92),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: paperEdge, width: 2),
+                ),
+                child: Text(
+                  widget.kind == GameKind.nests ? l10n.nestsRulesShort : l10n.pairsRulesShort,
+                  textAlign: TextAlign.center,
+                  style: chunky(14, color: inkSoft, weight: FontWeight.w500),
+                ),
+              ),
+            ]),
+          ),
+        ),
+        const SizedBox(height: 10),
+        _toolbar(l10n),
+        const SizedBox(height: 10),
       ]),
     );
   }
@@ -373,38 +418,33 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver, Ti
     };
   }
 
-  Widget _topBar(AppLocalizations l10n) => Padding(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-        child: Row(children: [
-          RoundIconButton(
-              key: const Key('back'), icon: Icons.arrow_back_rounded, onPressed: () => Navigator.maybePop(context), tooltip: l10n.back),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(gameName(l10n, widget.kind), style: chunky(24)),
-              Text(_daily ? l10n.dailyTitle(widget.number) : l10n.levelTitle(widget.number),
-                  style: chunky(14, color: inkSoft, weight: FontWeight.w700)),
-            ]),
-          ),
-          StatPill(key: const Key('coins'), emoji: '🪙', text: '${_services.stats.coins}'),
-        ]),
+  Widget _topBar(AppLocalizations l10n) => MeadowTopBar(
+        backKey: const Key('back'),
+        backTooltip: l10n.back,
+        title: gameName(l10n, widget.kind),
+        subtitle: _daily ? l10n.dailyTitle(widget.number) : l10n.levelTitle(widget.number),
+        trailing: [CoinCounter(key: const Key('coins'), value: _services.stats.coins - _coinsHeld, iconKey: _coinTarget)],
       );
 
   Widget _clockRow(AppLocalizations l10n) {
     final s = _session;
     final penalty = s == null || !_daily ? 0 : rankedMillis(0, mistakes: s.mistakes, hints: s.hints);
     return Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-      StatPill(key: const Key('timer'), emoji: '⏱️', text: formatTime(_elapsed)),
+      StatPill(
+        key: const Key('timer'),
+        icon: const Icon(Icons.timer_rounded, color: skyEdge),
+        text: formatTime(_elapsed),
+      ),
       if (penalty > 0) ...[
         const SizedBox(width: 8),
         PopIn(
           key: ValueKey(penalty),
           child: StatPill(
             key: const Key('penalty'),
-            emoji: '⚠️',
+            icon: const Icon(Icons.warning_rounded, color: coralEdge),
             text: l10n.penaltySeconds(penalty ~/ 1000),
             color: accentSoft,
-            textColor: const Color(0xFFC2512A),
+            textColor: coralEdge,
           ),
         ),
       ],
@@ -415,13 +455,14 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver, Ti
     final s = _session;
     final active = s != null && !_finishing;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 14),
       child: Row(children: [
         Expanded(
           child: _ToolButton(
             key: const Key('undo'),
             icon: Icons.undo_rounded,
             label: l10n.undo,
+            color: sky,
             onTap: active && s.canUndo ? _undo : null,
           ),
         ),
@@ -431,6 +472,7 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver, Ti
             key: const Key('restart'),
             icon: Icons.refresh_rounded,
             label: l10n.restart,
+            color: woodButton,
             onTap: active && !s.isPristine ? _restart : null,
           ),
         ),
@@ -440,8 +482,8 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver, Ti
             key: const Key('hint'),
             icon: Icons.lightbulb_rounded,
             label: l10n.hint,
-            highlight: true,
-            badge: '🪙${Economy.hintCost}',
+            color: gold,
+            cost: Economy.hintCost,
             onTap: active ? _hint : null,
           ),
         ),
@@ -450,44 +492,81 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver, Ti
   }
 
   Widget _levelWinPanel(AppLocalizations l10n) {
+    final cheer = buddyCritters(_services.stats, 3, seed: widget.number + 1);
     return Positioned.fill(
       child: Container(
-        color: ink.withValues(alpha: 0.25),
-        alignment: Alignment.center,
-        padding: const EdgeInsets.all(24),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 400),
-          child: PopIn(
-            child: SoftCard(
-              padding: const EdgeInsets.fromLTRB(22, 26, 22, 20),
-              child: Column(mainAxisSize: MainAxisSize.min, children: [
-                CritterImage(_critter, size: 84),
-                const SizedBox(height: 8),
-                Text(l10n.levelSolved(widget.number), textAlign: TextAlign.center, style: chunky(26)),
-                const SizedBox(height: 6),
-                StatPill(emoji: '🪙', text: '+$_levelCoins', color: goldSoft),
-                if (_session!.hints == 0) ...[
-                  const SizedBox(height: 8),
-                  Text(l10n.noHintBonus, style: chunky(14, color: inkSoft, weight: FontWeight.w700)),
-                ],
-                const SizedBox(height: 20),
-                ChunkyButton(
-                  key: const Key('nextLevel'),
-                  label: l10n.nextLevel,
-                  expand: true,
-                  icon: const Icon(Icons.arrow_forward_rounded, color: Colors.white),
-                  onPressed: () => _afterLevel(next: true),
+        color: ink.withValues(alpha: 0.35),
+        child: SafeArea(
+          child: UiScale(
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 380),
+                  child: PopIn(
+                    duration: const Duration(milliseconds: 650),
+                    child: Stack(clipBehavior: Clip.none, alignment: Alignment.topCenter, children: [
+                      Padding(
+                        padding: const EdgeInsets.only(top: 64),
+                        child: SoftCard(
+                          padding: const EdgeInsets.fromLTRB(20, 40, 20, 18),
+                          child: Column(mainAxisSize: MainAxisSize.min, children: [
+                            Text(l10n.levelSolved(widget.number), textAlign: TextAlign.center, style: chunky(26)),
+                            const SizedBox(height: 10),
+                            StarRow(stars: _stars, size: 54),
+                            const SizedBox(height: 12),
+                            PopIn(
+                              delay: const Duration(milliseconds: 1300),
+                              child: Container(
+                                key: _rewardKey,
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                                decoration: BoxDecoration(
+                                  color: goldSoft,
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(color: gold, width: 2.5),
+                                ),
+                                child: Row(mainAxisSize: MainAxisSize.min, children: [
+                                  const CoinIcon(size: 30),
+                                  const SizedBox(width: 8),
+                                  Text('+$_levelCoins', style: chunky(24, color: woodDark)),
+                                ]),
+                              ),
+                            ),
+                            if (_session!.hints == 0) ...[
+                              const SizedBox(height: 8),
+                              Text(l10n.noHintBonus,
+                                  textAlign: TextAlign.center, style: chunky(15, color: inkSoft, weight: FontWeight.w500)),
+                            ],
+                            const SizedBox(height: 18),
+                            ChunkyButton(
+                              key: const Key('nextLevel'),
+                              label: l10n.nextLevel,
+                              expand: true,
+                              icon: const Icon(Icons.arrow_forward_rounded, color: Colors.white),
+                              onPressed: () => _afterLevel(next: true),
+                            ),
+                            const SizedBox(height: 10),
+                            ChunkyButton(
+                              key: const Key('levelHome'),
+                              label: l10n.levelMap,
+                              expand: true,
+                              small: true,
+                              color: woodButton,
+                              icon: const Icon(Icons.map_rounded, color: Colors.white, size: 20),
+                              onPressed: () => _afterLevel(next: false),
+                            ),
+                          ]),
+                        ),
+                      ),
+                      // Cheering critters sitting on the panel.
+                      Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.end, children: [
+                        for (final (i, id) in cheer.indexed)
+                          CritterBuddy(id, size: i == 1 ? 92 : 66, cheer: true, seed: i + 3, shadow: false),
+                      ]),
+                    ]),
+                  ),
                 ),
-                const SizedBox(height: 10),
-                ChunkyButton(
-                  key: const Key('levelHome'),
-                  label: l10n.home,
-                  expand: true,
-                  color: tileEmpty,
-                  textColor: ink,
-                  onPressed: () => _afterLevel(next: false),
-                ),
-              ]),
+              ),
             ),
           ),
         ),
@@ -496,41 +575,90 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver, Ti
   }
 }
 
+/// The board with two critters peeking over its top edge (they hop when the puzzle is solved).
+class BoardStage extends StatelessWidget {
+  const BoardStage({super.key, required this.child, this.critters = const [], this.cheer = false, this.maxSide = 720});
+
+  final Widget child;
+  final List<String> critters;
+  final bool cheer;
+  final double maxSide;
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(builder: (context, box) {
+        final peek = critters.isEmpty ? 0.0 : (box.maxWidth * 0.2).clamp(44.0, 110.0);
+        const shown = 0.62;
+        final side = [box.maxWidth, box.maxHeight - peek * shown, maxSide].reduce((a, b) => a < b ? a : b);
+        return Center(
+          heightFactor: 1,
+          child: SizedBox(
+            width: side,
+            height: side + peek * shown,
+            child: Stack(clipBehavior: Clip.none, children: [
+              for (final (i, id) in critters.indexed)
+                Positioned(
+                  left: i == 0 ? side * 0.1 : null,
+                  right: i == 0 ? null : side * 0.1,
+                  top: 0,
+                  child: CritterBuddy(id, size: peek, cheer: cheer, seed: i + 11, shadow: false),
+                ),
+              Positioned(left: 0, right: 0, bottom: 0, height: side, child: child),
+            ]),
+          ),
+        );
+      });
+}
+
 class _ToolButton extends StatelessWidget {
-  const _ToolButton({super.key, required this.icon, required this.label, this.onTap, this.highlight = false, this.badge});
+  const _ToolButton({super.key, required this.icon, required this.label, required this.color, this.onTap, this.cost});
 
   final IconData icon;
   final String label;
+  final Color color;
   final VoidCallback? onTap;
-  final bool highlight;
-  final String? badge;
+  final int? cost;
 
   @override
   Widget build(BuildContext context) {
     final enabled = onTap != null;
-    final fg = enabled ? (highlight ? Colors.white : ink) : inkSoft.withValues(alpha: 0.5);
-    final bg = highlight ? (enabled ? accent : accent.withValues(alpha: 0.4)) : surface;
+    final face = enabled ? color : Color.lerp(color, const Color(0xFFC9C3B8), 0.7)!;
+    final rim = edgeOf(face);
     return Bouncy(
       onTap: onTap,
-      child: Container(
-        height: 64,
-        decoration: BoxDecoration(
-          color: bg,
-          borderRadius: BorderRadius.circular(radius),
-          boxShadow: [
-            BoxShadow(color: highlight ? Color.lerp(accent, Colors.black, 0.18)! : shadow, offset: const Offset(0, 4), blurRadius: highlight ? 0 : 8),
-          ],
-        ),
-        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-          Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            Icon(icon, color: fg, size: 24),
-            if (badge != null) ...[
-              const SizedBox(width: 4),
-              Text(badge!, style: chunky(12, color: fg, weight: FontWeight.w800)),
-            ],
-          ]),
-          const SizedBox(height: 2),
-          Text(label, style: chunky(13, color: fg, weight: FontWeight.w800)),
+      builder: (context, p, child) {
+        final pressed = p.clamp(0.0, 1.0);
+        return CustomPaint(
+          painter: CandyPainter(face: face, edge: rim, press: pressed, depth: 6, radius: 18),
+          child: Padding(padding: EdgeInsets.only(top: 6 * pressed, bottom: 6 * (1 - pressed)), child: child),
+        );
+      },
+      child: SizedBox(
+        height: 60,
+        child: Stack(clipBehavior: Clip.none, children: [
+          Center(
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
+              Icon(icon, color: Colors.white, size: 26, shadows: [Shadow(color: rim, offset: const Offset(0, 2))]),
+              Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: outlinedText(14, stroke: rim, width: 1.3)),
+            ]),
+          ),
+          if (cost != null)
+            Positioned(
+              right: -4,
+              top: -10,
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(3, 2, 7, 2),
+                decoration: BoxDecoration(
+                  color: paper,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: woodEdge.withValues(alpha: 0.7), width: 1.5),
+                ),
+                child: Row(mainAxisSize: MainAxisSize.min, children: [
+                  const CoinIcon(size: 16),
+                  const SizedBox(width: 2),
+                  Text('$cost', style: chunky(12, color: woodDark)),
+                ]),
+              ),
+            ),
         ]),
       ),
     );

@@ -59,12 +59,10 @@ Future<DailyRewards> grantDailyRewards(StatsStore stats, int day) async {
   return DailyRewards(coins: Economy.dailyWin, capsule: capsule, streak: streak, chest: chest);
 }
 
+/// Stars for a solve (1–3): 3 with no hint and no mistake, 2 with one of the two, 1 otherwise.
+int starsFor({required int hints, required int mistakes}) => 1 + (hints == 0 ? 1 : 0) + (mistakes == 0 ? 1 : 0);
+
 /// Coins for a level win.
 int levelReward({required int hints}) => hints == 0 ? Economy.levelWinNoHint : Economy.levelWin;
 
 /// UI settings that StatsStore doesn't have a field for yet (kept in a 'settings' save slot).
-extension UiSettings on StatsStore {
-  /// Nests: shade the cells a placed critter rules out. On by default.
-  bool get autoCross => savedGame('settings')?['autoCross'] as bool? ?? true;
-  Future<void> setAutoCross(bool value) => saveGame('settings', {...?savedGame('settings'), 'autoCross': value});
-}

@@ -89,7 +89,8 @@ class TestApp {
   final sound = NoSound();
   DateTime now = DateTime(2026, 12, 12, 10);
 
-  Future<void> pump(WidgetTester tester, {Locale? locale, Size size = const Size(412, 915)}) async {
+  Future<void> pump(WidgetTester tester, {Locale? locale, Size size = const Size(412, 915), bool motion = false}) async {
+    if (!motion) calmMotion(tester);
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
@@ -103,11 +104,33 @@ class TestApp {
       today: () => now,
       locale: locale,
     ));
-    await tester.pumpAndSettle();
+    if (motion) {
+      // Clouds drift and critters idle forever: pump frames instead of settling.
+      for (var i = 0; i < 10; i++) {
+        await tester.pump(const Duration(milliseconds: 100));
+      }
+    } else {
+      await tester.pumpAndSettle();
+    }
   }
 }
 
 const today = 12;
+
+/// Turns on the system "reduce motion" setting: the meadow's looping animations (clouds, idle critters) stay still,
+/// so `pumpAndSettle` can settle.
+void calmMotion(WidgetTester tester) {
+  tester.platformDispatcher.accessibilityFeaturesTestValue = const FakeAccessibilityFeatures(disableAnimations: true);
+  addTearDown(tester.platformDispatcher.clearAccessibilityFeaturesTestValue);
+}
+
+/// Opens a game's level path and plays the current level.
+Future<void> playLevel(WidgetTester tester, GameKind kind) async {
+  await tester.tap(find.byKey(Key('level-${kind.name}')));
+  await tester.pumpAndSettle();
+  await tester.tap(find.byKey(const Key('playLevel')));
+  await tester.pumpAndSettle();
+}
 
 /// Taps a board cell [times] times.
 Future<void> tapCell(WidgetTester tester, int cell, {int times = 1}) async {
@@ -132,5 +155,8 @@ Future<void> solvePairs(WidgetTester tester) async {
   }
 }
 
-Future<void> scrollTo(WidgetTester tester, Finder finder) =>
-    tester.scrollUntilVisible(finder, 120, scrollable: find.byType(Scrollable).first);
+Future<void> scrollTo(WidgetTester tester, Finder finder) async {
+  await tester.scrollUntilVisible(finder, 120, scrollable: find.byType(Scrollable).first);
+  await tester.ensureVisible(finder);
+  await tester.pumpAndSettle();
+}

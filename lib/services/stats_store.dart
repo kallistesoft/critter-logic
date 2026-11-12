@@ -102,6 +102,16 @@ class StatsStore {
   int level(GameKind kind) => _prefs.getInt('level.${kind.name}') ?? 1;
   Future<void> setLevel(GameKind kind, int level) => _prefs.setInt('level.${kind.name}', level);
 
+  /// Best stars (1–3) won on [level] of [kind]'s track; 0 when not solved yet (or solved before stars existed).
+  int levelStars(GameKind kind, int level) => _prefs.getInt('stars.${kind.name}.$level') ?? 0;
+
+  /// Keeps the best result: a replay with fewer stars doesn't lower it. Returns the stored stars.
+  Future<int> recordLevelStars(GameKind kind, int level, int stars) async {
+    final best = stars.clamp(1, 3) > levelStars(kind, level) ? stars.clamp(1, 3) : levelStars(kind, level);
+    await _prefs.setInt('stars.${kind.name}.$level', best);
+    return best;
+  }
+
   /// Levels won, all games: paces interstitials and the review prompt.
   int get levelsWon => _prefs.getInt('levelsWon') ?? 0;
   Future<void> addLevelWon() => _prefs.setInt('levelsWon', levelsWon + 1);
@@ -170,6 +180,10 @@ class StatsStore {
 
   bool get muted => _prefs.getBool('muted') ?? false;
   Future<void> setMuted(bool value) => _prefs.setBool('muted', value);
+
+  /// Nests: shade the cells a placed critter rules out. On by default.
+  bool get autoCross => _prefs.getBool('autoCross') ?? true;
+  Future<void> setAutoCross(bool value) => _prefs.setBool('autoCross', value);
 
   bool get musicOn => _prefs.getBool('music') ?? true;
   Future<void> setMusicOn(bool value) => _prefs.setBool('music', value);
