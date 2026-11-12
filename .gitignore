@@ -52,3 +52,6 @@ android/app/google-services.json
 
 # Firebase iOS config (like android/app/google-services.json): kept out of git
 ios/Runner/GoogleService-Info.plist
+
+# Agent worktrees
+.claude/
