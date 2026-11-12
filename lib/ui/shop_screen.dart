@@ -150,7 +150,7 @@ class _ShopScreenState extends State<ShopScreen> {
           Expanded(
             child: ListView(
               key: ValueKey(_tab),
-              padding: const EdgeInsets.fromLTRB(16, 14, 16, 24),
+              padding: EdgeInsets.fromLTRB(16, 14, 16, 24 + MediaQuery.viewPaddingOf(context).bottom),
               children: switch (_tab) {
                 ShopTab.capsules => [
                   if (deal != null && deal.item.category != ShopCategory.capsule) ...[

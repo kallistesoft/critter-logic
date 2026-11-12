@@ -60,7 +60,7 @@ class _AlbumScreenState extends State<AlbumScreen> {
           ],
         ),
         Expanded(
-          child: ListView(padding: const EdgeInsets.fromLTRB(16, 14, 16, 24), children: [
+          child: ListView(padding: EdgeInsets.fromLTRB(16, 14, 16, 24 + MediaQuery.viewPaddingOf(context).bottom), children: [
             SoftCard(
               key: const Key('albumCapsules'),
               color: waiting > 0 ? goldSoft : paper,

@@ -29,7 +29,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         MeadowTopBar(title: l10n.settings, backTooltip: l10n.back),
         Expanded(
           child: ListView(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+            padding: EdgeInsets.fromLTRB(16, 16, 16, 24 + MediaQuery.viewPaddingOf(context).bottom),
             children: [
               SlideIn(
                 child: SoftCard(

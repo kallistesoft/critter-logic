@@ -294,7 +294,7 @@ class _EventScreenState extends State<EventScreen> {
           ),
           Expanded(
             child: ListView(
-              padding: const EdgeInsets.fromLTRB(16, 14, 16, 24),
+              padding: EdgeInsets.fromLTRB(16, 14, 16, 24 + MediaQuery.viewPaddingOf(context).bottom),
               children: [
                 SoftCard(
                   color: const Color(0xFFFFF3E6),

@@ -90,7 +90,7 @@ class _TrophiesScreenState extends State<TrophiesScreen> {
           ),
           Expanded(
             child: ListView(
-              padding: const EdgeInsets.fromLTRB(16, 14, 16, 24),
+              padding: EdgeInsets.fromLTRB(16, 14, 16, 24 + MediaQuery.viewPaddingOf(context).bottom),
               children: [
                 for (final (i, a) in sorted.indexed) ...[
                   if (i > 0) const SizedBox(height: 12),
