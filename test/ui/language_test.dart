@@ -25,7 +25,7 @@ void main() {
   late TestApp app;
 
   setUp(() async {
-    SharedPreferences.setMockInitialValues({});
+    SharedPreferences.setMockInitialValues({'flutter.progress.world.chosen': true});
     stats = await StatsStore.open();
     app = TestApp(stats);
   });
