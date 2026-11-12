@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../l10n/app_localizations.dart';
 import '../meta/game_flow.dart';
 import '../meta/reminders.dart';
+import '../meta/retention.dart';
 import '../puzzles/nests/nests.dart';
 import '../puzzles/puzzle.dart';
 import '../services/leaderboard_service.dart';
@@ -22,6 +23,7 @@ import 'game/session.dart';
 import 'navigation.dart';
 import 'palette.dart';
 import 'services.dart';
+import 'retention_ui.dart';
 import 'share.dart';
 import 'widgets.dart';
 
@@ -34,6 +36,7 @@ class DailyResultScreen extends StatefulWidget {
     required this.result,
     this.fresh = false,
     this.rewards,
+    this.retention,
   });
 
   final GameKind kind;
@@ -43,6 +46,9 @@ class DailyResultScreen extends StatefulWidget {
   /// Just solved for the first time: post the time, run the once-per-solve effects, interstitial on leaving.
   final bool fresh;
   final DailyRewards? rewards;
+
+  /// What the first solve did for the weekly event and the trophies.
+  final RetentionUpdate? retention;
 
   @override
   State<DailyResultScreen> createState() => _DailyResultScreenState();
@@ -83,6 +89,12 @@ class _DailyResultScreenState extends State<DailyResultScreen> with SingleTicker
       final r = widget.rewards;
       if (r != null && (r.capsule || r.chest != null)) {
         s.sound.play(r.chest != null ? Sfx.chest : Sfx.coin);
+      }
+      final update = widget.retention;
+      if (update != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) showRetentionUpdate(context, update, tokens: false);
+        });
       }
       if (r != null) {
         _coinsHeld = r.coins + (r.chest?.coins ?? 0);
@@ -140,6 +152,8 @@ class _DailyResultScreenState extends State<DailyResultScreen> with SingleTicker
     final results = [for (final k in GameKind.values) ?stats.daily(k, widget.number)];
     _services.analytics.share(daily: true);
     await shareText(context, dailyShareText(widget.number, results, streak: stats.streak(widget.number), l10n: l10n));
+    final update = await _services.retention.recordEvent(const Shared(), _services.today());
+    if (mounted) await showRetentionUpdate(context, update);
   }
 
   @override
@@ -385,7 +399,7 @@ class _DailyResultScreenState extends State<DailyResultScreen> with SingleTicker
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         Text(l10n.rewards, textAlign: TextAlign.center, style: outlinedText(22, color: const Color(0xFFFFE066), stroke: goldEdge)),
         const SizedBox(height: 6),
-        for (final (i, row) in rows.indexed)
+        for (final (i, row) in [...rows, ?_tokensRow(l10n)].indexed)
           PopIn(
             key: i == 0 ? _coinSource : null,
             delay: Duration(milliseconds: 900 + 220 * i),
@@ -393,6 +407,21 @@ class _DailyResultScreenState extends State<DailyResultScreen> with SingleTicker
             child: row,
           ),
       ]),
+    );
+  }
+}
+
+/// "+3 🐾 Panda Week" under the rewards.
+extension on _DailyResultScreenState {
+  Widget? _tokensRow(AppLocalizations l10n) {
+    final u = widget.retention;
+    final event = _services.retention.event.current(_services.today());
+    if (u == null || u.tokens <= 0 || event == null) return null;
+    return Padding(
+      key: const Key('eventTokensRow'),
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Text(l10n.eventTokensShort(u.tokens, eventName(l10n, event.theme.id)),
+          textAlign: TextAlign.center, style: chunky(17, color: coralEdge)),
     );
   }
 }

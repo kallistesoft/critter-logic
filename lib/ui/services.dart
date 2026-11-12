@@ -1,8 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
+import '../meta/progress_store.dart';
+import '../meta/retention.dart';
 import '../services/ad_service.dart';
 import '../services/analytics_service.dart';
+import '../services/coin_store_service.dart';
 import '../services/game_settings.dart';
 import '../services/leaderboard_service.dart';
 import '../services/music_service.dart';
@@ -27,6 +30,8 @@ class Services extends InheritedWidget {
     AnalyticsService? analytics,
     ValueListenable<GameSettings>? settings,
     MusicService? music,
+    ValueListenable<Retention>? retention,
+    CoinStoreService? coinStore,
     this.reminders = const NoReminders(),
     this.review = const NoReviewService(),
     this.leaderboard = const NoLeaderboardService(),
@@ -38,7 +43,10 @@ class Services extends InheritedWidget {
         analytics = analytics ?? NoAnalytics(),
         puzzles = puzzles ?? const DevPuzzleSource(),
         settings = settings ?? ValueNotifier(const GameSettings()),
-        music = music ?? NoMusic();
+        music = music ?? NoMusic(),
+        coinStore = coinStore ?? NoCoinStore(),
+        retentionListenable = retention ??
+            ValueNotifier(Retention(stats: stats, progress: ProgressStore(stats.prefs), analytics: analytics));
 
   final StatsStore stats;
   final AdService ads;
@@ -52,6 +60,13 @@ class Services extends InheritedWidget {
   final ValueListenable<GameSettings> settings;
   final MusicService music;
   final ReminderService reminders;
+
+  /// Login calendar, trophies, weekly event, shop, Lucky Nest; replaced when Remote Config brings new settings.
+  final ValueListenable<Retention> retentionListenable;
+  Retention get retention => retentionListenable.value;
+
+  /// Coin packs on the store; [NoCoinStore] (no packs) on web and in tests.
+  final CoinStoreService coinStore;
 
   /// Dailies and level tracks.
   final PuzzleSource puzzles;
@@ -81,5 +96,7 @@ class Services extends InheritedWidget {
       old.settings != settings ||
       old.music != music ||
       old.reminders != reminders ||
+      old.retentionListenable != retentionListenable ||
+      old.coinStore != coinStore ||
       old.banner != banner;
 }

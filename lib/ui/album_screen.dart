@@ -3,7 +3,10 @@ import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
 import '../meta/album.dart';
+import '../meta/economy.dart';
+import '../meta/set_rewards.dart';
 import 'capsule_screen.dart';
+import 'cosmetics.dart';
 import 'critter_image.dart';
 import 'meadow.dart';
 import 'navigation.dart';
@@ -42,6 +45,7 @@ class _AlbumScreenState extends State<AlbumScreen> {
     final stats = Services.of(context).stats;
     final owned = stats.owned;
     final waiting = stats.capsules + stats.goldenCapsules;
+    final goldFrame = Services.of(context).retention.progress.cosmetics.contains('frame.album_gold');
     return MeadowScaffold(
       child: Column(children: [
         MeadowTopBar(
@@ -72,10 +76,32 @@ class _AlbumScreenState extends State<AlbumScreen> {
                 const Icon(Icons.chevron_right_rounded, color: woodDark, size: 30),
               ]),
             ),
-            for (final (i, set) in albumSets.indexed) ...[
-              const SizedBox(height: 22),
-              SlideIn(delay: Duration(milliseconds: 80 * i), child: _SetPage(set: set, owned: owned, tilt: i.isEven ? -0.012 : 0.012)),
+            if (goldFrame) ...[
+              const SizedBox(height: 16),
+              _GoldBanner(text: l10n.albumCompleteTitle),
             ],
+            const SizedBox(height: 6),
+            Container(
+              key: goldFrame ? const Key('albumGoldFrame') : null,
+              padding: goldFrame ? const EdgeInsets.fromLTRB(10, 0, 10, 16) : EdgeInsets.zero,
+              decoration: goldFrame
+                  ? BoxDecoration(
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(color: gold, width: 6),
+                      gradient: const LinearGradient(colors: [Color(0x33FFE47A), Color(0x22FFC23D)]),
+                      boxShadow: const [BoxShadow(color: goldEdge, offset: Offset(0, 4))],
+                    )
+                  : null,
+              child: Column(children: [
+                for (final (i, set) in albumSets.indexed) ...[
+                  const SizedBox(height: 22),
+                  SlideIn(
+                    delay: Duration(milliseconds: 80 * i),
+                    child: _SetPage(set: set, owned: owned, tilt: i.isEven ? -0.012 : 0.012),
+                  ),
+                ],
+              ]),
+            ),
           ]),
         ),
       ]),
@@ -113,14 +139,18 @@ class _SetPage extends StatelessWidget {
           ),
           child: CustomPaint(
             painter: const _RuledPainter(),
-            child: LayoutBuilder(builder: (context, constraints) {
-              const gap = 12.0;
-              final w = (constraints.maxWidth - 2 * gap) / 3;
-              return Wrap(spacing: gap, runSpacing: gap, children: [
-                for (final (i, c) in critters.indexed)
-                  SizedBox(width: w, child: _Photo(critter: c, owned: owned.contains(c.id), tilt: ((i * 37) % 5 - 2) * 0.02)),
-              ]);
-            }),
+            child: Column(children: [
+              LayoutBuilder(builder: (context, constraints) {
+                const gap = 12.0;
+                final w = (constraints.maxWidth - 2 * gap) / 3;
+                return Wrap(spacing: gap, runSpacing: gap, children: [
+                  for (final (i, c) in critters.indexed)
+                    SizedBox(width: w, child: _Photo(critter: c, owned: owned.contains(c.id), tilt: ((i * 37) % 5 - 2) * 0.02)),
+                ]);
+              }),
+              const SizedBox(height: 12),
+              _SetReward(set: set, complete: complete),
+            ]),
           ),
         ),
         // Wooden name tag pinned at the top.
@@ -165,6 +195,67 @@ class _SetPage extends StatelessWidget {
       ]),
     );
   }
+}
+
+/// What finishing the set gives: its coins and its hat; "Unlocked!" once done.
+class _SetReward extends StatelessWidget {
+  const _SetReward({required this.set, required this.complete});
+
+  final String set;
+  final bool complete;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final hat = setUnlocks[set];
+    final shownHat = hat != null && shownCosmetic(hat) ? hat : null;
+    return Container(
+      key: Key('setReward-$set'),
+      padding: const EdgeInsets.fromLTRB(8, 6, 10, 6),
+      decoration: BoxDecoration(
+        color: complete ? goldSoft : Colors.white.withValues(alpha: 0.6),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: complete ? gold : paperEdge, width: 2),
+      ),
+      child: Row(children: [
+        if (shownHat != null)
+          SizedBox(width: 40, height: 32, child: CustomPaint(painter: HatPainter(shownHat)))
+        else
+          const CoinIcon(size: 28),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            l10n.setRewardLabel([
+              l10n.rewardCoins(Economy.setComplete),
+              if (shownHat != null) cosmeticName(l10n, shownHat),
+            ].join(' · ')),
+            style: chunky(14, color: woodDark, weight: FontWeight.w600),
+          ),
+        ),
+        if (complete) Text(l10n.setUnlockedBadge, style: chunky(14, color: leafEdge)),
+      ]),
+    );
+  }
+}
+
+class _GoldBanner extends StatelessWidget {
+  const _GoldBanner({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) => Center(
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(colors: [Color(0xFFFFE47A), gold]),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: goldEdge, width: 2.5),
+            boxShadow: const [BoxShadow(color: goldEdge, offset: Offset(0, 3))],
+          ),
+          child: Text('👑 $text', style: outlinedText(18, stroke: goldEdge, width: 1.4)),
+        ),
+      );
 }
 
 /// Faint ruled lines on a scrapbook page.

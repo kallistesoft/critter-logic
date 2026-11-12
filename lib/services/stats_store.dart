@@ -38,6 +38,9 @@ class StatsStore {
 
   final SharedPreferences _prefs;
 
+  /// The preferences behind this store (the retention [ProgressStore] keeps its keys there too).
+  SharedPreferences get prefs => _prefs;
+
   static Future<StatsStore> open() async => StatsStore(await SharedPreferences.getInstance());
 
   // ---- Daily puzzles and streak ----

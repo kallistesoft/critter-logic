@@ -7,6 +7,7 @@ import '../../l10n/app_localizations.dart';
 import '../../meta/economy.dart';
 import '../../meta/game_flow.dart';
 import '../../meta/level_ad_pacer.dart';
+import '../../meta/retention.dart';
 import '../../puzzles/nests/nests.dart';
 import '../../puzzles/puzzle.dart';
 import '../../services/share_text.dart';
@@ -18,6 +19,7 @@ import '../meadow.dart';
 import '../navigation.dart';
 import '../palette.dart';
 import '../result_screen.dart';
+import '../retention_ui.dart';
 import '../services.dart';
 import '../widgets.dart';
 import 'confetti.dart';
@@ -191,7 +193,10 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver, Ti
     if (s == null || s.solved || _finishing || s.findHint() == null) return;
     final services = _services;
     final l10n = AppLocalizations.of(context);
-    if (await services.stats.spendCoins(Economy.hintCost)) {
+    if (await services.retention.progress.useFreeHint()) {
+      services.sound.play(Sfx.coin);
+      services.analytics.hintUsed(widget.kind.name, paidWith: 'free');
+    } else if (await services.stats.spendCoins(Economy.hintCost)) {
       services.sound.play(Sfx.coin);
       services.analytics.hintUsed(widget.kind.name, paidWith: 'coins');
     } else {
@@ -275,6 +280,7 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver, Ti
       final first = await stats.recordDaily(result);
       final rewards = first ? await grantDailyRewards(stats, widget.number) : null;
       if (first) services.analytics.setUserState(levelsWon: stats.levelsWon, streak: rewards!.streak);
+      final update = first ? await services.retention.recordEvent(DailySolved(result), services.today()) : null;
       await celebration;
       if (!mounted) return;
       Navigator.of(context).pushReplacement(softRoute(DailyResultScreen(
@@ -283,6 +289,7 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver, Ti
         result: stats.daily(widget.kind, widget.number) ?? result,
         fresh: first,
         rewards: rewards,
+        retention: update,
       )));
     } else {
       _levelCoins = levelReward(hints: s.hints);
@@ -292,11 +299,13 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver, Ti
       await stats.addCoins(_levelCoins);
       await stats.addLevelWon();
       if (stats.level(widget.kind) <= widget.number) await stats.setLevel(widget.kind, widget.number + 1);
+      final update = await services.retention.recordEvent(LevelWon(widget.kind, hints: s.hints), services.today());
       services.analytics.setUserState(levelsWon: stats.levelsWon, streak: stats.streak(todayNumber(services.today())));
       await celebration;
       if (!mounted) return;
       setState(() => _levelWon = true);
-      _flyRewardCoins();
+      await _flyRewardCoins();
+      if (mounted) await showRetentionUpdate(context, update);
     }
   }
 
@@ -484,6 +493,7 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver, Ti
             label: l10n.hint,
             color: gold,
             cost: Economy.hintCost,
+            free: _services.retention.progress.freeHints,
             onTap: active ? _hint : null,
           ),
         ),
@@ -610,13 +620,16 @@ class BoardStage extends StatelessWidget {
 }
 
 class _ToolButton extends StatelessWidget {
-  const _ToolButton({super.key, required this.icon, required this.label, required this.color, this.onTap, this.cost});
+  const _ToolButton({super.key, required this.icon, required this.label, required this.color, this.onTap, this.cost, this.free = 0});
 
   final IconData icon;
   final String label;
   final Color color;
   final VoidCallback? onTap;
   final int? cost;
+
+  /// Free hints won at the Lucky Nest: shown instead of the price while there are some.
+  final int free;
 
   @override
   Widget build(BuildContext context) {
@@ -641,7 +654,25 @@ class _ToolButton extends StatelessWidget {
               Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: outlinedText(14, stroke: rim, width: 1.3)),
             ]),
           ),
-          if (cost != null)
+          if (free > 0)
+            Positioned(
+              right: -4,
+              top: -10,
+              child: Container(
+                key: const Key('freeHints'),
+                padding: const EdgeInsets.fromLTRB(4, 2, 7, 2),
+                decoration: BoxDecoration(
+                  color: leaf,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.white, width: 1.5),
+                ),
+                child: Row(mainAxisSize: MainAxisSize.min, children: [
+                  const Icon(Icons.lightbulb_rounded, color: Colors.white, size: 14),
+                  Text('×$free', style: outlinedText(12, stroke: leafEdge, width: 1)),
+                ]),
+              ),
+            )
+          else if (cost != null)
             Positioned(
               right: -4,
               top: -10,

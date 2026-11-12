@@ -734,6 +734,702 @@ abstract class AppLocalizations {
   /// **'Polar'**
   String get setPolar;
 
+  /// No description provided for @close.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get close;
+
+  /// No description provided for @calendarTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily gifts'**
+  String get calendarTitle;
+
+  /// No description provided for @calendarSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'A gift for every day you visit'**
+  String get calendarSubtitle;
+
+  /// No description provided for @calendarDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Day {day}'**
+  String calendarDay(int day);
+
+  /// No description provided for @calendarClaim.
+  ///
+  /// In en, this message translates to:
+  /// **'Claim'**
+  String get calendarClaim;
+
+  /// No description provided for @calendarDouble.
+  ///
+  /// In en, this message translates to:
+  /// **'x2'**
+  String get calendarDouble;
+
+  /// No description provided for @calendarTomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Come back tomorrow for the next gift!'**
+  String get calendarTomorrow;
+
+  /// No description provided for @capsuleWord.
+  ///
+  /// In en, this message translates to:
+  /// **'Capsule'**
+  String get capsuleWord;
+
+  /// No description provided for @goldenCapsuleWord.
+  ///
+  /// In en, this message translates to:
+  /// **'Golden capsule'**
+  String get goldenCapsuleWord;
+
+  /// No description provided for @trophies.
+  ///
+  /// In en, this message translates to:
+  /// **'Trophies'**
+  String get trophies;
+
+  /// No description provided for @trophyClaim.
+  ///
+  /// In en, this message translates to:
+  /// **'Claim'**
+  String get trophyClaim;
+
+  /// No description provided for @trophyDone.
+  ///
+  /// In en, this message translates to:
+  /// **'All done!'**
+  String get trophyDone;
+
+  /// No description provided for @trophyUnlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Trophy unlocked!'**
+  String get trophyUnlocked;
+
+  /// No description provided for @achievementFirstDaily.
+  ///
+  /// In en, this message translates to:
+  /// **'First steps'**
+  String get achievementFirstDaily;
+
+  /// No description provided for @achievementFirstDailyDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Solve your first daily'**
+  String get achievementFirstDailyDesc;
+
+  /// No description provided for @achievementDailies.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily habit'**
+  String get achievementDailies;
+
+  /// No description provided for @achievementDailiesDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Solve {n} dailies'**
+  String achievementDailiesDesc(int n);
+
+  /// No description provided for @achievementStreak.
+  ///
+  /// In en, this message translates to:
+  /// **'On fire'**
+  String get achievementStreak;
+
+  /// No description provided for @achievementStreakDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Reach a {n}-day streak'**
+  String achievementStreakDesc(int n);
+
+  /// No description provided for @achievementBothDailies.
+  ///
+  /// In en, this message translates to:
+  /// **'Double up'**
+  String get achievementBothDailies;
+
+  /// No description provided for @achievementBothDailiesDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Solve both dailies on {n} days'**
+  String achievementBothDailiesDesc(int n);
+
+  /// No description provided for @achievementPerfectDaily.
+  ///
+  /// In en, this message translates to:
+  /// **'Flawless'**
+  String get achievementPerfectDaily;
+
+  /// No description provided for @achievementPerfectDailyDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Solve {n} dailies with no mistake and no hint'**
+  String achievementPerfectDailyDesc(int n);
+
+  /// No description provided for @achievementFastNests.
+  ///
+  /// In en, this message translates to:
+  /// **'Speedy nests'**
+  String get achievementFastNests;
+
+  /// No description provided for @achievementFastNestsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{Solve a Nests daily in under a minute} other{Solve {n} Nests dailies in under a minute}}'**
+  String achievementFastNestsDesc(int n);
+
+  /// No description provided for @achievementFastPairs.
+  ///
+  /// In en, this message translates to:
+  /// **'Speedy pairs'**
+  String get achievementFastPairs;
+
+  /// No description provided for @achievementFastPairsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{Solve a Pairs daily in under a minute} other{Solve {n} Pairs dailies in under a minute}}'**
+  String achievementFastPairsDesc(int n);
+
+  /// No description provided for @achievementNestsLevels.
+  ///
+  /// In en, this message translates to:
+  /// **'Nest builder'**
+  String get achievementNestsLevels;
+
+  /// No description provided for @achievementNestsLevelsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Win {n} Nests levels'**
+  String achievementNestsLevelsDesc(int n);
+
+  /// No description provided for @achievementPairsLevels.
+  ///
+  /// In en, this message translates to:
+  /// **'Stone hopper'**
+  String get achievementPairsLevels;
+
+  /// No description provided for @achievementPairsLevelsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Win {n} Pairs levels'**
+  String achievementPairsLevelsDesc(int n);
+
+  /// No description provided for @achievementLevels.
+  ///
+  /// In en, this message translates to:
+  /// **'Level climber'**
+  String get achievementLevels;
+
+  /// No description provided for @achievementLevelsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Win {n} levels'**
+  String achievementLevelsDesc(int n);
+
+  /// No description provided for @achievementNoHint.
+  ///
+  /// In en, this message translates to:
+  /// **'No help needed'**
+  String get achievementNoHint;
+
+  /// No description provided for @achievementNoHintDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Solve {n} puzzles without a hint'**
+  String achievementNoHintDesc(int n);
+
+  /// No description provided for @achievementCritters.
+  ///
+  /// In en, this message translates to:
+  /// **'Collector'**
+  String get achievementCritters;
+
+  /// No description provided for @achievementCrittersDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Collect {n} critters'**
+  String achievementCrittersDesc(int n);
+
+  /// No description provided for @achievementSets.
+  ///
+  /// In en, this message translates to:
+  /// **'Set master'**
+  String get achievementSets;
+
+  /// No description provided for @achievementSetsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{Complete an album set} other{Complete {n} album sets}}'**
+  String achievementSetsDesc(int n);
+
+  /// No description provided for @achievementGolden.
+  ///
+  /// In en, this message translates to:
+  /// **'Golden touch'**
+  String get achievementGolden;
+
+  /// No description provided for @achievementGoldenDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{Find a golden critter} other{Find {n} golden critters}}'**
+  String achievementGoldenDesc(int n);
+
+  /// No description provided for @achievementCapsules.
+  ///
+  /// In en, this message translates to:
+  /// **'Egg cracker'**
+  String get achievementCapsules;
+
+  /// No description provided for @achievementCapsulesDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Open {n} capsules'**
+  String achievementCapsulesDesc(int n);
+
+  /// No description provided for @achievementShares.
+  ///
+  /// In en, this message translates to:
+  /// **'Show-off'**
+  String get achievementShares;
+
+  /// No description provided for @achievementSharesDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{Share a result} other{Share {n} results}}'**
+  String achievementSharesDesc(int n);
+
+  /// No description provided for @achievementCalendar.
+  ///
+  /// In en, this message translates to:
+  /// **'Regular visitor'**
+  String get achievementCalendar;
+
+  /// No description provided for @achievementCalendarDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Claim {n} daily gifts'**
+  String achievementCalendarDesc(int n);
+
+  /// No description provided for @achievementEvents.
+  ///
+  /// In en, this message translates to:
+  /// **'Event star'**
+  String get achievementEvents;
+
+  /// No description provided for @achievementEventsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{Finish a weekly event} other{Finish {n} weekly events}}'**
+  String achievementEventsDesc(int n);
+
+  /// No description provided for @eventPolar.
+  ///
+  /// In en, this message translates to:
+  /// **'Polar Week'**
+  String get eventPolar;
+
+  /// No description provided for @eventPanda.
+  ///
+  /// In en, this message translates to:
+  /// **'Panda Week'**
+  String get eventPanda;
+
+  /// No description provided for @eventJungle.
+  ///
+  /// In en, this message translates to:
+  /// **'Jungle Week'**
+  String get eventJungle;
+
+  /// No description provided for @eventSafari.
+  ///
+  /// In en, this message translates to:
+  /// **'Safari Week'**
+  String get eventSafari;
+
+  /// No description provided for @eventFarm.
+  ///
+  /// In en, this message translates to:
+  /// **'Farm Week'**
+  String get eventFarm;
+
+  /// No description provided for @eventWinter.
+  ///
+  /// In en, this message translates to:
+  /// **'Winter Week'**
+  String get eventWinter;
+
+  /// No description provided for @eventEndsDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{days}d {hours}h left'**
+  String eventEndsDays(int days, int hours);
+
+  /// No description provided for @eventEndsHours.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours}h {minutes}m left'**
+  String eventEndsHours(int hours, int minutes);
+
+  /// No description provided for @eventTokens.
+  ///
+  /// In en, this message translates to:
+  /// **'+{n} event tokens'**
+  String eventTokens(int n);
+
+  /// No description provided for @eventTokensShort.
+  ///
+  /// In en, this message translates to:
+  /// **'+{n} 🐾 {event}'**
+  String eventTokensShort(int n, String event);
+
+  /// No description provided for @eventPrizeReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Event prize ready!'**
+  String get eventPrizeReady;
+
+  /// No description provided for @eventHowTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Solve a daily: +{daily} 🐾 · Win a level: +{level} 🐾'**
+  String eventHowTo(int daily, int level);
+
+  /// No description provided for @eventPrizeCritter.
+  ///
+  /// In en, this message translates to:
+  /// **'A new {set} critter + a frame'**
+  String eventPrizeCritter(String set);
+
+  /// No description provided for @eventLastDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Last day! Claim your prizes before midnight.'**
+  String get eventLastDay;
+
+  /// No description provided for @eventSetCritters.
+  ///
+  /// In en, this message translates to:
+  /// **'This week\'s critters'**
+  String get eventSetCritters;
+
+  /// No description provided for @eventClaim.
+  ///
+  /// In en, this message translates to:
+  /// **'Claim'**
+  String get eventClaim;
+
+  /// No description provided for @eventClaimed.
+  ///
+  /// In en, this message translates to:
+  /// **'Claimed'**
+  String get eventClaimed;
+
+  /// No description provided for @shop.
+  ///
+  /// In en, this message translates to:
+  /// **'Shop'**
+  String get shop;
+
+  /// No description provided for @shopCapsules.
+  ///
+  /// In en, this message translates to:
+  /// **'Capsules'**
+  String get shopCapsules;
+
+  /// No description provided for @shopHats.
+  ///
+  /// In en, this message translates to:
+  /// **'Hats'**
+  String get shopHats;
+
+  /// No description provided for @shopCoins.
+  ///
+  /// In en, this message translates to:
+  /// **'Coins'**
+  String get shopCoins;
+
+  /// No description provided for @shopDeal.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily deal'**
+  String get shopDeal;
+
+  /// No description provided for @shopEquip.
+  ///
+  /// In en, this message translates to:
+  /// **'Equip'**
+  String get shopEquip;
+
+  /// No description provided for @shopEquipped.
+  ///
+  /// In en, this message translates to:
+  /// **'Equipped'**
+  String get shopEquipped;
+
+  /// No description provided for @shopTakeOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Take off'**
+  String get shopTakeOff;
+
+  /// No description provided for @shopCapsuleBody.
+  ///
+  /// In en, this message translates to:
+  /// **'A surprise critter for your album'**
+  String get shopCapsuleBody;
+
+  /// No description provided for @shopStreakRepair.
+  ///
+  /// In en, this message translates to:
+  /// **'Streak repair'**
+  String get shopStreakRepair;
+
+  /// No description provided for @shopStreakRepairBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Saves yesterday\'s missed day'**
+  String get shopStreakRepairBody;
+
+  /// No description provided for @shopStreakRepairNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Your streak is safe'**
+  String get shopStreakRepairNone;
+
+  /// No description provided for @shopNotEnough.
+  ///
+  /// In en, this message translates to:
+  /// **'You need {n} more coins.'**
+  String shopNotEnough(int n);
+
+  /// No description provided for @shopBought.
+  ///
+  /// In en, this message translates to:
+  /// **'It\'s yours!'**
+  String get shopBought;
+
+  /// No description provided for @shopOrSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Free with the {set} set'**
+  String shopOrSet(String set);
+
+  /// No description provided for @shopOrAlbum.
+  ///
+  /// In en, this message translates to:
+  /// **'Free with the full album'**
+  String get shopOrAlbum;
+
+  /// No description provided for @shopCoinsNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Coins help with hints, capsules and new looks. Ask a grown-up first.'**
+  String get shopCoinsNote;
+
+  /// No description provided for @coinPackCoins.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} coins'**
+  String coinPackCoins(int n);
+
+  /// No description provided for @coinPackBonus.
+  ///
+  /// In en, this message translates to:
+  /// **'+{percent}%'**
+  String coinPackBonus(int percent);
+
+  /// No description provided for @coinPackBest.
+  ///
+  /// In en, this message translates to:
+  /// **'Best value'**
+  String get coinPackBest;
+
+  /// No description provided for @hatFlowers.
+  ///
+  /// In en, this message translates to:
+  /// **'Flower crown'**
+  String get hatFlowers;
+
+  /// No description provided for @hatParty.
+  ///
+  /// In en, this message translates to:
+  /// **'Party hat'**
+  String get hatParty;
+
+  /// No description provided for @hatBeanie.
+  ///
+  /// In en, this message translates to:
+  /// **'Beanie'**
+  String get hatBeanie;
+
+  /// No description provided for @hatCrown.
+  ///
+  /// In en, this message translates to:
+  /// **'Crown'**
+  String get hatCrown;
+
+  /// No description provided for @frameAlbumGold.
+  ///
+  /// In en, this message translates to:
+  /// **'Gold album frame'**
+  String get frameAlbumGold;
+
+  /// No description provided for @luckyNest.
+  ///
+  /// In en, this message translates to:
+  /// **'Lucky Nest'**
+  String get luckyNest;
+
+  /// No description provided for @luckyFree.
+  ///
+  /// In en, this message translates to:
+  /// **'Free!'**
+  String get luckyFree;
+
+  /// No description provided for @luckyFreeEgg.
+  ///
+  /// In en, this message translates to:
+  /// **'Free egg'**
+  String get luckyFreeEgg;
+
+  /// No description provided for @luckyTapEgg.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick an egg!'**
+  String get luckyTapEgg;
+
+  /// No description provided for @luckyOdds.
+  ///
+  /// In en, this message translates to:
+  /// **'Odds'**
+  String get luckyOdds;
+
+  /// No description provided for @luckyOddsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What\'s in an egg?'**
+  String get luckyOddsTitle;
+
+  /// No description provided for @luckyOddsNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Every egg is drawn on its own: the odds are the same for every egg.'**
+  String get luckyOddsNote;
+
+  /// No description provided for @luckyPrizeGolden.
+  ///
+  /// In en, this message translates to:
+  /// **'Golden capsule'**
+  String get luckyPrizeGolden;
+
+  /// No description provided for @luckyPrizeCapsule.
+  ///
+  /// In en, this message translates to:
+  /// **'Capsule'**
+  String get luckyPrizeCapsule;
+
+  /// No description provided for @luckyPrizeCoins.
+  ///
+  /// In en, this message translates to:
+  /// **'{min}–{max} coins'**
+  String luckyPrizeCoins(int min, int max);
+
+  /// No description provided for @luckyPrizeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Free hint'**
+  String get luckyPrizeHint;
+
+  /// No description provided for @luckyPrizeFeather.
+  ///
+  /// In en, this message translates to:
+  /// **'A feather'**
+  String get luckyPrizeFeather;
+
+  /// No description provided for @luckySoClose.
+  ///
+  /// In en, this message translates to:
+  /// **'So close!'**
+  String get luckySoClose;
+
+  /// No description provided for @luckyWonHint.
+  ///
+  /// In en, this message translates to:
+  /// **'+1 free hint'**
+  String get luckyWonHint;
+
+  /// No description provided for @luckyAnother.
+  ///
+  /// In en, this message translates to:
+  /// **'Another egg'**
+  String get luckyAnother;
+
+  /// No description provided for @luckyTomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Next free egg tomorrow'**
+  String get luckyTomorrow;
+
+  /// No description provided for @luckyOpenCapsule.
+  ///
+  /// In en, this message translates to:
+  /// **'Open it'**
+  String get luckyOpenCapsule;
+
+  /// No description provided for @freeHintUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Free hint used ({n} left)'**
+  String freeHintUsed(int n);
+
+  /// No description provided for @setCompleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set complete!'**
+  String get setCompleteTitle;
+
+  /// No description provided for @albumCompleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Album complete!'**
+  String get albumCompleteTitle;
+
+  /// No description provided for @setUnlockedItem.
+  ///
+  /// In en, this message translates to:
+  /// **'{item} unlocked'**
+  String setUnlockedItem(String item);
+
+  /// No description provided for @setRewardLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Reward: {item}'**
+  String setRewardLabel(String item);
+
+  /// No description provided for @setUnlockedBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlocked!'**
+  String get setUnlockedBadge;
+
+  /// No description provided for @later.
+  ///
+  /// In en, this message translates to:
+  /// **'Later'**
+  String get later;
+
+  /// No description provided for @nice.
+  ///
+  /// In en, this message translates to:
+  /// **'Nice!'**
+  String get nice;
+
   /// No description provided for @settingSound.
   ///
   /// In en, this message translates to:

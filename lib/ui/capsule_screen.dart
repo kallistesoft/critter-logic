@@ -7,6 +7,7 @@ import '../l10n/app_localizations.dart';
 import '../meta/album.dart';
 import '../meta/economy.dart';
 import '../meta/game_flow.dart';
+import '../meta/retention.dart';
 import '../services/sound_service.dart';
 import 'album_screen.dart';
 import 'coin_fly.dart';
@@ -14,6 +15,7 @@ import 'critter_image.dart';
 import 'meadow.dart';
 import 'game/confetti.dart';
 import 'navigation.dart';
+import 'retention_ui.dart';
 import 'palette.dart';
 import 'services.dart';
 import 'widgets.dart';
@@ -81,6 +83,7 @@ class _CapsuleScreenState extends State<CapsuleScreen> with TickerProviderStateM
       await stats.addCritter(result.critter.id);
     }
     if (result.completedSet != null) await stats.addCoins(Economy.setComplete);
+    final update = await services.retention.recordEvent(const CapsuleOpened(), services.today());
     services.analytics.capsuleOpen(rarity: result.critter.rarity.name, duplicate: result.duplicate);
     services.sound.play(Sfx.reveal);
     HapticFeedback.heavyImpact();
@@ -98,6 +101,7 @@ class _CapsuleScreenState extends State<CapsuleScreen> with TickerProviderStateM
       });
       if (mounted) setState(() => _coinsHeld = 0);
     }
+    if (mounted) await showRetentionUpdate(context, update);
   }
 
   void _again() => setState(() {
@@ -408,7 +412,7 @@ class _Bubble extends StatelessWidget {
 
 /// A twig nest; [front] draws only its front rim (over the egg).
 class _Nest extends StatelessWidget {
-  const _Nest({required this.width, this.front = false});
+  const _Nest({super.key, required this.width, this.front = false});
 
   final double width;
   final bool front;
@@ -623,4 +627,9 @@ class RaysPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(RaysPainter old) => old.t != t || old.color != color || old.angle != angle;
+}
+
+/// The twig nest, for other screens (Lucky Nest); [front] draws only the front rim.
+class TwigNest extends _Nest {
+  const TwigNest({super.key, required super.width, super.front});
 }

@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 
 import '../services/sound_service.dart';
 import '../services/stats_store.dart';
+import 'cosmetics.dart';
 import 'critter_image.dart';
 import 'meadow.dart';
 import 'services.dart';
@@ -35,6 +36,7 @@ class CritterBuddy extends StatefulWidget {
     this.cheer = false,
     this.seed = 0,
     this.shadow = true,
+    this.hat = true,
   });
 
   final String id;
@@ -45,6 +47,9 @@ class CritterBuddy extends StatefulWidget {
   final bool cheer;
   final int seed;
   final bool shadow;
+
+  /// Wears the equipped shop hat.
+  final bool hat;
 
   @override
   State<CritterBuddy> createState() => _CritterBuddyState();
@@ -112,7 +117,7 @@ class _CritterBuddyState extends State<CritterBuddy> with TickerProviderStateMix
   @override
   Widget build(BuildContext context) {
     final s = widget.size;
-    final image = RepaintBoundary(child: CritterImage(widget.id, size: s));
+    final image = RepaintBoundary(child: widget.hat ? HattedCritter(widget.id, size: s) : CritterImage(widget.id, size: s));
     final body = AnimatedBuilder(
       animation: Listenable.merge([_breath, _act]),
       child: image,
