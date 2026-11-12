@@ -16,7 +16,8 @@ Tier pairsTierOf(SolveResult r) {
 }
 
 /// Seeded Pairs generator: fills a random valid grid, adds a few links, then takes givens away while the deduction
-/// solver still solves it at the requested tier.
+/// solver still solves it at the requested tier, keeping at least `minGivens` of them (more givens = fewer cells to
+/// work out, for quick first puzzles).
 class PairsGenerator {
   PairsGenerator(int seed) : rnd = SeededRandom(seed);
 
@@ -25,7 +26,7 @@ class PairsGenerator {
   /// Grids tried by the last [generate] call.
   int attempts = 0;
 
-  PairsPuzzle generate(int size, Tier tier) {
+  PairsPuzzle generate(int size, Tier tier, {int minGivens = 0}) {
     final n = size;
     PairsPuzzle? fallback;
     var fallbackGap = 99;
@@ -38,9 +39,15 @@ class PairsGenerator {
 
       final order = [for (var i = 0; i < n * n; i++) i];
       shuffleWith(order, rnd);
+      var given = n * n;
       for (final i in order) {
+        if (given <= minGivens) break;
         givens[i] = null;
-        if (!ok(PairsSolver(n, givens, links, maxLevel: maxLevel).solve())) givens[i] = solution[i];
+        given--;
+        if (!ok(PairsSolver(n, givens, links, maxLevel: maxLevel).solve())) {
+          givens[i] = solution[i];
+          given++;
+        }
       }
       // Drop links that add nothing, keeping at least a few for the look of the puzzle.
       final linkOrder = [for (var i = 0; i < links.length; i++) i];

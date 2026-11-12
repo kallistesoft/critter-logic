@@ -5,6 +5,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'game_settings.dart';
+import 'retention_settings.dart';
 import 'share_text.dart';
 
 enum UpdateStatus { none, recommended, required }
@@ -16,7 +17,8 @@ UpdateStatus updateStatusFor({required int build, required int minVersion, requi
   return UpdateStatus.none;
 }
 
-/// Firebase Remote Config (Critter Logic Firebase project): forced / suggested updates and the [GameSettings].
+/// Firebase Remote Config (Critter Logic Firebase project): forced / suggested updates, the [GameSettings] and the
+/// [RetentionSettings].
 /// Firebase is started by [initCrashReporting] before this runs.
 ///
 /// Parameters (Number): `min_version_code` blocks older builds, `recommended_version_code` offers the update.
@@ -24,6 +26,7 @@ UpdateStatus updateStatusFor({required int build, required int minVersion, requi
 class UpdateService {
   final status = ValueNotifier(UpdateStatus.none);
   final settings = ValueNotifier(const GameSettings());
+  final retention = ValueNotifier(const RetentionSettings());
   int _build = 0;
 
   String _key(String name) => kDebugMode ? '${name}_debug' : name;
@@ -35,6 +38,7 @@ class UpdateService {
       await config.setDefaults({
         for (final name in ['min_version_code', 'recommended_version_code']) ...{name: 0, '${name}_debug': 0},
         ...GameSettings.defaults,
+        ...RetentionSettings.defaults,
       });
       await config.setConfigSettings(RemoteConfigSettings(
         fetchTimeout: const Duration(seconds: 10),
@@ -48,6 +52,7 @@ class UpdateService {
         recommendedVersion: config.getInt(_key('recommended_version_code')),
       );
       settings.value = GameSettings.read(config.getBool, config.getInt);
+      retention.value = RetentionSettings.read(config.getBool, config.getInt, config.getString);
     } catch (_) {
       // No Firebase or no network on first launch: never block the game for that.
     }
