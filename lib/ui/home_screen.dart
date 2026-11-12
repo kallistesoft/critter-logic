@@ -286,7 +286,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Text(l10n.album, style: chunky(18), overflow: TextOverflow.ellipsis),
+                                      FittedBox(fit: BoxFit.scaleDown, alignment: AlignmentDirectional.centerStart, child: Text(l10n.album, style: chunky(18), maxLines: 1)),
                                       Text(
                                         '${album.where((c) => owned.contains(c.id)).length}/${album.length}',
                                         style: chunky(14, color: inkSoft, weight: FontWeight.w600),
@@ -317,16 +317,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                       child: Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          Text(l10n.capsules, style: chunky(18), overflow: TextOverflow.ellipsis),
-                                          Text(
+                                          FittedBox(fit: BoxFit.scaleDown, alignment: AlignmentDirectional.centerStart, child: Text(l10n.capsules, style: chunky(18), maxLines: 1)),
+                                          FittedBox(fit: BoxFit.scaleDown, alignment: AlignmentDirectional.centerStart, child: Text(
                                             waiting > 0 ? l10n.openNow : l10n.capsuleShort,
-                                            overflow: TextOverflow.ellipsis,
                                             style: chunky(
                                               14,
                                               color: waiting > 0 ? coralEdge : inkSoft,
                                               weight: FontWeight.w600,
-                                            ),
-                                          ),
+                                            ), maxLines: 1)),
                                         ],
                                       ),
                                     ),
@@ -401,11 +399,9 @@ class _SectionTitle extends StatelessWidget {
   Widget build(BuildContext context) => Row(
     children: [
       Expanded(
-        child: Text(
+        child: FittedBox(fit: BoxFit.scaleDown, alignment: AlignmentDirectional.centerStart, child: Text(
           text,
-          overflow: TextOverflow.ellipsis,
-          style: outlinedText(21, stroke: woodEdge),
-        ),
+          style: outlinedText(21, stroke: woodEdge), maxLines: 1)),
       ),
       if (trailing != null)
         Container(

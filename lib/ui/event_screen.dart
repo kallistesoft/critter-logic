@@ -76,12 +76,11 @@ class EventBanner extends StatelessWidget {
                     Row(
                       children: [
                         Expanded(
-                          child: Text(
+                          child: FittedBox(fit: BoxFit.scaleDown, alignment: AlignmentDirectional.centerStart, child: Text(
                             eventName(l10n, state.theme.id),
                             maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
                             style: chunky(18, color: coralEdge),
-                          ),
+                          )),
                         ),
                         Text(
                           timeLeft(l10n, state.remaining(now)),

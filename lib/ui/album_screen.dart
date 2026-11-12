@@ -309,11 +309,10 @@ class _Photo extends StatelessWidget {
           child: Center(child: image),
         ),
         const SizedBox(height: 3),
-        Text(owned ? critterName(l10n, critter.id) : '???',
+        FittedBox(fit: BoxFit.scaleDown, alignment: AlignmentDirectional.centerStart, child: Text(owned ? critterName(l10n, critter.id) : '???',
             key: Key('critter-${critter.id}'),
             maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: chunky(12, color: owned ? ink : inkSoft)),
+            style: chunky(12, color: owned ? ink : inkSoft))),
       ]),
     );
     if (owned && critter.rarity == Rarity.golden) photo = Shimmer(child: photo);

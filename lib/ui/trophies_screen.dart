@@ -143,7 +143,7 @@ class _TrophyCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: chunky(18), maxLines: 1, overflow: TextOverflow.ellipsis),
+                FittedBox(fit: BoxFit.scaleDown, alignment: AlignmentDirectional.centerStart, child: Text(title, style: chunky(18), maxLines: 1)),
                 Text(
                   desc,
                   style: chunky(14, color: inkSoft, weight: FontWeight.w500),

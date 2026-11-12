@@ -222,12 +222,11 @@ class _TabChip extends StatelessWidget {
         boxShadow: [BoxShadow(color: selected ? woodEdge : paperEdge, offset: const Offset(0, 3))],
       ),
       alignment: Alignment.center,
-      child: Text(
+      child: FittedBox(fit: BoxFit.scaleDown, alignment: AlignmentDirectional.centerStart, child: Text(
         label,
         maxLines: 1,
-        overflow: TextOverflow.ellipsis,
         style: selected ? outlinedText(16, stroke: woodEdge, width: 1.4) : chunky(16, color: woodDark),
-      ),
+      )),
     ),
   );
 }
@@ -474,7 +473,7 @@ class _HatCard extends StatelessWidget {
         children: [
           _HatShowcase(hat: offer.item.id),
           const SizedBox(height: 6),
-          Text(cosmeticName(l10n, offer.item.id), maxLines: 1, overflow: TextOverflow.ellipsis, style: chunky(17)),
+          FittedBox(fit: BoxFit.scaleDown, alignment: AlignmentDirectional.centerStart, child: Text(cosmeticName(l10n, offer.item.id), maxLines: 1, style: chunky(17))),
           if (offer.equipped)
             Text(l10n.shopEquipped, style: chunky(13, color: leafEdge))
           else if (!offer.owned && set != null)
