@@ -1773,6 +1773,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Font: Fredoka (SIL Open Font License)'**
   String get fontCredit;
+
+  /// Snackbar when tapping a coin pack in a dev build (no store)
+  ///
+  /// In en, this message translates to:
+  /// **'Store not available in the dev build: this is a preview.'**
+  String get coinsPreview;
 }
 
 class _AppLocalizationsDelegate
