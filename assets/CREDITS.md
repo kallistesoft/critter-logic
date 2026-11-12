@@ -18,3 +18,17 @@ Exact source file → effect mapping: `tools/import_sfx.py` (`EFFECTS`). Critter
 
 - `assets/music/loop.m4a` — original music, synthesized by `tools/make_music.py` (no samples).
 - `assets/icon/*` board and background — drawn by `tools/make_icon.py`.
+
+## Font
+
+- `assets/fonts/Fredoka-{Medium,SemiBold,Bold}.ttf` — **Fredoka** by the Fredoka Project Authors (Milena Brandão,
+  Hafontia), from the official Google Fonts repository (<https://github.com/google/fonts/tree/main/ofl/fredoka>),
+  licensed under the **SIL Open Font License 1.1** (full text in `assets/fonts/OFL.txt`). The three files are static
+  instances (weights 500/600/700, width 100) cut from the variable `Fredoka[wdth,wght].ttf` with fontTools; the font
+  is unmodified otherwise and keeps its name, as the OFL allows for instances.
+
+## Meadow UI
+
+The meadow world (sky, sun, clouds, hills, flowers, trees), wooden signs and panels, candy buttons, coins, stars,
+the egg capsule and nest, the level trail and its decorations are all drawn in code (`lib/ui/meadow.dart`,
+`lib/ui/widgets.dart`, `lib/ui/capsule_screen.dart`, `lib/ui/level_path_screen.dart`); no image assets were added.
