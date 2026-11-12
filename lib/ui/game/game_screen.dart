@@ -368,29 +368,31 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver, Ti
         Expanded(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(12, 4, 12, 6),
-            child: s == null
-                ? const Center(child: CircularProgressIndicator(color: leaf))
-                : BoardStage(
-                    critters: buddyCritters(_services.stats, 2, seed: widget.number),
-                    cheer: _finishing,
-                    child: _board(s),
-                  ),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 18),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-            decoration: BoxDecoration(
-              color: paper.withValues(alpha: 0.92),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: paperEdge, width: 2),
-            ),
-            child: Text(
-              widget.kind == GameKind.nests ? l10n.nestsRulesShort : l10n.pairsRulesShort,
-              textAlign: TextAlign.center,
-              style: chunky(14, color: inkSoft, weight: FontWeight.w500),
-            ),
+            child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+              Flexible(
+                child: s == null
+                    ? const Center(child: CircularProgressIndicator(color: leaf))
+                    : BoardStage(
+                        critters: buddyCritters(_services.stats, 2, seed: widget.number),
+                        cheer: _finishing,
+                        child: _board(s),
+                      ),
+              ),
+              const SizedBox(height: 14),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                decoration: BoxDecoration(
+                  color: paper.withValues(alpha: 0.92),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: paperEdge, width: 2),
+                ),
+                child: Text(
+                  widget.kind == GameKind.nests ? l10n.nestsRulesShort : l10n.pairsRulesShort,
+                  textAlign: TextAlign.center,
+                  style: chunky(14, color: inkSoft, weight: FontWeight.w500),
+                ),
+              ),
+            ]),
           ),
         ),
         const SizedBox(height: 10),
@@ -584,10 +586,11 @@ class BoardStage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => LayoutBuilder(builder: (context, box) {
-        final peek = critters.isEmpty ? 0.0 : (box.maxWidth * 0.17).clamp(40.0, 96.0);
-        const shown = 0.5;
+        final peek = critters.isEmpty ? 0.0 : (box.maxWidth * 0.2).clamp(44.0, 110.0);
+        const shown = 0.62;
         final side = [box.maxWidth, box.maxHeight - peek * shown, maxSide].reduce((a, b) => a < b ? a : b);
         return Center(
+          heightFactor: 1,
           child: SizedBox(
             width: side,
             height: side + peek * shown,

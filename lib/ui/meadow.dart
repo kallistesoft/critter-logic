@@ -312,7 +312,7 @@ class UiScale extends StatelessWidget {
 
   static double factorFor(Size s) {
     if (s.width <= 520) return 1;
-    final byWidth = min(s.width / 440, 1.75);
+    final byWidth = min(s.width / 460, 1.65);
     final byHeight = max(1.0, s.height / 660);
     return min(byWidth, byHeight);
   }

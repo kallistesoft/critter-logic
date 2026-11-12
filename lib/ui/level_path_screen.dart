@@ -55,7 +55,7 @@ class _LevelPathScreenState extends State<LevelPathScreen> {
     final first = max(1, current - _behind);
     final last = current + _ahead;
     final critter = buddyCritters(stats, 1, seed: current).first;
-    _scroll ??= ScrollController(initialScrollOffset: max(0.0, (current - first) * _spacing - 160));
+    _scroll ??= ScrollController(initialScrollOffset: max(0.0, (current - first) * _spacing - 40));
 
     return MeadowScaffold(
       child: Column(children: [
@@ -245,7 +245,7 @@ class _CurrentNodeState extends State<_CurrentNode> with SingleTickerProviderSta
           ]),
         ),
         Positioned(
-          bottom: 52,
+          bottom: 66,
           child: IgnorePointer(child: CritterBuddy(widget.critter, size: 58, tappable: false, cheer: true, seed: 2)),
         ),
         Positioned(

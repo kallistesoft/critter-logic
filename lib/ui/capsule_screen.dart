@@ -299,7 +299,7 @@ class _CapsuleScreenState extends State<CapsuleScreen> with TickerProviderStateM
               ),
               if (t > 0.1)
                 Positioned(
-                  bottom: 70 + up,
+                  bottom: 34 + up,
                   child: Transform(
                     alignment: Alignment.bottomCenter,
                     transform: Matrix4.diagonal3Values(1 - stretch + squash, 1 + stretch - squash, 1),
@@ -601,7 +601,7 @@ class RaysPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final c = Offset(size.width / 2, size.height * 0.5);
+    final c = Offset(size.width / 2, size.height * 0.6);
     final r = size.width / 2 * (0.7 + 0.5 * t);
     final paint = Paint()..color = color.withValues(alpha: 0.3 * t);
     for (var k = 0; k < 14; k++) {

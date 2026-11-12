@@ -449,15 +449,15 @@ class _FlamePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final outer = lit ? const Color(0xFFFF6B2C) : const Color(0xFFBDB3A6);
-    final inner = lit ? const Color(0xFFFFC93C) : const Color(0xFFE2DBD0);
+    final outer = lit ? const Color(0xFFFF6B2C) : const Color(0xFFFFB892);
+    final inner = lit ? const Color(0xFFFFC93C) : const Color(0xFFFFE6C8);
     canvas.drawPath(_flame(size, 1), Paint()..color = outer);
     canvas.save();
     canvas.translate(0, size.height * 0.12);
     canvas.drawPath(_flame(size, 0.6), Paint()..color = inner);
     canvas.restore();
     canvas.drawPath(_flame(size, 1), Paint()
-      ..color = lit ? const Color(0xFFC2410C) : inkSoft
+      ..color = lit ? const Color(0xFFC2410C) : const Color(0xFFD9895F)
       ..style = PaintingStyle.stroke
       ..strokeWidth = max(1, size.width * 0.06));
   }
@@ -701,9 +701,10 @@ class MeadowTopBar extends StatelessWidget {
             onPressed: onBack ?? () => Navigator.maybePop(context),
           ),
           const SizedBox(width: 10),
-          Flexible(child: WoodLabel(text: title, subtitle: subtitle)),
-          const Spacer(),
-          for (final (i, t) in trailing.indexed) ...[if (i > 0) const SizedBox(width: 6), t],
+          Expanded(
+            child: Align(alignment: Alignment.centerLeft, child: WoodLabel(text: title, subtitle: subtitle)),
+          ),
+          for (final t in trailing) ...[const SizedBox(width: 6), t],
         ]),
       );
 }
