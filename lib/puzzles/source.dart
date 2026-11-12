@@ -2,6 +2,7 @@ import 'nests/nests.dart';
 import 'nests/solver.dart';
 import 'pairs/pairs.dart';
 import 'pairs/solver.dart';
+import 'trail/trail.dart';
 
 /// Where puzzles come from: the bundled dailies (the same for everyone) and the endless level tracks.
 abstract class PuzzleSource {
@@ -11,6 +12,15 @@ abstract class PuzzleSource {
   /// Level [level] (1-based) of each track; the same puzzle for a given level on every device.
   Future<NestsPuzzle> levelNests(int level);
   Future<PairsPuzzle> levelPairs(int level);
+}
+
+/// Where Trail puzzles come from. Separate from [PuzzleSource] until Trail joins [GameKind] (so fakes of
+/// [PuzzleSource] keep compiling); [BundledPuzzleSource] implements both.
+abstract class TrailSource {
+  Future<TrailPuzzle> dailyTrail(int number);
+
+  /// Level [level] (1-based) of the Trail track.
+  Future<TrailPuzzle> levelTrail(int level);
 }
 
 /// One step the player can take: put [value] in [cell]. [wrong] means the cell currently holds something that
