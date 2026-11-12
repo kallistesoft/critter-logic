@@ -20,12 +20,15 @@ val keyProperties = Properties().apply {
 
 android {
     namespace = "ca.kallistesoft.critterlogic"
-    compileSdk = flutter.compileSdkVersion
+    // flutter_local_notifications 23 needs compile SDK 37 (Flutter defaults to 36).
+    compileSdk = 37
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+        // flutter_local_notifications (daily reminder) needs java.time on old Android versions.
+        isCoreLibraryDesugaringEnabled = true
     }
 
     defaultConfig {
@@ -42,7 +45,7 @@ android {
         versionCode = flutter.versionCode
         versionName = flutter.versionName
         // AdMob app ID; debug builds use Google's sample app so test ads are served.
-        manifestPlaceholders["admobAppId"] = "ca-app-pub-3940256099942544~3347511713" // TODO: Critter Logic AdMob app ID once created
+        manifestPlaceholders["admobAppId"] = "ca-app-pub-7557144664039757~1213786880"
     }
 
     signingConfigs {
@@ -75,4 +78,8 @@ kotlin {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }
