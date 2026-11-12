@@ -82,8 +82,10 @@ flutter:
   uses-material-design: true
 
   assets:
+    - assets/critters/
     - assets/sfx/
     - assets/dailies/
+    - assets/music/
 
   # To add assets to your application, add an assets section, like this:
   # assets:
