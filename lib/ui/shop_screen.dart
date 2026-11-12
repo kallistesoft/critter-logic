@@ -96,6 +96,11 @@ class _ShopScreenState extends State<ShopScreen> {
 
   Future<void> _buyPack(CoinPack pack) async {
     final store = Services.of(context).coinStore;
+    if (store.preview) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(AppLocalizations.of(context).coinsPreview)));
+      return;
+    }
     if (await askParent(context, widget.random ?? Random())) await store.buy(pack);
   }
 

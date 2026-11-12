@@ -34,6 +34,9 @@ abstract class CoinStoreService extends ChangeNotifier {
   List<(CoinPack, String price)> get packs;
 
   Future<void> buy(CoinPack pack);
+
+  /// Dev builds without a store show the packs with sample prices; buying does nothing.
+  bool get preview => false;
 }
 
 /// Web and tests: nothing to buy.
@@ -64,11 +67,20 @@ class StoreCoinService extends CoinStoreService {
 
   static const _creditedKey = 'coinPurchasesCredited';
 
+  /// Sample prices for the dev-build preview (the CAD prices set in Play Console).
+  static const _samplePrices = {'coins_150': 'CA\$0.99', 'coins_350': 'CA\$1.99', 'coins_1000': 'CA\$4.99'};
+
+  /// Dev builds (another app id, never sold anything by Play) preview the Coins tab when the store has no packs.
   @override
-  List<(CoinPack, String)> get packs => [
-        for (final p in coinPacks)
-          if (_products[p.productId] != null) (p, _products[p.productId]!.price),
-      ];
+  bool get preview => !kReleaseMode && _products.isEmpty;
+
+  @override
+  List<(CoinPack, String)> get packs => preview
+      ? [for (final p in coinPacks) (p, _samplePrices[p.productId]!)]
+      : [
+          for (final p in coinPacks)
+            if (_products[p.productId] != null) (p, _products[p.productId]!.price),
+        ];
 
   Future<void> init() async {
     _sub = _store.purchaseStream.listen(_onPurchases, onError: (_) {});
@@ -87,7 +99,7 @@ class StoreCoinService extends CoinStoreService {
   @override
   Future<void> buy(CoinPack pack) async {
     final product = _products[pack.productId];
-    if (product == null) return;
+    if (product == null) return; // preview: nothing to buy
     await _store.buyConsumable(purchaseParam: PurchaseParam(productDetails: product));
   }
 
