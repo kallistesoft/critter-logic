@@ -178,9 +178,10 @@ void main() {
       await tester.tap(find.byKey(const Key('remindersToggle')));
       await tester.pumpAndSettle();
       expect(app.sound.muted, isTrue);
-      expect(stats.musicOn, isFalse);
-      expect(stats.remindersOn, isTrue);
-      expect(stats.savedGame('settings')!['autoCross'], isFalse);
+      expect(stats.autoCross, isFalse);
+      // The test app has no notification permission: the reminder stays off and says why.
+      expect(stats.remindersOn, isFalse);
+      expect(find.text('Turn on notifications for Critter Logic in your phone settings.'), findsOneWidget);
     });
 
     for (final locale in const [Locale('en'), Locale('fr')]) {

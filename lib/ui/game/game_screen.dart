@@ -37,14 +37,15 @@ String boardCritter(StatsStore stats, int number) {
 
 /// One puzzle being played, daily or level: board, timer, undo, restart, hint.
 class GameScreen extends StatefulWidget {
-  const GameScreen({super.key, required this.kind, required this.mode, required this.number, this.pacer = const LevelAdPacer()});
+  const GameScreen({super.key, required this.kind, required this.mode, required this.number, this.pacer});
 
   final GameKind kind;
   final PlayMode mode;
 
   /// Daily number or level.
   final int number;
-  final LevelAdPacer pacer;
+  /// Interstitial pacing; null reads it from Remote Config ([Services.settings]).
+  final LevelAdPacer? pacer;
 
   @override
   State<GameScreen> createState() => _GameScreenState();
@@ -294,7 +295,13 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver, Ti
   Future<void> _afterLevel({required bool next}) async {
     final services = _services;
     final nav = Navigator.of(context);
-    if (!_adShown && widget.pacer.shouldShow(services.stats.levelsWon)) {
+    final settings = services.settings.value;
+    final pacer = widget.pacer ??
+        LevelAdPacer(
+          firstAfter: settings.interstitialFirstLevel < 1 ? 1 : settings.interstitialFirstLevel,
+          every: settings.interstitialEvery,
+        );
+    if (!_adShown && pacer.shouldShow(services.stats.levelsWon)) {
       _adShown = true;
       await services.ads.showInterstitial();
     }

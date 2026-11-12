@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
 import '../meta/game_flow.dart';
+import '../meta/reminders.dart';
 import '../puzzles/nests/nests.dart';
 import '../puzzles/puzzle.dart';
 import '../services/leaderboard_service.dart';
@@ -70,6 +71,7 @@ class _DailyResultScreenState extends State<DailyResultScreen> with SingleTicker
       _standing = s.leaderboard.submitDaily(widget.kind, widget.number, widget.result.millis);
       s.leaderboard.submitProfile(bestStreak: stats.bestStreak, solved: stats.dailiesSolved);
       ReviewPrompter(stats, s.review).onDailySolved(widget.rewards?.streak ?? stats.streak(widget.number));
+      planReminders(stats, s.reminders, AppLocalizations.of(context), s.today());
       final r = widget.rewards;
       if (r != null && (r.capsule || r.chest != null)) {
         s.sound.play(r.chest != null ? Sfx.chest : Sfx.coin);

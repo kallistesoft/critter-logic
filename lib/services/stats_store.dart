@@ -171,6 +171,10 @@ class StatsStore {
   bool get muted => _prefs.getBool('muted') ?? false;
   Future<void> setMuted(bool value) => _prefs.setBool('muted', value);
 
+  /// Nests: shade the cells a placed critter rules out. On by default.
+  bool get autoCross => _prefs.getBool('autoCross') ?? true;
+  Future<void> setAutoCross(bool value) => _prefs.setBool('autoCross', value);
+
   bool get musicOn => _prefs.getBool('music') ?? true;
   Future<void> setMusicOn(bool value) => _prefs.setBool('music', value);
 

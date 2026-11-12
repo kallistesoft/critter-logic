@@ -63,8 +63,3 @@ Future<DailyRewards> grantDailyRewards(StatsStore stats, int day) async {
 int levelReward({required int hints}) => hints == 0 ? Economy.levelWinNoHint : Economy.levelWin;
 
 /// UI settings that StatsStore doesn't have a field for yet (kept in a 'settings' save slot).
-extension UiSettings on StatsStore {
-  /// Nests: shade the cells a placed critter rules out. On by default.
-  bool get autoCross => savedGame('settings')?['autoCross'] as bool? ?? true;
-  Future<void> setAutoCross(bool value) => saveGame('settings', {...?savedGame('settings'), 'autoCross': value});
-}

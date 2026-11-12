@@ -59,7 +59,12 @@ class _CapsuleScreenState extends State<CapsuleScreen> with TickerProviderStateM
       _shake.forward(from: 0);
       return;
     }
-    final result = openCapsule(stats.owned, _random, forceGolden: _golden);
+    final result = openCapsule(stats.owned, _random,
+        forceGolden: _golden,
+        odds: CapsuleOdds(
+          rare: Services.of(context).settings.value.capsuleRareOdds,
+          golden: Services.of(context).settings.value.capsuleGoldenOdds,
+        ));
     await stats.takeCapsule(golden: _golden);
     if (result.duplicate) {
       await stats.addCoins(Economy.duplicateCritter);

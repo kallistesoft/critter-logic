@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
-import '../meta/game_flow.dart';
+import '../meta/reminders.dart';
 import '../puzzles/puzzle.dart';
 import 'game/game_screen.dart';
 import 'navigation.dart';
@@ -61,9 +61,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       key: const Key('musicToggle'),
                       emoji: '🎵',
                       label: l10n.settingMusic,
-                      value: stats.musicOn,
+                      value: services.music.enabled,
                       onChanged: (v) async {
-                        await stats.setMusicOn(v);
+                        await services.music.setEnabled(v);
                         setState(() {});
                       },
                     ),
@@ -84,7 +84,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       label: l10n.settingReminders,
                       value: stats.remindersOn,
                       onChanged: (v) async {
+                        final messenger = ScaffoldMessenger.of(context);
+                        if (v && !await services.reminders.requestPermission()) {
+                          messenger.showSnackBar(SnackBar(content: Text(l10n.reminderDenied)));
+                          v = false;
+                        }
                         await stats.setRemindersOn(v);
+                        await services.analytics.log('reminder_toggle', {'on': v ? 1 : 0});
+                        if (context.mounted) {
+                          await planReminders(stats, services.reminders, l10n, services.today());
+                        }
                         setState(() {});
                       },
                     ),

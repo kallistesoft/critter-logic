@@ -540,5 +540,26 @@
   "critterNarwhal": "Narwhal",
   "@critterNarwhal": {
     "description": "Album critter name"
+  },
+  "reminderTitle": "Your critters are waiting 🐣",
+  "@reminderTitle": {
+    "description": "Daily reminder notification"
+  },
+  "reminderBody": "Today's Nests and Pairs are ready.",
+  "@reminderBody": {
+    "description": "Daily reminder notification"
+  },
+  "reminderStreak": "{count, plural, one{Keep your 🔥 {count}-day streak: play today!} other{Keep your 🔥 {count}-day streak: play today!}}",
+  "@reminderStreak": {
+    "description": "Daily reminder notification",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reminderDenied": "Turn on notifications for Critter Logic in your phone settings.",
+  "@reminderDenied": {
+    "description": "Snackbar when the notification permission is refused"
   }
 }

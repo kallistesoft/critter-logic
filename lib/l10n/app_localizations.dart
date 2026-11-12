@@ -949,6 +949,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Narwhal'**
   String get critterNarwhal;
+
+  /// Daily reminder notification
+  ///
+  /// In en, this message translates to:
+  /// **'Your critters are waiting 🐣'**
+  String get reminderTitle;
+
+  /// Daily reminder notification
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s Nests and Pairs are ready.'**
+  String get reminderBody;
+
+  /// Daily reminder notification
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{Keep your 🔥 {count}-day streak: play today!} other{Keep your 🔥 {count}-day streak: play today!}}'**
+  String reminderStreak(int count);
+
+  /// Snackbar when the notification permission is refused
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on notifications for Critter Logic in your phone settings.'**
+  String get reminderDenied;
 }
 
 class _AppLocalizationsDelegate

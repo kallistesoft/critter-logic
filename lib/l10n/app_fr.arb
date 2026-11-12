@@ -141,5 +141,9 @@
   "critterWalrus": "Morse",
   "critterWhale": "Baleine",
   "critterPenguin": "Pingouin",
-  "critterNarwhal": "Narval"
+  "critterNarwhal": "Narval",
+  "reminderTitle": "Tes bestioles t’attendent 🐣",
+  "reminderBody": "Les Nids et les Paires du jour sont prêts.",
+  "reminderStreak": "{count, plural, one{Garde ta série 🔥 de {count} jour : joue aujourd’hui !} other{Garde ta série 🔥 de {count} jours : joue aujourd’hui !}}",
+  "reminderDenied": "Active les notifications de Critter Logic dans les réglages du téléphone."
 }
