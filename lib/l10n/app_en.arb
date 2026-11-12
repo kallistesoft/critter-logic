@@ -98,5 +98,447 @@
   "tagline": "Daily logic puzzles",
   "@tagline": {
     "description": "Home subtitle under the game name"
+  },
+  "play": "Play",
+  "@play": {
+    "description": "Home daily card button"
+  },
+  "todaysPuzzles": "Today's puzzles",
+  "@todaysPuzzles": {
+    "description": "Home section title"
+  },
+  "allDailiesDone": "Both dailies done — see you tomorrow! 🎉",
+  "@allDailiesDone": {},
+  "levels": "Levels",
+  "@levels": {
+    "description": "Home section: endless level tracks"
+  },
+  "levelTitle": "Level {level}",
+  "@levelTitle": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "album": "Album",
+  "@album": {
+    "description": "Critter collection"
+  },
+  "capsules": "Capsules",
+  "@capsules": {
+    "description": "Surprise eggs holding a critter"
+  },
+  "openNow": "Open now!",
+  "@openNow": {
+    "description": "Home capsule button when capsules wait"
+  },
+  "capsuleShort": "Earn by playing",
+  "@capsuleShort": {
+    "description": "Home capsule button when none wait"
+  },
+  "settings": "Settings",
+  "@settings": {},
+  "back": "Back",
+  "@back": {},
+  "streakDays": "{count, plural, =0{0 days} =1{1 day} other{{count} days}}",
+  "@streakDays": {
+    "description": "Streak counter",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "streakBroken": "Your streak broke yesterday. Watch a video to save it!",
+  "@streakBroken": {},
+  "repairStreak": "Repair with a video",
+  "@repairStreak": {},
+  "streakRepaired": "Streak repaired! 🔥",
+  "@streakRepaired": {},
+  "undo": "Undo",
+  "@undo": {
+    "description": "Game toolbar"
+  },
+  "restart": "Restart",
+  "@restart": {
+    "description": "Game toolbar: clears the board"
+  },
+  "hint": "Hint",
+  "@hint": {
+    "description": "Game toolbar"
+  },
+  "penaltySeconds": "+{seconds}s",
+  "@penaltySeconds": {
+    "description": "Daily: time added by mistakes and hints",
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "nestsRulesShort": "One critter per row, column and zone. They never touch!",
+  "@nestsRulesShort": {},
+  "pairsRulesShort": "As many ☀️ as 🌙 in each line, never 3 alike in a row.",
+  "@pairsRulesShort": {},
+  "hintNoCoinsTitle": "Not enough coins",
+  "@hintNoCoinsTitle": {},
+  "hintNoCoinsBody": "A hint costs {cost} coins. Watch a short video for a free one?",
+  "@hintNoCoinsBody": {
+    "placeholders": {
+      "cost": {
+        "type": "int"
+      }
+    }
+  },
+  "watchVideo": "Watch a video",
+  "@watchVideo": {},
+  "solved": "Solved!",
+  "@solved": {},
+  "levelSolved": "Level {level} solved!",
+  "@levelSolved": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "noHintBonus": "No-hint bonus!",
+  "@noHintBonus": {},
+  "nextLevel": "Next level",
+  "@nextLevel": {},
+  "alreadySolved": "Already solved",
+  "@alreadySolved": {
+    "description": "Result of a daily reopened later"
+  },
+  "yourTime": "Your time",
+  "@yourTime": {},
+  "flawless": "Flawless! No mistakes, no hints ✨",
+  "@flawless": {},
+  "timeBreakdown": "{clock} + {penalty}s ({mistakes} ✗ · {hints} 💡)",
+  "@timeBreakdown": {
+    "description": "Clock time, penalty seconds, mistakes and hints",
+    "placeholders": {
+      "clock": {
+        "type": "String"
+      },
+      "mistakes": {
+        "type": "int"
+      },
+      "hints": {
+        "type": "int"
+      },
+      "penalty": {
+        "type": "int"
+      }
+    }
+  },
+  "leaderboardLoading": "Checking the leaderboard…",
+  "@leaderboardLoading": {},
+  "leaderboardOffline": "Leaderboard unavailable right now.",
+  "@leaderboardOffline": {},
+  "fasterThan": "Faster than {percent}% of players",
+  "@fasterThan": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "rankOf": "Rank {rank} of {total}",
+  "@rankOf": {
+    "placeholders": {
+      "rank": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "topTimes": "Top 10",
+  "@topTimes": {},
+  "you": "You",
+  "@you": {
+    "description": "Leaderboard: the player"
+  },
+  "player": "Player",
+  "@player": {
+    "description": "Leaderboard: someone else (anonymous)"
+  },
+  "rewards": "Rewards",
+  "@rewards": {},
+  "rewardCoins": "+{coins} coins",
+  "@rewardCoins": {
+    "placeholders": {
+      "coins": {
+        "type": "int"
+      }
+    }
+  },
+  "rewardDailyCapsule": "Both dailies done: +1 capsule",
+  "@rewardDailyCapsule": {},
+  "rewardCapsule": "+1 capsule",
+  "@rewardCapsule": {},
+  "rewardGoldenCapsule": "+1 golden capsule",
+  "@rewardGoldenCapsule": {},
+  "rewardChest": "{streak}-day streak chest: +{coins} coins",
+  "@rewardChest": {
+    "placeholders": {
+      "streak": {
+        "type": "int"
+      },
+      "coins": {
+        "type": "int"
+      }
+    }
+  },
+  "playOtherDaily": "Play {game}",
+  "@playOtherDaily": {
+    "description": "Result: open the other daily",
+    "placeholders": {
+      "game": {
+        "type": "String"
+      }
+    }
+  },
+  "todaysGrid": "Today's grid",
+  "@todaysGrid": {},
+  "howToPlay": "How to play {game}",
+  "@howToPlay": {
+    "placeholders": {
+      "game": {
+        "type": "String"
+      }
+    }
+  },
+  "skip": "Skip",
+  "@skip": {},
+  "tutorialTapHint": "Tap the highlighted cells.",
+  "@tutorialTapHint": {},
+  "tutorialOops": "Oops, that breaks a rule. Tap again to change it.",
+  "@tutorialOops": {},
+  "tutorialNice": "Nice! Next",
+  "@tutorialNice": {},
+  "tutorialLetsPlay": "Let's play!",
+  "@tutorialLetsPlay": {},
+  "tutNestsRow": "One critter per row! Tap a cell once for ✕, twice for a critter.",
+  "@tutNestsRow": {},
+  "tutNestsColumn": "One per column too.",
+  "@tutNestsColumn": {},
+  "tutNestsZone": "One per color zone.",
+  "@tutNestsZone": {},
+  "tutNestsTouch": "Critters never touch, not even at the corners.",
+  "@tutNestsTouch": {},
+  "tutPairsBalance": "Each line has as many ☀️ as 🌙. Tap once for ☀️, twice for 🌙.",
+  "@tutPairsBalance": {},
+  "tutPairsThree": "Never three alike in a row.",
+  "@tutPairsThree": {},
+  "tutPairsLinks": "= means the same, × means opposite.",
+  "@tutPairsLinks": {},
+  "setComplete": "Complete",
+  "@setComplete": {
+    "description": "Album set badge"
+  },
+  "capsulesWaiting": "{count, plural, =1{1 capsule to open!} other{{count} capsules to open!}}",
+  "@capsulesWaiting": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "capsulesHowTo": "Solve both dailies to earn a capsule each day.",
+  "@capsulesHowTo": {},
+  "noCapsules": "No capsules yet",
+  "@noCapsules": {},
+  "capsuleForVideo": "Free capsule for a video",
+  "@capsuleForVideo": {},
+  "capsuleTap": "Tap the capsule!",
+  "@capsuleTap": {},
+  "capsuleTapAgain": "Again!",
+  "@capsuleTapAgain": {},
+  "capsuleAlmost": "One more tap!",
+  "@capsuleAlmost": {},
+  "goldenCapsule": "Golden capsule!",
+  "@goldenCapsule": {},
+  "capsuleNew": "New in your album! ✨",
+  "@capsuleNew": {},
+  "capsuleDuplicate": "Already in your album: +{coins} coins",
+  "@capsuleDuplicate": {
+    "placeholders": {
+      "coins": {
+        "type": "int"
+      }
+    }
+  },
+  "capsuleSetComplete": "{set} set complete! +{coins} coins",
+  "@capsuleSetComplete": {
+    "placeholders": {
+      "set": {
+        "type": "String"
+      },
+      "coins": {
+        "type": "int"
+      }
+    }
+  },
+  "openAnother": "Open the next one ({count})",
+  "@openAnother": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "seeAlbum": "See album",
+  "@seeAlbum": {},
+  "rarityCommon": "Common",
+  "@rarityCommon": {},
+  "rarityRare": "Rare",
+  "@rarityRare": {},
+  "rarityGolden": "Golden",
+  "@rarityGolden": {},
+  "setFarm": "Farm",
+  "@setFarm": {},
+  "setFriends": "Friends",
+  "@setFriends": {},
+  "setSavanna": "Savanna",
+  "@setSavanna": {},
+  "setJungle": "Jungle",
+  "@setJungle": {},
+  "setPolar": "Polar",
+  "@setPolar": {},
+  "settingSound": "Sound effects",
+  "@settingSound": {},
+  "settingMusic": "Music",
+  "@settingMusic": {},
+  "settingAutoCross": "Auto-cross",
+  "@settingAutoCross": {},
+  "settingAutoCrossInfo": "Nests: dim the cells a critter rules out",
+  "@settingAutoCrossInfo": {},
+  "settingReminders": "Daily reminder",
+  "@settingReminders": {},
+  "credits": "Art and sounds: Kenney (kenney.nl), CC0",
+  "@credits": {},
+  "critterChick": "Chick",
+  "@critterChick": {
+    "description": "Album critter name"
+  },
+  "critterChicken": "Chicken",
+  "@critterChicken": {
+    "description": "Album critter name"
+  },
+  "critterDuck": "Duck",
+  "@critterDuck": {
+    "description": "Album critter name"
+  },
+  "critterPig": "Pig",
+  "@critterPig": {
+    "description": "Album critter name"
+  },
+  "critterGoat": "Goat",
+  "@critterGoat": {
+    "description": "Album critter name"
+  },
+  "critterCow": "Cow",
+  "@critterCow": {
+    "description": "Album critter name"
+  },
+  "critterDog": "Dog",
+  "@critterDog": {
+    "description": "Album critter name"
+  },
+  "critterRabbit": "Rabbit",
+  "@critterRabbit": {
+    "description": "Album critter name"
+  },
+  "critterFrog": "Frog",
+  "@critterFrog": {
+    "description": "Album critter name"
+  },
+  "critterHorse": "Horse",
+  "@critterHorse": {
+    "description": "Album critter name"
+  },
+  "critterOwl": "Owl",
+  "@critterOwl": {
+    "description": "Album critter name"
+  },
+  "critterPanda": "Panda",
+  "@critterPanda": {
+    "description": "Album critter name"
+  },
+  "critterZebra": "Zebra",
+  "@critterZebra": {
+    "description": "Album critter name"
+  },
+  "critterBuffalo": "Buffalo",
+  "@critterBuffalo": {
+    "description": "Album critter name"
+  },
+  "critterHippo": "Hippo",
+  "@critterHippo": {
+    "description": "Album critter name"
+  },
+  "critterRhino": "Rhino",
+  "@critterRhino": {
+    "description": "Album critter name"
+  },
+  "critterGiraffe": "Giraffe",
+  "@critterGiraffe": {
+    "description": "Album critter name"
+  },
+  "critterElephant": "Elephant",
+  "@critterElephant": {
+    "description": "Album critter name"
+  },
+  "critterSnake": "Snake",
+  "@critterSnake": {
+    "description": "Album critter name"
+  },
+  "critterCrocodile": "Crocodile",
+  "@critterCrocodile": {
+    "description": "Album critter name"
+  },
+  "critterParrot": "Parrot",
+  "@critterParrot": {
+    "description": "Album critter name"
+  },
+  "critterGorilla": "Gorilla",
+  "@critterGorilla": {
+    "description": "Album critter name"
+  },
+  "critterMonkey": "Monkey",
+  "@critterMonkey": {
+    "description": "Album critter name"
+  },
+  "critterSloth": "Sloth",
+  "@critterSloth": {
+    "description": "Album critter name"
+  },
+  "critterMoose": "Moose",
+  "@critterMoose": {
+    "description": "Album critter name"
+  },
+  "critterBear": "Bear",
+  "@critterBear": {
+    "description": "Album critter name"
+  },
+  "critterWalrus": "Walrus",
+  "@critterWalrus": {
+    "description": "Album critter name"
+  },
+  "critterWhale": "Whale",
+  "@critterWhale": {
+    "description": "Album critter name"
+  },
+  "critterPenguin": "Penguin",
+  "@critterPenguin": {
+    "description": "Album critter name"
+  },
+  "critterNarwhal": "Narwhal",
+  "@critterNarwhal": {
+    "description": "Album critter name"
   }
 }

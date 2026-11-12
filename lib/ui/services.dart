@@ -8,6 +8,8 @@ import '../services/premium_service.dart';
 import '../services/review_service.dart';
 import '../services/sound_service.dart';
 import '../services/stats_store.dart';
+import '../puzzles/source.dart';
+import 'dev_puzzles.dart';
 
 /// App-wide services, available to every screen.
 class Services extends InheritedWidget {
@@ -18,6 +20,7 @@ class Services extends InheritedWidget {
     required this.sound,
     required this.today,
     PremiumService? premium,
+    PuzzleSource? puzzles,
     AnalyticsService? analytics,
     this.review = const NoReviewService(),
     this.leaderboard = const NoLeaderboardService(),
@@ -26,7 +29,8 @@ class Services extends InheritedWidget {
     this.showPrivacyOptions,
     required super.child,
   })  : premium = premium ?? NoPremiumService(),
-        analytics = analytics ?? NoAnalytics();
+        analytics = analytics ?? NoAnalytics(),
+        puzzles = puzzles ?? const DevPuzzleSource();
 
   final StatsStore stats;
   final AdService ads;
@@ -35,6 +39,9 @@ class Services extends InheritedWidget {
   final AnalyticsService analytics;
   final ReviewService review;
   final LeaderboardService leaderboard;
+
+  /// Dailies and level tracks.
+  final PuzzleSource puzzles;
 
   /// Banner ad at the bottom of the screen; null where there are no banners (web, tests).
   final WidgetBuilder? banner;
@@ -57,5 +64,6 @@ class Services extends InheritedWidget {
       old.review != review ||
       old.leaderboard != leaderboard ||
       old.analytics != analytics ||
+      old.puzzles != puzzles ||
       old.banner != banner;
 }

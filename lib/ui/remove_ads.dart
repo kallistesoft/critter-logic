@@ -33,7 +33,7 @@ class RemoveAdsButtons extends StatelessWidget {
             TextButton(
               key: const Key('restore'),
               onPressed: premium.restore,
-              child: Text(l10n.restorePurchase, style: const TextStyle(color: Colors.white54)),
+              child: Text(l10n.restorePurchase, style: const TextStyle(color: inkSoft)),
             ),
           ]);
         },
