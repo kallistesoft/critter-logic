@@ -1,130 +1,95 @@
-"""Draws the Block Daily app icon: the game's blocks plus the Kallistesoft brand marks.
+"""Draws the Critter Logic app icon: a pastel 3x3 Nests board on coral, with the chick sitting on it.
 
-Brand marks, the same on every Kallistesoft game icon: the gold sun (top right), the light-blue
-waves (bottom), and K / S in navy on the hero's top-left and bottom-right elements. Only the hero
-(here a 3x3 board one block short of full, drawn like paintBlock in lib/ui/palette.dart) and the
-background color change between games.
+Game-first, no brand marks. The board's zones use the Nests zone colors from lib/ui/palette.dart;
+the chick is Kenney's "Animal Pack Remastered" chick (CC0), rendered from the pack's vector sheet
+by tools/make_critters.py so it stays sharp at 1024 px.
 
 Writes assets/icon/icon.png (iOS, web, legacy Android) and, for the Android adaptive icon,
-assets/icon/background.png (background + waves) and assets/icon/foreground.png (hero + sun),
-with the design shrunk into the area Android never crops.
-Run: python3 tools/make_icon.py  (needs Pillow), then regenerate sizes as in flutter_launcher_icons.yaml.
+assets/icon/background.png (plain coral) and assets/icon/foreground.png (board + chick, shrunk into
+the circle Android never crops).
+Run: python3 -I tools/make_icon.py <unzipped Animal Pack Remastered root>  (Pillow, numpy, Chrome),
+then: dart pub global run flutter_launcher_icons
 """
-import math
 import os
+import sys
 
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFilter
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from make_critters import HEAD, render_critter  # noqa: E402
 
 SIZE = 1024
 SS = 4  # supersampling for smooth edges
 S = SIZE * SS
 
-# Kallistesoft brand (from kallistesoft.ca/assets/logo.svg).
-SUN = (0xF2, 0xB1, 0x34)
-WAVE = (0x63, 0xB6, 0xE6)
-INK = (0x16, 0x21, 0x3E)  # K and S
-FONT = '/System/Library/Fonts/Supplemental/Arial Black.ttf'
-
-# Block Daily.
-BACKGROUND = (0x16, 0x21, 0x3E)
-EMPTY = (0x1E, 0x29, 0x3B)
-YELLOW, PINK, GREEN, PURPLE, BLUE = (0xFF, 0xC9, 0x3C), (0xF4, 0x72, 0xB6), (0x4A, 0xDE, 0x80), (0x7C, 0x4D, 0xFF), (0x4F, 0xC3, 0xF7)
-GRID = [
-    [YELLOW, YELLOW, None],
-    [PINK, GREEN, GREEN],
-    [PINK, PURPLE, BLUE],
+BACKGROUND = (0xFF, 0x9F, 0x7A)  # a softer take on palette.dart's coral accent
+BOARD = (0xFF, 0xF6, 0xE9)  # palette.dart background (cream)
+# Nests zones (palette.dart zoneColors): peach, mint, sky, lavender, pink, lemon.
+PEACH, MINT, SKY, LAVENDER, PINK, LEMON = (0xFF, 0xD6, 0xA5), (0xCA, 0xFF, 0xBF), (0x9B, 0xF6, 0xFF), (0xBD, 0xB2, 0xFF), (0xFF, 0xAD, 0xAD), (0xFD, 0xFF, 0xB6)
+ZONES = [
+    [SKY, SKY, PINK],
+    [LAVENDER, MINT, PINK],
+    [LAVENDER, MINT, MINT],
 ]
 
-# Android shows only the middle 72/108 of an adaptive icon, sometimes as a circle.
-ADAPTIVE_SCALE = 72 / 108
+# Android shows only a circle of diameter 66/108 for sure; keep the whole design inside it.
+ADAPTIVE_SCALE = 0.6
 
 
-class Canvas:
-    """Draws in design units (0..1 of the full icon), optionally shrunk around the center."""
+def design(img, scale, pack):
+    """Board + chick, in design units (0..1) shrunk by `scale` around the center."""
+    def p(v):
+        return (0.5 + (v - 0.5) * scale) * S
 
-    def __init__(self, img, scale=1.0):
-        self.img, self.draw, self.scale = img, ImageDraw.Draw(img), scale
+    def ln(v):
+        return v * scale * S
 
-    def p(self, v, axis_center=0.5):
-        return (axis_center + (v - axis_center) * self.scale) * S
+    d = ImageDraw.Draw(img)
+    # Board: cream rounded square with 3x3 zone tiles.
+    x0, y0, size = p(0.14), p(0.08), ln(0.72)
+    d.rounded_rectangle([x0, y0, x0 + size, y0 + size], radius=ln(0.11), fill=BOARD)
+    pad, gap = ln(0.035), ln(0.018)
+    cell = (size - 2 * pad - 2 * gap) / 3
+    for r, row in enumerate(ZONES):
+        for c, color in enumerate(row):
+            tx, ty = x0 + pad + c * (cell + gap), y0 + pad + r * (cell + gap)
+            d.rounded_rectangle([tx, ty, tx + cell, ty + cell], radius=cell * 0.22, fill=color)
+            # Same-zone neighbors merge into one region, like a Nests zone.
+            if c < 2 and row[c + 1] == color:
+                d.rectangle([tx + cell / 2, ty, tx + cell * 1.5 + gap, ty + cell], fill=color)
+            if r < 2 and ZONES[r + 1][c] == color:
+                d.rectangle([tx, ty + cell / 2, tx + cell, ty + cell * 1.5 + gap], fill=color)
 
-    def len(self, v):
-        return v * self.scale * S
-
-
-def waves(cv, top):
-    # Gentle sine along the top edge, filled down to the bottom of the canvas.
-    amp, pts = 0.02, []
-    for i in range(0, 201):
-        x = i / 200
-        pts.append((cv.p(x), cv.p(top + amp * math.sin(x * 2 * math.pi * 2.5))))
-    # Stretch the band across the whole canvas even when the design is shrunk.
-    pts[0], pts[-1] = (0, pts[0][1]), (S, pts[-1][1])
-    cv.draw.polygon(pts + [(S, S), (0, S)], fill=WAVE)
-
-
-def sun(cv):
-    cx, cy, r = cv.p(0.79), cv.p(0.19), cv.len(0.055)
-    cv.draw.ellipse([cx - r, cy - r, cx + r, cy + r], fill=SUN)
-
-
-def block(cv, x, y, c, color):
-    """Same proportions as paintBlock: 4% inset, 16% corner radius, a light shine band near the top."""
-    d = c * 0.04
-    cv.draw.rounded_rectangle([x + d, y + d, x + c - d, y + c - d], radius=c * 0.16, fill=color)
-    inset = c * 0.14
-    top = y + inset * 0.7
-    # paintBlock draws white at 28% over the tile; blend it here since ImageDraw doesn't alpha-blend.
-    light = tuple(round(v + (255 - v) * 0.28) for v in color)
-    cv.draw.rounded_rectangle([x + inset, top, x + c - inset, top + c * 0.22], radius=c * 0.1, fill=light)
-
-
-def letter(cv, x, y, c, ch):
-    font = ImageFont.truetype(FONT, int(c * 0.62))
-    b = cv.draw.textbbox((0, 0), ch, font=font)
-    # Slightly below center so the shine band stays visible.
-    cv.draw.text((x + c / 2 - (b[0] + b[2]) / 2, y + c * 0.56 - (b[1] + b[3]) / 2), ch, font=font, fill=INK)
-
-
-def hero(cv):
-    # Board slightly left and down, leaving the top-right corner to the sun.
-    c = cv.len(0.50 / 3)
-    left, top = cv.p(0.46) - c * 1.5, cv.p(0.47) - c * 1.5
-    for r, row in enumerate(GRID):
-        for q, color in enumerate(row):
-            x, y = left + q * c, top + r * c
-            if color is None:
-                d = c * 0.04
-                cv.draw.rounded_rectangle([x + d, y + d, x + c - d, y + c - d], radius=c * 0.16, fill=EMPTY)
-            else:
-                block(cv, x, y, c, color)
-    letter(cv, left, top, c, 'K')
-    letter(cv, left + 2 * c, top + 2 * c, c, 'S')
+    # Chick: head circle 0.54 wide, sitting low on the board, with a soft shadow.
+    head = ln(0.54)
+    chick, (hx, hy) = render_critter(pack, 'chick', head / HEAD)
+    cx, cy = p(0.5), p(0.61)
+    shadow = Image.new('L', img.size, 0)
+    ImageDraw.Draw(shadow).ellipse([cx - head * 0.42, cy + head * 0.36, cx + head * 0.42, cy + head * 0.54], fill=90)
+    shadow = shadow.filter(ImageFilter.GaussianBlur(ln(0.02)))
+    img.paste((0x8A, 0x4B, 0x2F, 255), (0, 0), shadow)
+    img.alpha_composite(chick, (round(cx - hx), round(cy - hy)))
 
 
 def save(img, path, rgb=True):
     img = img.resize((SIZE, SIZE), Image.LANCZOS)
-    (img.convert('RGB') if rgb else img).save(path)
+    (img.convert('RGB') if rgb else img).save(path, optimize=True)
 
 
 def main():
+    pack = sys.argv[1]
     out = os.path.join(os.path.dirname(__file__), '..', 'assets', 'icon')
     os.makedirs(out, exist_ok=True)
 
-    full = Canvas(Image.new('RGBA', (S, S), BACKGROUND + (255,)))
-    waves(full, 0.80)
-    sun(full)
-    hero(full)
-    save(full.img, os.path.join(out, 'icon.png'))
+    full = Image.new('RGBA', (S, S), BACKGROUND + (255,))
+    design(full, 1.0, pack)
+    save(full, os.path.join(out, 'icon.png'))
 
-    back = Canvas(Image.new('RGBA', (S, S), BACKGROUND + (255,)), ADAPTIVE_SCALE)
-    waves(back, 0.80)
-    save(back.img, os.path.join(out, 'background.png'))
+    save(Image.new('RGBA', (S, S), BACKGROUND + (255,)), os.path.join(out, 'background.png'))
 
-    front = Canvas(Image.new('RGBA', (S, S), (0, 0, 0, 0)), ADAPTIVE_SCALE)
-    sun(front)
-    hero(front)
-    save(front.img, os.path.join(out, 'foreground.png'), rgb=False)
+    front = Image.new('RGBA', (S, S), (0, 0, 0, 0))
+    design(front, ADAPTIVE_SCALE, pack)
+    save(front, os.path.join(out, 'foreground.png'), rgb=False)
 
 
 if __name__ == '__main__':
