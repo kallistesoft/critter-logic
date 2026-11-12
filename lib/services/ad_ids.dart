@@ -12,14 +12,15 @@ class AdIds {
   static String get _testBanner =>
       _ios ? 'ca-app-pub-3940256099942544/2934735716' : 'ca-app-pub-3940256099942544/6300978111';
 
-  // TODO: Critter Logic units once its AdMob app exists (account pub-7557144664039757). Empty = no ads in release.
+  // iOS: no AdMob app yet. Empty = no ads in an iOS release build.
   static const _iosInterstitial = '';
   static const _iosRewarded = '';
   static const _iosBanner = '';
 
-  static String get _interstitial => _ios ? _iosInterstitial : '';
-  static String get _rewarded => _ios ? _iosRewarded : '';
-  static String get _banner => _ios ? _iosBanner : '';
+  // Android app ca-app-pub-7557144664039757~1213786880.
+  static String get _interstitial => _ios ? _iosInterstitial : 'ca-app-pub-7557144664039757/4856830068'; // puzzle done
+  static String get _rewarded => _ios ? _iosRewarded : 'ca-app-pub-7557144664039757/7795652896'; // hint/capsule/repair
+  static String get _banner => _ios ? _iosBanner : 'ca-app-pub-7557144664039757/8800632867'; // bottom
 
   /// False on a release build until the ad units are filled in: the app then runs without ads.
   static bool get configured => !kReleaseMode || _interstitial.isNotEmpty;
