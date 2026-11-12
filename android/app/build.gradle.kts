@@ -45,7 +45,7 @@ android {
         versionCode = flutter.versionCode
         versionName = flutter.versionName
         // AdMob app ID; debug builds use Google's sample app so test ads are served.
-        manifestPlaceholders["admobAppId"] = "ca-app-pub-3940256099942544~3347511713" // TODO: Critter Logic AdMob app ID once created
+        manifestPlaceholders["admobAppId"] = "ca-app-pub-7557144664039757~1213786880"
     }
 
     signingConfigs {

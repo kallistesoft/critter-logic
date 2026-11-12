@@ -14,7 +14,7 @@
       `android/app/build.gradle.kts`. Link AdMob ↔ Firebase.
 - [ ] **Play Console** app "Critter Logic: Daily Puzzles", in-app product `remove_ads` (3.99 CAD), upload key
       `~/Keys/kallistesoft/critter-logic-upload.jks` + `android/key.properties`.
-- [ ] Privacy page on kallistesoft.ca: /en/privacy/critter-logic/ and /fr/confidentialite/critter-logic/.
+- [ ] Privacy page on kallistesoft.ca: /en/privacy/critter-logic/ and /confidentialite/critter-logic/ (live, site PR #37).
 
 ## Store listing (Claude prepares, owner sends for review)
 - [ ] `store/listing.json`: title, short and full description in en-US, fr-CA, fr-FR, de-DE, es-419, es-ES, es-US,
