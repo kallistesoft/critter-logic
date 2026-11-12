@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 
 import 'l10n/app_localizations.dart';
 
+import 'puzzles/source.dart';
 import 'services/ad_ids.dart';
 import 'services/ad_service.dart';
 import 'services/admob_ad_service.dart';
@@ -100,6 +101,7 @@ class CritterLogicApp extends StatelessWidget {
     this.onUpdate,
     this.today = DateTime.now,
     this.locale,
+    this.puzzles,
   });
 
   final StatsStore stats;
@@ -121,6 +123,9 @@ class CritterLogicApp extends StatelessWidget {
   /// Forces a language (tests); null follows the phone, falling back to English.
   final Locale? locale;
 
+  /// Dailies and levels; null uses the built-in development puzzles.
+  final PuzzleSource? puzzles;
+
   @override
   Widget build(BuildContext context) {
     return Services(
@@ -131,6 +136,7 @@ class CritterLogicApp extends StatelessWidget {
       analytics: analytics,
       review: review,
       leaderboard: leaderboard,
+      puzzles: puzzles,
       banner: banner,
       privacyOptionsRequired: privacyOptionsRequired,
       showPrivacyOptions: showPrivacyOptions,

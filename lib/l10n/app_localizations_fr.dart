@@ -55,7 +55,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get updateRequiredBody =>
-      'Cette version de Critter Logic n’est plus prise en charge. Mettez-la à jour pour continuer à jouer avec le même défi du jour que tout le monde.';
+      'Cette version de Critter Logic n’est plus prise en charge. Mets-la à jour pour continuer à jouer avec le même défi du jour que tout le monde.';
 
   @override
   String get updateRequiredButton => 'METTRE À JOUR';
@@ -67,7 +67,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get shareResult => 'Partager le résultat';
 
   @override
-  String get shareCopied => 'Résultat copié — collez-le où vous voulez !';
+  String get shareCopied => 'Résultat copié — colle-le où tu veux !';
 
   @override
   String shareStreak(int count) {
@@ -82,7 +82,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get noAdAvailable =>
-      'Aucune pub disponible pour le moment. Réessayez dans un instant.';
+      'Aucune vidéo disponible pour le moment. Réessaie dans un instant.';
 
   @override
   String dailyTitle(int number) {
@@ -97,4 +97,412 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get tagline => 'Casse-tête logiques du jour';
+
+  @override
+  String get play => 'Jouer';
+
+  @override
+  String get todaysPuzzles => 'Défis du jour';
+
+  @override
+  String get allDailiesDone => 'Les deux défis sont faits — à demain ! 🎉';
+
+  @override
+  String get levels => 'Niveaux';
+
+  @override
+  String levelTitle(int level) {
+    return 'Niveau $level';
+  }
+
+  @override
+  String get album => 'Album';
+
+  @override
+  String get capsules => 'Capsules';
+
+  @override
+  String get openNow => 'À ouvrir !';
+
+  @override
+  String get capsuleShort => 'À gagner en jouant';
+
+  @override
+  String get settings => 'Réglages';
+
+  @override
+  String get back => 'Retour';
+
+  @override
+  String streakDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count jours',
+      one: '1 jour',
+      zero: '0 jour',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get streakBroken =>
+      'Ta série s’est arrêtée hier. Regarde une vidéo pour la sauver !';
+
+  @override
+  String get repairStreak => 'Réparer avec une vidéo';
+
+  @override
+  String get streakRepaired => 'Série réparée ! 🔥';
+
+  @override
+  String get undo => 'Annuler';
+
+  @override
+  String get restart => 'Recommencer';
+
+  @override
+  String get hint => 'Indice';
+
+  @override
+  String penaltySeconds(int seconds) {
+    return '+$seconds s';
+  }
+
+  @override
+  String get nestsRulesShort =>
+      'Une bestiole par ligne, colonne et zone. Elles ne se touchent jamais !';
+
+  @override
+  String get pairsRulesShort =>
+      'Autant de ☀️ que de 🌙 par ligne, jamais 3 pareils de suite.';
+
+  @override
+  String get hintNoCoinsTitle => 'Pas assez de pièces';
+
+  @override
+  String hintNoCoinsBody(int cost) {
+    return 'Un indice coûte $cost pièces. Regarde une courte vidéo pour en avoir un gratuit ?';
+  }
+
+  @override
+  String get watchVideo => 'Regarder une vidéo';
+
+  @override
+  String get solved => 'Réussi !';
+
+  @override
+  String levelSolved(int level) {
+    return 'Niveau $level réussi !';
+  }
+
+  @override
+  String get noHintBonus => 'Bonus sans indice !';
+
+  @override
+  String get nextLevel => 'Niveau suivant';
+
+  @override
+  String get alreadySolved => 'Déjà résolu';
+
+  @override
+  String get yourTime => 'Ton temps';
+
+  @override
+  String get flawless => 'Parfait ! Sans erreur ni indice ✨';
+
+  @override
+  String timeBreakdown(String clock, int mistakes, int hints, int penalty) {
+    return '$clock + $penalty s ($mistakes ✗ · $hints 💡)';
+  }
+
+  @override
+  String get leaderboardLoading => 'On regarde le classement…';
+
+  @override
+  String get leaderboardOffline => 'Classement indisponible pour le moment.';
+
+  @override
+  String fasterThan(int percent) {
+    return 'Plus rapide que $percent % des joueurs';
+  }
+
+  @override
+  String rankOf(int rank, int total) {
+    return 'Rang $rank sur $total';
+  }
+
+  @override
+  String get topTimes => 'Top 10';
+
+  @override
+  String get you => 'Toi';
+
+  @override
+  String get player => 'Joueur';
+
+  @override
+  String get rewards => 'Récompenses';
+
+  @override
+  String rewardCoins(int coins) {
+    return '+$coins pièces';
+  }
+
+  @override
+  String get rewardDailyCapsule => 'Les deux défis faits : +1 capsule';
+
+  @override
+  String get rewardCapsule => '+1 capsule';
+
+  @override
+  String get rewardGoldenCapsule => '+1 capsule dorée';
+
+  @override
+  String rewardChest(int streak, int coins) {
+    return 'Coffre de série de $streak jours : +$coins pièces';
+  }
+
+  @override
+  String playOtherDaily(String game) {
+    return 'Jouer à $game';
+  }
+
+  @override
+  String get todaysGrid => 'La grille du jour';
+
+  @override
+  String howToPlay(String game) {
+    return 'Comment jouer : $game';
+  }
+
+  @override
+  String get skip => 'Passer';
+
+  @override
+  String get tutorialTapHint => 'Touche les cases en surbrillance.';
+
+  @override
+  String get tutorialOops =>
+      'Oups, ça enfreint une règle. Touche encore pour changer.';
+
+  @override
+  String get tutorialNice => 'Bravo ! Suivant';
+
+  @override
+  String get tutorialLetsPlay => 'C’est parti !';
+
+  @override
+  String get tutNestsRow =>
+      'Une bestiole par ligne ! Touche une case une fois pour ✕, deux fois pour une bestiole.';
+
+  @override
+  String get tutNestsColumn => 'Une par colonne aussi.';
+
+  @override
+  String get tutNestsZone => 'Une par zone de couleur.';
+
+  @override
+  String get tutNestsTouch =>
+      'Les bestioles ne se touchent jamais, même pas en diagonale.';
+
+  @override
+  String get tutPairsBalance =>
+      'Chaque ligne a autant de ☀️ que de 🌙. Touche une fois pour ☀️, deux fois pour 🌙.';
+
+  @override
+  String get tutPairsThree => 'Jamais trois pareils de suite.';
+
+  @override
+  String get tutPairsLinks => '= veut dire pareil, × veut dire l’inverse.';
+
+  @override
+  String get setComplete => 'Complète';
+
+  @override
+  String capsulesWaiting(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count capsules à ouvrir !',
+      one: '1 capsule à ouvrir !',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get capsulesHowTo =>
+      'Résous les deux défis pour gagner une capsule chaque jour.';
+
+  @override
+  String get noCapsules => 'Pas de capsule pour l’instant';
+
+  @override
+  String get capsuleForVideo => 'Capsule gratuite contre une vidéo';
+
+  @override
+  String get capsuleTap => 'Touche la capsule !';
+
+  @override
+  String get capsuleTapAgain => 'Encore !';
+
+  @override
+  String get capsuleAlmost => 'Encore un petit coup !';
+
+  @override
+  String get goldenCapsule => 'Capsule dorée !';
+
+  @override
+  String get capsuleNew => 'Nouveau dans ton album ! ✨';
+
+  @override
+  String capsuleDuplicate(int coins) {
+    return 'Déjà dans ton album : +$coins pièces';
+  }
+
+  @override
+  String capsuleSetComplete(String set, int coins) {
+    return 'Série $set complète ! +$coins pièces';
+  }
+
+  @override
+  String openAnother(int count) {
+    return 'Ouvrir la suivante ($count)';
+  }
+
+  @override
+  String get seeAlbum => 'Voir l’album';
+
+  @override
+  String get rarityCommon => 'Commun';
+
+  @override
+  String get rarityRare => 'Rare';
+
+  @override
+  String get rarityGolden => 'Doré';
+
+  @override
+  String get setFarm => 'Ferme';
+
+  @override
+  String get setFriends => 'Copains';
+
+  @override
+  String get setSavanna => 'Savane';
+
+  @override
+  String get setJungle => 'Jungle';
+
+  @override
+  String get setPolar => 'Banquise';
+
+  @override
+  String get settingSound => 'Effets sonores';
+
+  @override
+  String get settingMusic => 'Musique';
+
+  @override
+  String get settingAutoCross => 'Croix automatiques';
+
+  @override
+  String get settingAutoCrossInfo =>
+      'Nids : grise les cases exclues par une bestiole';
+
+  @override
+  String get settingReminders => 'Rappel quotidien';
+
+  @override
+  String get credits => 'Dessins et sons : Kenney (kenney.nl), CC0';
+
+  @override
+  String get critterChick => 'Poussin';
+
+  @override
+  String get critterChicken => 'Poule';
+
+  @override
+  String get critterDuck => 'Canard';
+
+  @override
+  String get critterPig => 'Cochon';
+
+  @override
+  String get critterGoat => 'Chèvre';
+
+  @override
+  String get critterCow => 'Vache';
+
+  @override
+  String get critterDog => 'Chien';
+
+  @override
+  String get critterRabbit => 'Lapin';
+
+  @override
+  String get critterFrog => 'Grenouille';
+
+  @override
+  String get critterHorse => 'Cheval';
+
+  @override
+  String get critterOwl => 'Hibou';
+
+  @override
+  String get critterPanda => 'Panda';
+
+  @override
+  String get critterZebra => 'Zèbre';
+
+  @override
+  String get critterBuffalo => 'Buffle';
+
+  @override
+  String get critterHippo => 'Hippo';
+
+  @override
+  String get critterRhino => 'Rhino';
+
+  @override
+  String get critterGiraffe => 'Girafe';
+
+  @override
+  String get critterElephant => 'Éléphant';
+
+  @override
+  String get critterSnake => 'Serpent';
+
+  @override
+  String get critterCrocodile => 'Crocodile';
+
+  @override
+  String get critterParrot => 'Perroquet';
+
+  @override
+  String get critterGorilla => 'Gorille';
+
+  @override
+  String get critterMonkey => 'Singe';
+
+  @override
+  String get critterSloth => 'Paresseux';
+
+  @override
+  String get critterMoose => 'Orignal';
+
+  @override
+  String get critterBear => 'Ours';
+
+  @override
+  String get critterWalrus => 'Morse';
+
+  @override
+  String get critterWhale => 'Baleine';
+
+  @override
+  String get critterPenguin => 'Pingouin';
+
+  @override
+  String get critterNarwhal => 'Narval';
 }
