@@ -339,7 +339,8 @@ class _Link extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(child: Text(label, style: chunky(17))),
             if (value != null)
-              Flexible(
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 150),
                 child: Text(value!, textAlign: TextAlign.end, style: chunky(15, color: inkSoft, weight: FontWeight.w600)),
               ),
             const Icon(Icons.chevron_right_rounded, color: woodDark, size: 28),
