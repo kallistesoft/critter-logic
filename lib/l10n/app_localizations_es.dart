@@ -1039,4 +1039,8 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get fontCredit => 'Fuente: Fredoka (licencia SIL Open Font)';
+
+  @override
+  String get coinsPreview =>
+      'Tienda no disponible en la versión de desarrollo: esto es una vista previa.';
 }

@@ -278,5 +278,6 @@
   "levelLocked": "Primero termina el nivel {level}",
   "levelPathTitle": "Niveles de {game}",
   "levelDone": "Nivel {level}: {stars}/3 estrellas",
-  "fontCredit": "Fuente: Fredoka (licencia SIL Open Font)"
+  "fontCredit": "Fuente: Fredoka (licencia SIL Open Font)",
+  "coinsPreview": "Tienda no disponible en la versión de desarrollo: esto es una vista previa."
 }
