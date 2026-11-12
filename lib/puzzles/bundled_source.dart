@@ -7,11 +7,12 @@ import 'levels.dart';
 import 'nests/nests.dart';
 import 'pairs/pairs.dart';
 import 'source.dart';
+import 'trail/trail.dart';
 
 /// Dailies from assets/dailies/*.json (made by tools/gen_dailies.dart), generated on the device past the end of
 /// the bundle; levels generated on demand. Nests 7×7 and up can take tens of ms on a slow phone, so they are
-/// generated in a background isolate; Pairs takes a few ms and runs inline.
-class BundledPuzzleSource implements PuzzleSource {
+/// generated in a background isolate; Pairs and Trail take a few ms and run inline.
+class BundledPuzzleSource implements PuzzleSource, TrailSource {
   BundledPuzzleSource({Future<String> Function(String key)? load, this.useIsolate = true})
       : _load = load ?? rootBundle.loadString;
 
@@ -20,7 +21,7 @@ class BundledPuzzleSource implements PuzzleSource {
   /// Whether big Nests are generated in a background isolate.
   final bool useIsolate;
 
-  Future<_Bundle>? _nests, _pairs;
+  Future<_Bundle>? _nests, _pairs, _trail;
 
   Future<_Bundle> _bundle(String name) async {
     try {
@@ -47,10 +48,19 @@ class BundledPuzzleSource implements PuzzleSource {
   }
 
   @override
+  Future<TrailPuzzle> dailyTrail(int number) async {
+    final json = (await (_trail ??= _bundle('trail'))).at(number);
+    return json != null ? TrailPuzzle.fromJson(json) : _run(generateTrailDaily, number, heavy: false);
+  }
+
+  @override
   Future<NestsPuzzle> levelNests(int level) => _run(generateNestsLevel, level, heavy: nestsLevelSpec(level).size >= 7);
 
   @override
   Future<PairsPuzzle> levelPairs(int level) => _run(generatePairsLevel, level, heavy: false);
+
+  @override
+  Future<TrailPuzzle> levelTrail(int level) => _run(generateTrailLevel, level, heavy: false);
 }
 
 class _Bundle {
