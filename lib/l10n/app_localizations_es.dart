@@ -602,7 +602,7 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get achievementCapsules => 'Rompehuevos';
+  String get achievementCapsules => 'Abrecápsulas';
 
   @override
   String achievementCapsulesDesc(int n) {

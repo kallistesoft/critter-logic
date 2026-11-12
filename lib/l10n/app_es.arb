@@ -155,7 +155,7 @@
   "achievementSetsDesc": "{n, plural, =1{Completa una colección del álbum} other{Completa {n} colecciones del álbum}}",
   "achievementGolden": "Toque dorado",
   "achievementGoldenDesc": "{n, plural, =1{Encuentra un animalito dorado} other{Encuentra {n} animalitos dorados}}",
-  "achievementCapsules": "Rompehuevos",
+  "achievementCapsules": "Abrecápsulas",
   "achievementCapsulesDesc": "Abre {n} cápsulas",
   "achievementShares": "¡Mira esto!",
   "achievementSharesDesc": "{n, plural, =1{Comparte un resultado} other{Comparte {n} resultados}}",
