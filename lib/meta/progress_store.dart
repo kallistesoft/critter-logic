@@ -65,6 +65,12 @@ class ProgressStore {
   Set<int> eventClaimed(String weekId) => _set('event.$weekId.claimed').map(int.parse).toSet();
   Future<void> addEventClaimed(String weekId, int threshold) => _addTo('event.$weekId.claimed', '$threshold');
 
+  // ---- Album set unlocks ----
+
+  /// A completed set (or 'all') whose unlocks were already given.
+  bool setRewarded(String set) => _set('setRewarded').contains(set);
+  Future<void> setSetRewarded(String set) => _addTo('setRewarded', set);
+
   // ---- Cosmetics ----
 
   /// Owned cosmetics, e.g. event frames ('frame.polar').

@@ -215,3 +215,22 @@ A cozy egg draw (deliberately no casino look: no slots, chips or "bet" wording; 
 | `shop_prices` | String | empty (catalog prices); `id=price` pairs, 10–5000 |
 | `shop_deal_percent` | Number | `30` (0–90; 0 = no deal) |
 | `lucky_nest` | String | empty (defaults); `golden=15,capsule=120,coins=200,hint=300,price=50,paid_per_day=0 (0 = no limit),min_coins=40,max_coins=120` (odds in per mille) |
+| `lucky_nest` | String | empty (defaults); `golden=15,capsule=120,coins=200,hint=300,price=60,paid_per_day=3,min_coins=50,max_coins=150` (odds in per mille) |
+
+## Album set unlocks (`lib/meta/set_rewards.dart`)
+Completing a set still pays `Economy.setComplete` (200 coins) and now also unlocks a cosmetic (owned forever, so it
+disappears from the shop's for-sale list):
+
+| Set | Unlock |
+|---|---|
+| Farm | Flower crown hat (`hat.flowers`) |
+| Friends | Sunset board (`theme.sunset`) |
+| Savanna | Party hat (`hat.party`) |
+| Jungle | Autumn board (`theme.autumn`) |
+| Polar | Snowy board (`theme.snowy`) |
+| All 30 critters | Crown hat, Starry board, gold album frame (`frame.album_gold`) + 500 coins |
+
+- `grantSetUnlocks(stats, progress)` gives every pending unlock once; `Retention.recordEvent(CapsuleOpened())` calls it
+  and returns them in `RetentionUpdate.setUnlocks`; event prizes queue theirs in `takePendingSetUnlocks()`.
+- UI: after a capsule reveal that completes a set, show "Set complete!" with the unlocked item and an "Equip" button
+  (`shop.equip(id)`). Analytics: `set_unlock` (`set`, `cosmetics`).

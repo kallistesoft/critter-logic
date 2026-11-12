@@ -9,6 +9,7 @@ import 'album.dart';
 import 'login_calendar.dart';
 import 'progress_store.dart';
 import 'rewards.dart';
+import 'set_rewards.dart';
 import 'lucky_nest.dart';
 import 'shop.dart';
 import 'weekly_event.dart';
@@ -46,7 +47,12 @@ class CapsuleOpened extends RetentionEvent {
 
 /// What a [Retention.recordEvent] changed, for toasts and badges.
 class RetentionUpdate {
-  const RetentionUpdate({this.tokens = 0, this.thresholdsReached = const [], this.newAchievements = const []});
+  const RetentionUpdate({
+    this.tokens = 0,
+    this.thresholdsReached = const [],
+    this.newAchievements = const [],
+    this.setUnlocks = const [],
+  });
 
   /// Event tokens earned by this event.
   final int tokens;
@@ -56,6 +62,9 @@ class RetentionUpdate {
 
   /// Achievements with a claimable tier not announced before ("Trophy unlocked!").
   final List<AchievementProgress> newAchievements;
+
+  /// Album sets just completed and what they unlocked ("Set complete! Snowy board unlocked").
+  final List<SetUnlock> setUnlocks;
 }
 
 /// The login calendar, achievements and weekly events behind one object, so the UI and the game flow only call
@@ -81,6 +90,15 @@ class Retention {
   Achievements get achievements => Achievements(stats, progress, coins: settings.achievementCoins);
   WeeklyEvent get event => WeeklyEvent(progress, settings: settings.events);
   LuckyNest get luckyNest => LuckyNest(stats, progress, settings: settings.lucky, analytics: analytics, random: _random);
+  final _pendingUnlocks = <SetUnlock>[];
+
+  /// Set unlocks granted by an event prize, not shown yet; reading them clears the list.
+  List<SetUnlock> takePendingSetUnlocks() {
+    final list = [..._pendingUnlocks];
+    _pendingUnlocks.clear();
+    return list;
+  }
+
   Shop get shop => Shop(stats, progress, settings: settings.shop, analytics: analytics);
 
   // ---- App open ----
@@ -124,6 +142,8 @@ class Retention {
     final reward = await ev.claim(now, threshold, stats.owned, _random);
     if (s == null || reward == null) return null;
     final result = await grantReward(stats, progress, reward);
+    // The event critter may finish a set: its unlocks come with it (show them via [pendingSetUnlocks]).
+    _pendingUnlocks.addAll(await grantSetUnlocks(stats, progress));
     if (threshold == s.thresholds.last) await progress.increment(Counter.eventsCompleted);
     await analytics.log('event_prize_claim', {
       'theme': s.theme.id,
@@ -156,6 +176,11 @@ class Retention {
       case CapsuleOpened():
         await progress.increment(Counter.capsulesOpened);
     }
+    // A capsule or an event critter may have finished a set.
+    final unlocked = await grantSetUnlocks(stats, progress);
+    for (final u in unlocked) {
+      await analytics.log('set_unlock', {'set': u.set, 'cosmetics': u.cosmetics.join(' ')});
+    }
     final reached = await this.event.addTokens(now, tokens);
     if (reached.isNotEmpty) {
       final s = this.event.current(now)!;
@@ -168,6 +193,7 @@ class Retention {
       tokens: settings.events.enabled ? tokens : 0,
       thresholdsReached: reached,
       newAchievements: fresh,
+      setUnlocks: unlocked,
     );
   }
 
