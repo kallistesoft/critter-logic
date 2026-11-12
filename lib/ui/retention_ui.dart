@@ -20,30 +20,36 @@ import 'widgets.dart';
 
 /// Event names by theme id (`event_<theme>`).
 String eventName(AppLocalizations l10n, String theme) => switch (theme) {
-      'polar' => l10n.eventPolar,
-      'panda' => l10n.eventPanda,
-      'jungle' => l10n.eventJungle,
-      'safari' => l10n.eventSafari,
-      'farm' => l10n.eventFarm,
-      'winter' => l10n.eventWinter,
-      _ => theme,
-    };
+  'polar' => l10n.eventPolar,
+  'panda' => l10n.eventPanda,
+  'jungle' => l10n.eventJungle,
+  'safari' => l10n.eventSafari,
+  'farm' => l10n.eventFarm,
+  'winter' => l10n.eventWinter,
+  _ => theme,
+};
 
 /// A cozy toast at the bottom: an icon and one or more lines.
 void showToast(BuildContext context, List<String> lines, {Widget? icon, Key? key}) {
   if (lines.isEmpty) return;
-  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-    key: key,
-    duration: const Duration(milliseconds: 2800),
-    content: Row(children: [
-      if (icon != null) ...[SizedBox.square(dimension: 30, child: Center(child: icon)), const SizedBox(width: 10)],
-      Expanded(
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
-          for (final l in lines) Text(l, style: chunky(16, color: Colors.white)),
-        ]),
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      key: key,
+      duration: const Duration(milliseconds: 2800),
+      content: Row(
+        children: [
+          if (icon != null) ...[SizedBox.square(dimension: 30, child: Center(child: icon)), const SizedBox(width: 10)],
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [for (final l in lines) Text(l, style: chunky(16, color: Colors.white))],
+            ),
+          ),
+        ],
       ),
-    ]),
-  ));
+    ),
+  );
 }
 
 /// Tells the player what a [Retention.recordEvent] changed: event tokens, a prize ready, new trophies, and the
@@ -56,15 +62,23 @@ Future<void> showRetentionUpdate(BuildContext context, RetentionUpdate u, {bool 
     if (u.newAchievements.isNotEmpty) l10n.trophyUnlocked,
   ];
   if (lines.isNotEmpty) {
-    showToast(context, lines,
-        key: const Key('retentionToast'),
-        icon: u.newAchievements.isNotEmpty ? const TrophyIcon(size: 30) : const Text('🐾', style: TextStyle(fontSize: 22)));
+    showToast(
+      context,
+      lines,
+      key: const Key('retentionToast'),
+      icon: u.newAchievements.isNotEmpty
+          ? const TrophyIcon(size: 30)
+          : const Text('🐾', style: TextStyle(fontSize: 22)),
+    );
   }
   if (u.setUnlocks.isNotEmpty) await showSetUnlocks(context, u.setUnlocks);
 }
 
 /// The hat (and full-album coins) a set unlock gives that the player can see today; board themes come later.
-List<String> visibleUnlocks(SetUnlock u) => [for (final c in u.cosmetics) if (shownCosmetic(c)) c];
+List<String> visibleUnlocks(SetUnlock u) => [
+  for (final c in u.cosmetics)
+    if (shownCosmetic(c)) c,
+];
 
 /// "Set complete!" with what the set unlocked and an Equip button for a hat. Sets whose unlock is a board theme
 /// show nothing extra (their 200 coins are already announced by the capsule reveal).
@@ -84,38 +98,65 @@ Future<void> _showSetUnlock(BuildContext context, SetUnlock u, List<String> item
   HapticFeedback.heavyImpact();
   final all = u.set == 'all';
   final hat = items.where((i) => i.startsWith('hat.')).firstOrNull;
-  final critters = all ? ['cow', 'panda', 'elephant', 'sloth', 'narwhal'] : [for (final c in album) if (c.set == u.set) c.id];
+  final critters = all
+      ? ['cow', 'panda', 'elephant', 'sloth', 'narwhal']
+      : [
+          for (final c in album)
+            if (c.set == u.set) c.id,
+        ];
   return showSoftDialog<void>(
     context,
     title: all ? l10n.albumCompleteTitle : l10n.setCompleteTitle,
     body: all ? null : setName(l10n, u.set),
-    content: Column(key: const Key('setUnlock'), children: [
-      SizedBox(
-        height: 120,
-        child: Stack(alignment: Alignment.center, children: [
-          const Positioned.fill(child: _SpinningRays(color: gold)),
-          Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            for (final (i, id) in critters.take(3).indexed)
-              PopIn(
-                delay: Duration(milliseconds: 200 + 150 * i),
-                child: Hatted(hat: hat, size: i == 1 ? 86 : 64, child: CritterImage(id, size: i == 1 ? 86 : 64)),
+    content: Column(
+      key: const Key('setUnlock'),
+      children: [
+        SizedBox(
+          height: 120,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              const Positioned.fill(
+                child: ClipRect(child: _SpinningRays(color: gold)),
               ),
-          ]),
-        ]),
-      ),
-      const SizedBox(height: 8),
-      for (final item in items)
-        Padding(
-          padding: const EdgeInsets.only(bottom: 4),
-          child: Text(l10n.setUnlockedItem(cosmeticName(l10n, item)), textAlign: TextAlign.center, style: chunky(18, color: goldEdge)),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  for (final (i, id) in critters.take(3).indexed)
+                    PopIn(
+                      delay: Duration(milliseconds: 200 + 150 * i),
+                      child: Hatted(
+                        hat: hat,
+                        size: i == 1 ? 86 : 64,
+                        child: CritterImage(id, size: i == 1 ? 86 : 64),
+                      ),
+                    ),
+                ],
+              ),
+            ],
+          ),
         ),
-      if (u.coins > 0)
-        Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-          const CoinIcon(size: 26),
-          const SizedBox(width: 6),
-          Text(l10n.rewardCoins(u.coins), style: chunky(18, color: woodDark)),
-        ]),
-    ]),
+        const SizedBox(height: 8),
+        for (final item in items)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 4),
+            child: Text(
+              l10n.setUnlockedItem(cosmeticName(l10n, item)),
+              textAlign: TextAlign.center,
+              style: chunky(18, color: goldEdge),
+            ),
+          ),
+        if (u.coins > 0)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const CoinIcon(size: 26),
+              const SizedBox(width: 6),
+              Text(l10n.rewardCoins(u.coins), style: chunky(18, color: woodDark)),
+            ],
+          ),
+      ],
+    ),
     actions: [
       if (hat != null)
         Builder(
@@ -176,28 +217,33 @@ class _SpinningRaysState extends State<_SpinningRays> with SingleTickerProviderS
 
   @override
   Widget build(BuildContext context) => AnimatedBuilder(
-        animation: _c,
-        builder: (context, _) => CustomPaint(painter: RaysPainter(widget.color, 1, _c.value * 2 * pi)),
-      );
+    animation: _c,
+    builder: (context, _) => CustomPaint(painter: RaysPainter(widget.color, 1, _c.value * 2 * pi)),
+  );
 }
 
 // ---- Login calendar ----
 
 /// The once-a-day calendar popup (also opened from the home button). Coins fly to [coinTarget] when claimed.
 Future<void> showCalendarPopup(BuildContext context, {GlobalKey? coinTarget}) => showGeneralDialog<void>(
-      context: context,
-      barrierDismissible: true,
-      barrierLabel: AppLocalizations.of(context).calendarTitle,
-      barrierColor: const Color(0x664A3426),
-      transitionDuration: const Duration(milliseconds: 360),
-      transitionBuilder: (context, a, _, child) => FadeTransition(
-        opacity: a,
-        child: ScaleTransition(scale: CurvedAnimation(parent: a, curve: Curves.easeOutBack), child: child),
-      ),
-      pageBuilder: (context, _, _) => SafeArea(
-        child: UiScale(child: Center(child: CalendarPanel(coinTarget: coinTarget))),
-      ),
-    );
+  context: context,
+  barrierDismissible: true,
+  barrierLabel: AppLocalizations.of(context).calendarTitle,
+  barrierColor: const Color(0x664A3426),
+  transitionDuration: const Duration(milliseconds: 360),
+  transitionBuilder: (context, a, _, child) => FadeTransition(
+    opacity: a,
+    child: ScaleTransition(
+      scale: CurvedAnimation(parent: a, curve: Curves.easeOutBack),
+      child: child,
+    ),
+  ),
+  pageBuilder: (context, _, _) => SafeArea(
+    child: UiScale(
+      child: Center(child: CalendarPanel(coinTarget: coinTarget)),
+    ),
+  ),
+);
 
 class CalendarPanel extends StatefulWidget {
   const CalendarPanel({super.key, this.coinTarget});
@@ -263,14 +309,14 @@ class _CalendarPanelState extends State<CalendarPanel> {
     final services = Services.of(context);
     final state = services.retention.calendar.state(services.today());
     Widget tile(int i) => _DayTile(
-          key: _tileKeys[i],
-          day: i,
-          reward: state.rewards[i],
-          today: i == state.step,
-          claimed: i < state.step || (i == state.step && state.claimedToday),
-          stampNow: _justClaimed == i,
-          big: i == 6,
-        );
+      key: _tileKeys[i],
+      day: i,
+      reward: state.rewards[i],
+      today: i == state.step,
+      claimed: i < state.step || (i == state.step && state.claimedToday),
+      stampNow: _justClaimed == i,
+      big: i == 6,
+    );
     return Padding(
       padding: const EdgeInsets.all(16),
       child: ConstrainedBox(
@@ -282,64 +328,84 @@ class _CalendarPanelState extends State<CalendarPanel> {
             painter: const WoodPainter(radius: 26, plank: 40),
             child: Padding(
               padding: const EdgeInsets.fromLTRB(14, 16, 14, 16),
-              child: Column(mainAxisSize: MainAxisSize.min, children: [
-                Text(l10n.calendarTitle,
-                    style: outlinedText(30, color: const Color(0xFFFFF4D6), stroke: woodEdge, width: 2.4)),
-                Text(l10n.calendarSubtitle, style: chunky(15, color: const Color(0xFFFFE6BC), weight: FontWeight.w600)),
-                const SizedBox(height: 12),
-                Row(children: [
-                  for (var i = 0; i < 4; i++) ...[if (i > 0) const SizedBox(width: 8), Expanded(child: tile(i))],
-                ]),
-                const SizedBox(height: 8),
-                Row(children: [
-                  Expanded(child: tile(4)),
-                  const SizedBox(width: 8),
-                  Expanded(child: tile(5)),
-                  const SizedBox(width: 8),
-                  Expanded(flex: 2, child: tile(6)),
-                ]),
-                const SizedBox(height: 14),
-                if (_won != null) ...[
-                  PopIn(
-                    child: Text(_rewardText(l10n, _won!),
-                        key: const Key('calendarWon'), style: outlinedText(24, color: const Color(0xFFFFE066), stroke: goldEdge)),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    l10n.calendarTitle,
+                    style: outlinedText(30, color: const Color(0xFFFFF4D6), stroke: woodEdge, width: 2.4),
                   ),
-                  const SizedBox(height: 4),
-                ],
-                if (state.available) ...[
-                  Row(children: [
-                    Expanded(
-                      child: ChunkyButton(
-                        key: const Key('calendarClaim'),
-                        label: l10n.calendarClaim,
-                        color: leaf,
-                        onPressed: _busy ? null : () => _claim(doubled: false),
+                  Text(
+                    l10n.calendarSubtitle,
+                    style: chunky(15, color: const Color(0xFFFFE6BC), weight: FontWeight.w600),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      for (var i = 0; i < 4; i++) ...[if (i > 0) const SizedBox(width: 8), Expanded(child: tile(i))],
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(child: tile(4)),
+                      const SizedBox(width: 8),
+                      Expanded(child: tile(5)),
+                      const SizedBox(width: 8),
+                      Expanded(flex: 2, child: tile(6)),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                  if (_won != null) ...[
+                    PopIn(
+                      child: Text(
+                        _rewardText(l10n, _won!),
+                        key: const Key('calendarWon'),
+                        style: outlinedText(24, color: const Color(0xFFFFE066), stroke: goldEdge),
                       ),
                     ),
-                    if (state.canDouble) ...[
-                      const SizedBox(width: 10),
-                      ChunkyButton(
-                        key: const Key('calendarDouble'),
-                        label: l10n.calendarDouble,
-                        color: sky,
-                        icon: const Icon(Icons.play_circle_fill_rounded, color: Colors.white),
-                        onPressed: _busy ? null : () => _claim(doubled: true),
-                      ),
-                    ],
-                  ]),
-                ] else ...[
-                  Text(l10n.calendarTomorrow,
-                      textAlign: TextAlign.center, style: chunky(16, color: const Color(0xFFFFF4D6), weight: FontWeight.w600)),
-                  const SizedBox(height: 10),
-                  ChunkyButton(
-                    key: const Key('calendarClose'),
-                    label: l10n.close,
-                    small: true,
-                    color: woodButton,
-                    onPressed: () => Navigator.pop(context),
-                  ),
+                    const SizedBox(height: 4),
+                  ],
+                  if (state.available) ...[
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ChunkyButton(
+                            key: const Key('calendarClaim'),
+                            label: l10n.calendarClaim,
+                            color: leaf,
+                            onPressed: _busy ? null : () => _claim(doubled: false),
+                          ),
+                        ),
+                        if (state.canDouble) ...[
+                          const SizedBox(width: 10),
+                          ChunkyButton(
+                            key: const Key('calendarDouble'),
+                            label: l10n.calendarDouble,
+                            color: sky,
+                            icon: const Icon(Icons.play_circle_fill_rounded, color: Colors.white),
+                            onPressed: _busy ? null : () => _claim(doubled: true),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ] else ...[
+                    Text(
+                      l10n.calendarTomorrow,
+                      textAlign: TextAlign.center,
+                      style: chunky(16, color: const Color(0xFFFFF4D6), weight: FontWeight.w600),
+                    ),
+                    const SizedBox(height: 10),
+                    ChunkyButton(
+                      key: const Key('calendarClose'),
+                      label: l10n.close,
+                      small: true,
+                      color: woodButton,
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
                 ],
-              ]),
+              ),
             ),
           ),
         ),
@@ -351,8 +417,8 @@ class _CalendarPanelState extends State<CalendarPanel> {
 String _rewardText(AppLocalizations l10n, Reward r) => r.goldenCapsules > 0
     ? l10n.rewardGoldenCapsule
     : r.capsules > 0
-        ? l10n.rewardCapsule
-        : l10n.rewardCoins(r.coins);
+    ? l10n.rewardCapsule
+    : l10n.rewardCoins(r.coins);
 
 class _DayTile extends StatefulWidget {
   const _DayTile({
@@ -415,10 +481,13 @@ class _DayTileState extends State<_DayTile> with SingleTickerProviderStateMixin 
     final active = widget.today && !widget.claimed;
     final Widget icon = r.goldenCapsules > 0 || r.capsules > 0
         ? CapsuleEgg(size: widget.big ? 52 : 38, golden: r.goldenCapsules > 0 || widget.big)
-        : Column(mainAxisSize: MainAxisSize.min, children: [
-            CoinIcon(size: r.coins >= 50 ? 32 : 28),
-            Text('${r.coins}', style: chunky(15, color: woodDark, height: 1.1)),
-          ]);
+        : Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CoinIcon(size: r.coins >= 50 ? 32 : 28),
+              Text('${r.coins}', style: chunky(15, color: woodDark, height: 1.1)),
+            ],
+          );
     final card = Container(
       height: 96,
       padding: const EdgeInsets.fromLTRB(4, 6, 4, 6),
@@ -428,10 +497,14 @@ class _DayTileState extends State<_DayTile> with SingleTickerProviderStateMixin 
         border: Border.all(color: active ? coral : (golden ? gold : paperEdge), width: active ? 3.5 : 2.5),
         boxShadow: [BoxShadow(color: active ? coralEdge : woodEdge, offset: const Offset(0, 4))],
       ),
-      child: Column(children: [
-        Text(l10n.calendarDay(widget.day + 1), maxLines: 1, style: chunky(13, color: active ? coralEdge : inkSoft)),
-        Expanded(child: Center(child: FittedBox(child: icon))),
-      ]),
+      child: Column(
+        children: [
+          Text(l10n.calendarDay(widget.day + 1), maxLines: 1, style: chunky(13, color: active ? coralEdge : inkSoft)),
+          Expanded(
+            child: Center(child: FittedBox(child: icon)),
+          ),
+        ],
+      ),
     );
     return AnimatedBuilder(
       animation: _bounce,
@@ -442,22 +515,27 @@ class _DayTileState extends State<_DayTile> with SingleTickerProviderStateMixin 
           child: Transform.scale(scale: 1 + 0.04 * b, child: child),
         );
       },
-      child: Stack(clipBehavior: Clip.none, children: [
-        Opacity(opacity: widget.claimed && !widget.stampNow ? 0.75 : 1, child: card),
-        if (widget.claimed)
-          Positioned.fill(
-            child: widget.stampNow
-                ? TweenAnimationBuilder<double>(
-                    tween: Tween(begin: 2.2, end: 1),
-                    duration: const Duration(milliseconds: 420),
-                    curve: Curves.easeOutBack,
-                    builder: (context, s, child) =>
-                        Opacity(opacity: ((2.2 - s) / 1.2).clamp(0, 1), child: Transform.scale(scale: s, child: child)),
-                    child: const PawStamp(),
-                  )
-                : const PawStamp(),
-          ),
-      ]),
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Opacity(opacity: widget.claimed && !widget.stampNow ? 0.75 : 1, child: card),
+          if (widget.claimed)
+            Positioned.fill(
+              child: widget.stampNow
+                  ? TweenAnimationBuilder<double>(
+                      tween: Tween(begin: 2.2, end: 1),
+                      duration: const Duration(milliseconds: 420),
+                      curve: Curves.easeOutBack,
+                      builder: (context, s, child) => Opacity(
+                        opacity: ((2.2 - s) / 1.2).clamp(0, 1),
+                        child: Transform.scale(scale: s, child: child),
+                      ),
+                      child: const PawStamp(),
+                    )
+                  : const PawStamp(),
+            ),
+        ],
+      ),
     );
   }
 }
@@ -468,13 +546,16 @@ class PawStamp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => IgnorePointer(
-        child: Center(
-          child: Transform.rotate(
-            angle: -0.25,
-            child: SizedBox.square(dimension: 46, child: CustomPaint(key: const Key('paw'), painter: _PawPainter())),
-          ),
+    child: Center(
+      child: Transform.rotate(
+        angle: -0.25,
+        child: SizedBox.square(
+          dimension: 46,
+          child: CustomPaint(key: const Key('paw'), painter: _PawPainter()),
         ),
-      );
+      ),
+    ),
+  );
 }
 
 class _PawPainter extends CustomPainter {
@@ -482,10 +563,14 @@ class _PawPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final s = size.width;
     final ink = Paint()..color = const Color(0xD9D9473F);
-    canvas.drawCircle(Offset(s / 2, s / 2), s * 0.48, Paint()
-      ..color = const Color(0xB3D9473F)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = s * 0.06);
+    canvas.drawCircle(
+      Offset(s / 2, s / 2),
+      s * 0.48,
+      Paint()
+        ..color = const Color(0xB3D9473F)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = s * 0.06,
+    );
     canvas.drawOval(Rect.fromCenter(center: Offset(s * 0.5, s * 0.62), width: s * 0.38, height: s * 0.3), ink);
     for (final (x, y) in const [(0.27, 0.42), (0.41, 0.3), (0.59, 0.3), (0.73, 0.42)]) {
       canvas.drawOval(Rect.fromCenter(center: Offset(s * x, s * y), width: s * 0.14, height: s * 0.17), ink);
@@ -506,7 +591,10 @@ class TrophyIcon extends StatelessWidget {
   final Color color;
 
   @override
-  Widget build(BuildContext context) => SizedBox.square(dimension: size, child: CustomPaint(painter: _CupPainter(color)));
+  Widget build(BuildContext context) => SizedBox.square(
+    dimension: size,
+    child: CustomPaint(painter: _CupPainter(color)),
+  );
 }
 
 class _CupPainter extends CustomPainter {
@@ -539,9 +627,15 @@ class _CupPainter extends CustomPainter {
     canvas.drawPath(cup, Paint()..color = color);
     canvas.drawPath(cup, line);
     canvas.drawRect(Rect.fromLTWH(s * 0.44, s * 0.6, s * 0.12, s * 0.16), Paint()..color = edge);
-    final base = RRect.fromRectAndRadius(Rect.fromLTWH(s * 0.26, s * 0.74, s * 0.48, s * 0.16), Radius.circular(s * 0.04));
+    final base = RRect.fromRectAndRadius(
+      Rect.fromLTWH(s * 0.26, s * 0.74, s * 0.48, s * 0.16),
+      Radius.circular(s * 0.04),
+    );
     canvas.drawRRect(base, Paint()..color = woodDark);
-    canvas.drawOval(Rect.fromLTWH(s * 0.3, s * 0.16, s * 0.12, s * 0.22), Paint()..color = Colors.white.withValues(alpha: 0.55));
+    canvas.drawOval(
+      Rect.fromLTWH(s * 0.3, s * 0.16, s * 0.12, s * 0.22),
+      Paint()..color = Colors.white.withValues(alpha: 0.55),
+    );
   }
 
   @override

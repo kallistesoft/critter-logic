@@ -47,72 +47,113 @@ class EventBanner extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final now = Services.of(context).today();
     final ready = state.claimable.isNotEmpty;
-    return Stack(clipBehavior: Clip.none, children: [
-      SoftCard(
-        key: const Key('eventBanner'),
-        color: ready ? goldSoft : const Color(0xFFFFF3E6),
-        border: ready ? gold : coral,
-        padding: const EdgeInsets.fromLTRB(8, 8, 14, 10),
-        onTap: onTap,
-        child: Row(children: [
-          Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: const RadialGradient(colors: [Color(0xFFFFF0A0), Color(0xFFFFC23D)]),
-              border: Border.all(color: goldEdge, width: 2.5),
-            ),
-            child: Center(child: CritterImage(goldenOf(state.theme.set), size: 50)),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Row(children: [
-                Expanded(
-                  child: Text(eventName(l10n, state.theme.id),
-                      maxLines: 1, overflow: TextOverflow.ellipsis, style: chunky(18, color: coralEdge)),
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        SoftCard(
+          key: const Key('eventBanner'),
+          color: ready ? goldSoft : const Color(0xFFFFF3E6),
+          border: ready ? gold : coral,
+          padding: const EdgeInsets.fromLTRB(8, 8, 14, 10),
+          onTap: onTap,
+          child: Row(
+            children: [
+              Container(
+                width: 60,
+                height: 60,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: const RadialGradient(colors: [Color(0xFFFFF0A0), Color(0xFFFFC23D)]),
+                  border: Border.all(color: goldEdge, width: 2.5),
                 ),
-                Text(timeLeft(l10n, state.remaining(now)), style: chunky(13, color: inkSoft, weight: FontWeight.w600)),
-              ]),
-              const SizedBox(height: 6),
-              EventProgress(state: state, height: 16, giftSize: 24),
-            ]),
-          ),
-        ]),
-      ),
-      if (ready)
-        Positioned(
-          right: -6,
-          top: -8,
-          child: Container(
-            key: const Key('eventReady'),
-            width: 28,
-            height: 28,
-            decoration: BoxDecoration(color: bad, shape: BoxShape.circle, border: Border.all(color: Colors.white, width: 2.5)),
-            alignment: Alignment.center,
-            child: Text('!', style: chunky(16, color: Colors.white, height: 1)),
+                child: Center(child: CritterImage(goldenOf(state.theme.set), size: 50)),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            eventName(l10n, state.theme.id),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: chunky(18, color: coralEdge),
+                          ),
+                        ),
+                        Text(
+                          timeLeft(l10n, state.remaining(now)),
+                          style: chunky(13, color: inkSoft, weight: FontWeight.w600),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    EventProgress(state: state, height: 16, giftSize: 24),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
-    ]);
+        if (ready)
+          Positioned(
+            right: -6,
+            top: -8,
+            child: Container(
+              key: const Key('eventReady'),
+              width: 28,
+              height: 28,
+              decoration: BoxDecoration(
+                color: bad,
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white, width: 2.5),
+              ),
+              alignment: Alignment.center,
+              child: Text('!', style: chunky(16, color: Colors.white, height: 1)),
+            ),
+          ),
+      ],
+    );
   }
 }
 
 /// The token bar with a gift at each threshold (open and gold once reached).
 class EventProgress extends StatelessWidget {
-  const EventProgress({super.key, required this.state, this.height = 18, this.giftSize = 28});
+  const EventProgress({super.key, required this.state, this.height = 18, this.giftSize = 28, this.showCount = true});
+
+  /// The token count on the left of the bar.
+  final bool showCount;
 
   final WeeklyEventState state;
   final double height;
   final double giftSize;
 
   @override
-  Widget build(BuildContext context) => LayoutBuilder(builder: (context, box) {
-        final w = box.maxWidth - giftSize / 2;
-        final last = state.thresholds.last;
-        return SizedBox(
-          height: giftSize + 4,
-          child: Stack(clipBehavior: Clip.none, alignment: Alignment.centerLeft, children: [
+  Widget build(BuildContext context) => Row(
+    children: [
+      if (showCount) ...[
+        Text(
+          '${state.tokens.clamp(0, state.thresholds.last)} 🐾',
+          style: chunky(height * 0.85, color: coralEdge, height: 1),
+        ),
+        const SizedBox(width: 8),
+      ],
+      Expanded(child: _bar()),
+    ],
+  );
+
+  Widget _bar() => LayoutBuilder(
+    builder: (context, box) {
+      final w = box.maxWidth - giftSize / 2;
+      final last = state.thresholds.last;
+      return SizedBox(
+        height: giftSize + 4,
+        child: Stack(
+          clipBehavior: Clip.none,
+          alignment: Alignment.centerLeft,
+          children: [
             Container(
               width: w,
               height: height,
@@ -135,18 +176,16 @@ class EventProgress extends StatelessWidget {
                 ),
               ),
             ),
-            Positioned(
-              left: 8,
-              child: Text('${state.tokens.clamp(0, last)} 🐾', style: chunky(height * 0.7, color: ink, height: 1)),
-            ),
             for (final t in state.thresholds)
               Positioned(
                 left: w * t / last - giftSize / 2,
                 child: _Gift(size: giftSize, reached: state.tokens >= t, claimed: state.claimed.contains(t)),
               ),
-          ]),
-        );
-      });
+          ],
+        ),
+      );
+    },
+  );
 }
 
 class _Gift extends StatelessWidget {
@@ -219,8 +258,9 @@ class _EventScreenState extends State<EventScreen> {
         actions: [ChunkyButton(label: l10n.nice, expand: true, onPressed: () => Navigator.pop(context))],
       );
     } else if (r.capsules > 0 || r.goldenCapsules > 0) {
-      showToast(context, [r.goldenCapsules > 0 ? l10n.rewardGoldenCapsule : l10n.rewardCapsule],
-          icon: CapsuleEgg(size: 28, golden: r.goldenCapsules > 0));
+      showToast(context, [
+        r.goldenCapsules > 0 ? l10n.rewardGoldenCapsule : l10n.rewardCapsule,
+      ], icon: CapsuleEgg(size: 28, golden: r.goldenCapsules > 0));
     }
     if (!mounted) return;
     final unlocks = services.retention.takePendingSetUnlocks();
@@ -236,82 +276,118 @@ class _EventScreenState extends State<EventScreen> {
     final retention = services.retention;
     final s = retention.event.current(now);
     if (s == null) {
-      return MeadowScaffold(child: MeadowTopBar(title: l10n.calendarTitle, backTooltip: l10n.back));
+      return MeadowScaffold(
+        child: MeadowTopBar(title: l10n.calendarTitle, backTooltip: l10n.back),
+      );
     }
     final remaining = s.remaining(now);
     final owned = services.stats.owned;
     final critters = album.where((c) => c.set == s.theme.set).toList();
     return MeadowScaffold(
-      child: Column(children: [
-        MeadowTopBar(
-          title: eventName(l10n, s.theme.id),
-          subtitle: timeLeft(l10n, remaining),
-          backTooltip: l10n.back,
-          trailing: [CoinCounter(value: services.stats.coins - _coinsHeld, iconKey: _coinTarget)],
-        ),
-        Expanded(
-          child: ListView(padding: const EdgeInsets.fromLTRB(16, 14, 16, 24), children: [
-            SoftCard(
-              color: const Color(0xFFFFF3E6),
-              border: coral,
-              child: Column(children: [
-                Row(children: [
-                  Container(
-                    width: 84,
-                    height: 84,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: const RadialGradient(colors: [Color(0xFFFFF0A0), Color(0xFFFFC23D)]),
-                      border: Border.all(color: goldEdge, width: 3),
-                    ),
-                    child: Center(child: Shimmer(child: CritterImage(goldenOf(s.theme.set), size: 70))),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                      Text('${s.tokens} 🐾', key: const Key('eventTokens'), style: outlinedText(32, color: const Color(0xFFFFE066), stroke: coralEdge)),
-                      Text(
-                        l10n.eventHowTo(retention.settings.events.tokensPerDaily, retention.settings.events.tokensPerLevel),
-                        style: chunky(14, color: inkSoft, weight: FontWeight.w600),
+      child: Column(
+        children: [
+          MeadowTopBar(
+            title: eventName(l10n, s.theme.id),
+            subtitle: timeLeft(l10n, remaining),
+            backTooltip: l10n.back,
+            trailing: [CoinCounter(value: services.stats.coins - _coinsHeld, iconKey: _coinTarget)],
+          ),
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(16, 14, 16, 24),
+              children: [
+                SoftCard(
+                  color: const Color(0xFFFFF3E6),
+                  border: coral,
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            width: 84,
+                            height: 84,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: const RadialGradient(colors: [Color(0xFFFFF0A0), Color(0xFFFFC23D)]),
+                              border: Border.all(color: goldEdge, width: 3),
+                            ),
+                            child: Center(child: Shimmer(child: CritterImage(goldenOf(s.theme.set), size: 70))),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Text(
+                                      '${s.tokens}',
+                                      key: const Key('eventTokens'),
+                                      style: outlinedText(34, color: const Color(0xFFFFE066), stroke: coralEdge),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    const Text('🐾', style: TextStyle(fontSize: 26)),
+                                  ],
+                                ),
+                                Text(
+                                  l10n.eventHowTo(
+                                    retention.settings.events.tokensPerDaily,
+                                    retention.settings.events.tokensPerLevel,
+                                  ),
+                                  style: chunky(14, color: inkSoft, weight: FontWeight.w600),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
-                    ]),
+                      const SizedBox(height: 12),
+                      EventProgress(state: s, height: 20, giftSize: 32, showCount: false),
+                    ],
                   ),
-                ]),
-                const SizedBox(height: 12),
-                EventProgress(state: s, height: 20, giftSize: 32),
-              ]),
+                ),
+                if (remaining.inHours < 24 && s.claimable.isNotEmpty) ...[
+                  const SizedBox(height: 10),
+                  Text(
+                    l10n.eventLastDay,
+                    textAlign: TextAlign.center,
+                    style: outlinedText(17, stroke: coralEdge),
+                  ),
+                ],
+                for (final t in s.thresholds) ...[
+                  const SizedBox(height: 12),
+                  _PrizeCard(
+                    key: _prizeKeys.putIfAbsent(t, GlobalKey.new),
+                    threshold: t,
+                    text: prizeText(l10n, s.prizeFor(t), s.theme.set),
+                    prize: s.prizeFor(t),
+                    set: s.theme.set,
+                    reached: s.tokens >= t,
+                    claimed: s.claimed.contains(t),
+                    onClaim: _busy ? null : () => _claim(t),
+                  ),
+                ],
+                const SizedBox(height: 18),
+                Text(l10n.eventSetCritters, style: outlinedText(20, stroke: woodEdge)),
+                const SizedBox(height: 8),
+                SoftCard(
+                  child: Wrap(
+                    alignment: WrapAlignment.center,
+                    spacing: 18,
+                    runSpacing: 12,
+                    children: [
+                      for (final c in critters)
+                        owned.contains(c.id)
+                            ? CritterImage(c.id, size: 80)
+                            : Silhouette(child: CritterImage(c.id, size: 80)),
+                    ],
+                  ),
+                ),
+              ],
             ),
-            if (remaining.inHours < 24 && s.claimable.isNotEmpty) ...[
-              const SizedBox(height: 10),
-              Text(l10n.eventLastDay, textAlign: TextAlign.center, style: outlinedText(17, stroke: coralEdge)),
-            ],
-            for (final t in s.thresholds) ...[
-              const SizedBox(height: 12),
-              _PrizeCard(
-                key: _prizeKeys.putIfAbsent(t, GlobalKey.new),
-                threshold: t,
-                text: prizeText(l10n, s.prizeFor(t), s.theme.set),
-                prize: s.prizeFor(t),
-                set: s.theme.set,
-                reached: s.tokens >= t,
-                claimed: s.claimed.contains(t),
-                onClaim: _busy ? null : () => _claim(t),
-              ),
-            ],
-            const SizedBox(height: 18),
-            Text(l10n.eventSetCritters, style: outlinedText(20, stroke: woodEdge)),
-            const SizedBox(height: 8),
-            SoftCard(
-              child: Wrap(alignment: WrapAlignment.center, spacing: 10, runSpacing: 10, children: [
-                for (final c in critters)
-                  owned.contains(c.id)
-                      ? CritterImage(c.id, size: 60)
-                      : Silhouette(child: CritterImage(c.id, size: 60)),
-              ]),
-            ),
-          ]),
-        ),
-      ]),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -340,31 +416,45 @@ class _PrizeCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final Widget icon = prize.critter
-        ? Silhouette(color: const Color(0x995A3A1C), child: CritterImage(album.firstWhere((c) => c.set == set).id, size: 44))
+        ? Silhouette(
+            color: const Color(0x995A3A1C),
+            child: CritterImage(album.firstWhere((c) => c.set == set).id, size: 44),
+          )
         : prize.capsules > 0 || prize.goldenCapsules > 0
-            ? CapsuleEgg(size: 44, golden: prize.goldenCapsules > 0)
-            : const CoinIcon(size: 40);
+        ? CapsuleEgg(size: 44, golden: prize.goldenCapsules > 0)
+        : const CoinIcon(size: 40);
     return SoftCard(
       color: reached && !claimed ? goldSoft : paper,
       border: reached && !claimed ? gold : null,
       padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
-      child: Row(children: [
-        SizedBox(width: 52, child: Center(child: icon)),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text('$threshold 🐾', style: chunky(15, color: coralEdge)),
-            Text(text, style: chunky(16)),
-          ]),
-        ),
-        const SizedBox(width: 8),
-        if (claimed)
-          Text(l10n.eventClaimed, style: chunky(15, color: leafEdge))
-        else if (reached)
-          ChunkyButton(key: Key('eventClaim-$threshold'), label: l10n.eventClaim, small: true, color: leaf, onPressed: onClaim)
-        else
-          const Icon(Icons.lock_rounded, color: paperEdge, size: 28),
-      ]),
+      child: Row(
+        children: [
+          SizedBox(width: 52, child: Center(child: icon)),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('$threshold 🐾', style: chunky(15, color: coralEdge)),
+                Text(text, style: chunky(16)),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          if (claimed)
+            Text(l10n.eventClaimed, style: chunky(15, color: leafEdge))
+          else if (reached)
+            ChunkyButton(
+              key: Key('eventClaim-$threshold'),
+              label: l10n.eventClaim,
+              small: true,
+              color: leaf,
+              onPressed: onClaim,
+            )
+          else
+            const Icon(Icons.lock_rounded, color: paperEdge, size: 28),
+        ],
+      ),
     );
   }
 }

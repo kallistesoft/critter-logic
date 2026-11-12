@@ -51,8 +51,8 @@ class LuckyNestProp extends StatelessWidget {
               Positioned(bottom: 0, child: TwigNest(width: size, front: true)),
               if (free)
                 Positioned(
-                  top: -size * 0.12,
-                  right: -size * 0.1,
+                  top: -size * 0.16,
+                  right: 0,
                   child: Container(
                     key: const Key('luckyFreeBadge'),
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
@@ -491,12 +491,16 @@ class _LuckyNestScreenState extends State<LuckyNestScreen> with TickerProviderSt
             key: Key('egg-$i'),
             behavior: HitTestBehavior.opaque,
             onTap: canDraw && _draw == null ? () => _pick(i) : null,
-            child: Opacity(
-              opacity: faded ? 0.55 : (canDraw || _draw != null ? 1 : 0.6),
-              child: Transform.rotate(
-                alignment: Alignment.bottomCenter,
-                angle: angle,
-                child: NestEgg(size: size, color: _eggColors[i % 3], cracks: picked ? cracks : 0),
+            child: Transform.rotate(
+              alignment: Alignment.bottomCenter,
+              angle: angle,
+              // The other eggs stay solid, just paler, once one is picked.
+              child: NestEgg(
+                size: size,
+                color: faded || !(canDraw || _draw != null)
+                    ? Color.lerp(_eggColors[i % 3], const Color(0xFFE8E2D6), 0.6)!
+                    : _eggColors[i % 3],
+                cracks: picked ? cracks : 0,
               ),
             ),
           ),
@@ -554,7 +558,6 @@ class _LuckyNestScreenState extends State<LuckyNestScreen> with TickerProviderSt
   }
 
   Widget _result(AppLocalizations l10n, LuckyDraw draw, LuckyState state) {
-    final s = Services.of(context).retention.settings.lucky;
     final text = switch (draw.prize) {
       LuckyPrize.goldenCapsule => l10n.rewardGoldenCapsule,
       LuckyPrize.capsule => l10n.rewardCapsule,
@@ -577,11 +580,6 @@ class _LuckyNestScreenState extends State<LuckyNestScreen> with TickerProviderSt
               width: 2.2,
             ),
           ),
-          if (draw.prize == LuckyPrize.coins)
-            Text(
-              _prizeName(l10n, LuckyPrize.coins, s),
-              style: chunky(14, color: Colors.white).copyWith(shadows: outline(woodEdge, 1.2)),
-            ),
           const SizedBox(height: 10),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -610,7 +608,11 @@ class _LuckyNestScreenState extends State<LuckyNestScreen> with TickerProviderSt
                 )
               else
                 Flexible(
-                  child: Text(l10n.luckyTomorrow, textAlign: TextAlign.center, style: outlinedText(16, stroke: woodEdge)),
+                  child: Text(
+                    l10n.luckyTomorrow,
+                    textAlign: TextAlign.center,
+                    style: outlinedText(16, stroke: woodEdge),
+                  ),
                 ),
             ],
           ),

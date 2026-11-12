@@ -448,20 +448,21 @@ class _Foreground extends StatelessWidget {
             ),
           ),
           Expanded(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
+            // Scales down on narrow phones instead of overflowing.
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.bottomCenter,
+              child: Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
                 for (final (i, id) in mascots.indexed)
                   Padding(
-                    padding: EdgeInsets.only(bottom: (i.isEven ? 4 : 12) * k),
+                    padding: EdgeInsets.fromLTRB(4, 0, 4, (i.isEven ? 4 : 12) * k),
                     child: PopIn(
                       delay: Duration(milliseconds: 350 + 120 * i),
                       duration: const Duration(milliseconds: 650),
                       child: CritterBuddy(id, key: Key('mascot-$i'), size: _sizes[i % _sizes.length] * k, seed: i),
                     ),
                   ),
-              ],
+              ]),
             ),
           ),
           Padding(

@@ -21,21 +21,24 @@ class Hatted extends StatelessWidget {
   Widget build(BuildContext context) {
     final h = hat;
     if (h == null || !hatIds.contains(h)) return child;
-    final w = size * 0.56;
+    final w = size * 0.6;
     final hh = w * 0.8;
     return SizedBox(
       width: size,
       height: size,
-      child: Stack(clipBehavior: Clip.none, children: [
-        Positioned.fill(child: child),
-        Positioned(
-          left: (size - w) / 2,
-          top: size * 0.27 - hh,
-          width: w,
-          height: hh,
-          child: IgnorePointer(child: CustomPaint(painter: HatPainter(h))),
-        ),
-      ]),
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Positioned.fill(child: child),
+          Positioned(
+            left: (size - w) / 2,
+            top: size * 0.34 - hh,
+            width: w,
+            height: hh,
+            child: IgnorePointer(child: CustomPaint(painter: HatPainter(h))),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -52,10 +55,10 @@ class HattedCritter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Hatted(
-        hat: hat ?? Services.of(context).retention.shop.equippedHat,
-        size: size,
-        child: CritterImage(id, size: size),
-      );
+    hat: hat ?? Services.of(context).retention.shop.equippedHat,
+    size: size,
+    child: CritterImage(id, size: size),
+  );
 }
 
 const hatIds = ['hat.flowers', 'hat.party', 'hat.beanie', 'hat.crown'];
@@ -90,9 +93,15 @@ class HatPainter extends CustomPainter {
   void _flowers(Canvas canvas, Size s) {
     final w = s.width, h = s.height;
     // A leafy vine band lying on the head.
-    final band = Rect.fromLTWH(w * 0.04, h * 0.6, w * 0.92, h * 0.34);
+    final band = Rect.fromLTWH(w * 0.04, h * 0.66, w * 0.92, h * 0.3);
     canvas.drawArc(band, pi * 1.05, pi * 0.9, false, _stroke(const Color(0xFF3F9322), max(2, w * 0.07)));
-    canvas.drawArc(band.shift(Offset(0, h * 0.02)), pi * 0.05, pi * 0.9, false, _stroke(const Color(0xFF3F9322), max(2, w * 0.07)));
+    canvas.drawArc(
+      band.shift(Offset(0, h * 0.02)),
+      pi * 0.05,
+      pi * 0.9,
+      false,
+      _stroke(const Color(0xFF3F9322), max(2, w * 0.07)),
+    );
     final leaf = Paint()..color = const Color(0xFF6CCB3C);
     for (final (x, y, a) in const [(0.12, 0.74, -0.6), (0.88, 0.74, 0.6), (0.36, 0.95, 0.3), (0.64, 0.95, -0.3)]) {
       canvas.save();
@@ -120,7 +129,11 @@ class HatPainter extends CustomPainter {
         canvas.drawCircle(pc, pr * 0.62, petal);
         canvas.drawCircle(pc, pr * 0.62, edge);
       }
-      canvas.drawCircle(c, pr * 0.5, Paint()..color = color == const Color(0xFFFFC23D) ? const Color(0xFFFF8A5B) : const Color(0xFFFFD84A));
+      canvas.drawCircle(
+        c,
+        pr * 0.5,
+        Paint()..color = color == const Color(0xFFFFC23D) ? const Color(0xFFFF8A5B) : const Color(0xFFFFD84A),
+      );
     }
   }
 
@@ -144,23 +157,25 @@ class HatPainter extends CustomPainter {
     for (var k = -3; k < 6; k++) {
       final y = -h * 0.12 * k;
       canvas.drawPath(
-          Path()
-            ..moveTo(-w * 0.4, y)
-            ..lineTo(w * 0.4, y - h * 0.18)
-            ..lineTo(w * 0.4, y - h * 0.24)
-            ..lineTo(-w * 0.4, y - h * 0.06)
-            ..close(),
-          stripe);
+        Path()
+          ..moveTo(-w * 0.4, y)
+          ..lineTo(w * 0.4, y - h * 0.18)
+          ..lineTo(w * 0.4, y - h * 0.24)
+          ..lineTo(-w * 0.4, y - h * 0.06)
+          ..close(),
+        stripe,
+      );
     }
     final dot = Paint()..color = const Color(0xFFFFE066);
     for (final (x, y) in const [(-0.1, -0.25), (0.08, -0.45), (-0.02, -0.62), (0.13, -0.16)]) {
       canvas.drawCircle(Offset(w * x, h * y), w * 0.03, dot);
     }
     canvas.drawPath(
-        Path()
-          ..moveTo(-w * 0.05, -h * 0.8)
-          ..lineTo(-w * 0.2, -h * 0.1),
-        _stroke(Colors.white.withValues(alpha: 0.45), w * 0.04));
+      Path()
+        ..moveTo(-w * 0.05, -h * 0.8)
+        ..lineTo(-w * 0.2, -h * 0.1),
+      _stroke(Colors.white.withValues(alpha: 0.45), w * 0.04),
+    );
     canvas.restore();
     canvas.drawPath(cone, _stroke(const Color(0xFF2479B8), max(1.5, w * 0.03)));
     // Pom-pom on top.
@@ -192,7 +207,10 @@ class HatPainter extends CustomPainter {
       final x = w * (0.06 + 0.88 * k / 6);
       canvas.drawLine(Offset(x, h * 0.2), Offset(x, h * 0.8), col);
     }
-    canvas.drawOval(Rect.fromLTWH(w * 0.22, h * 0.3, w * 0.2, h * 0.1), Paint()..color = Colors.white.withValues(alpha: 0.3));
+    canvas.drawOval(
+      Rect.fromLTWH(w * 0.22, h * 0.3, w * 0.2, h * 0.1),
+      Paint()..color = Colors.white.withValues(alpha: 0.3),
+    );
     canvas.restore();
     canvas.drawPath(dome, _stroke(knitDark, max(1.5, w * 0.03)));
     // Folded cuff.
@@ -227,13 +245,14 @@ class HatPainter extends CustomPainter {
       ..close();
     canvas.drawPath(crown.shift(Offset(0, h * 0.04)), Paint()..color = const Color(0x40000000));
     canvas.drawPath(
-        crown,
-        Paint()
-          ..shader = const LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFFFFE47A), Color(0xFFFFC23D), Color(0xFFE59E1A)],
-          ).createShader(Offset.zero & s));
+      crown,
+      Paint()
+        ..shader = const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xFFFFE47A), Color(0xFFFFC23D), Color(0xFFE59E1A)],
+        ).createShader(Offset.zero & s),
+    );
     // Band and gems.
     canvas.drawRect(Rect.fromLTWH(w * 0.09, h * 0.74, w * 0.82, h * 0.06), Paint()..color = const Color(0xFFD38A12));
     canvas.drawCircle(Offset(w * 0.5, h * 0.62), w * 0.07, Paint()..color = const Color(0xFFE5484D));
@@ -241,10 +260,18 @@ class HatPainter extends CustomPainter {
     canvas.drawCircle(Offset(w * 0.72, h * 0.72), w * 0.045, Paint()..color = const Color(0xFF5CBF3A));
     canvas.drawCircle(Offset(w * 0.48, h * 0.6), w * 0.02, Paint()..color = Colors.white.withValues(alpha: 0.8));
     for (final x in const [0.04, 0.5, 0.96]) {
-      canvas.drawCircle(Offset(w * x, h * (x == 0.5 ? 0.18 : 0.32)), w * 0.05, Paint()..color = const Color(0xFFFFF0A0));
+      canvas.drawCircle(
+        Offset(w * x, h * (x == 0.5 ? 0.18 : 0.32)),
+        w * 0.05,
+        Paint()..color = const Color(0xFFFFF0A0),
+      );
     }
     canvas.drawPath(crown, _stroke(const Color(0xFFB7700A), max(1.5, w * 0.03)));
-    canvas.drawLine(Offset(w * 0.2, h * 0.5), Offset(w * 0.17, h * 0.8), _stroke(Colors.white.withValues(alpha: 0.5), w * 0.03));
+    canvas.drawLine(
+      Offset(w * 0.2, h * 0.5),
+      Offset(w * 0.17, h * 0.8),
+      _stroke(Colors.white.withValues(alpha: 0.5), w * 0.03),
+    );
   }
 
   @override
@@ -254,13 +281,13 @@ class HatPainter extends CustomPainter {
 // ---- Names ----
 
 String cosmeticName(AppLocalizations l10n, String id) => switch (id) {
-      'hat.flowers' => l10n.hatFlowers,
-      'hat.party' => l10n.hatParty,
-      'hat.beanie' => l10n.hatBeanie,
-      'hat.crown' => l10n.hatCrown,
-      'frame.album_gold' => l10n.frameAlbumGold,
-      _ => id,
-    };
+  'hat.flowers' => l10n.hatFlowers,
+  'hat.party' => l10n.hatParty,
+  'hat.beanie' => l10n.hatBeanie,
+  'hat.crown' => l10n.hatCrown,
+  'frame.album_gold' => l10n.frameAlbumGold,
+  _ => id,
+};
 
 /// Cosmetics the player can see for now: hats and the gold album frame (board themes come later as Worlds).
 bool shownCosmetic(String id) => id.startsWith('hat.') || id == 'frame.album_gold';
