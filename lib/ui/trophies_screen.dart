@@ -90,7 +90,7 @@ class _TrophiesScreenState extends State<TrophiesScreen> {
           ),
           Expanded(
             child: ListView(
-              padding: const EdgeInsets.fromLTRB(16, 14, 16, 24),
+              padding: EdgeInsets.fromLTRB(16, 14, 16, 24 + MediaQuery.viewPaddingOf(context).bottom),
               children: [
                 for (final (i, a) in sorted.indexed) ...[
                   if (i > 0) const SizedBox(height: 12),
@@ -143,7 +143,7 @@ class _TrophyCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: chunky(18), maxLines: 1, overflow: TextOverflow.ellipsis),
+                FittedBox(fit: BoxFit.scaleDown, alignment: AlignmentDirectional.centerStart, child: Text(title, style: chunky(18), maxLines: 1)),
                 Text(
                   desc,
                   style: chunky(14, color: inkSoft, weight: FontWeight.w500),

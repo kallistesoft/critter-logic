@@ -29,7 +29,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         MeadowTopBar(title: l10n.settings, backTooltip: l10n.back),
         Expanded(
           child: ListView(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+            padding: EdgeInsets.fromLTRB(16, 16, 16, 24 + MediaQuery.viewPaddingOf(context).bottom),
             children: [
               SlideIn(
                 child: SoftCard(
@@ -91,6 +91,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         }
                         setState(() {});
                       },
+                    ),
+                    const _Divider(),
+                    _Link(
+                      key: const Key('languageRow'),
+                      icon: Icons.translate_rounded,
+                      tint: const Color(0xFF4FB3A9),
+                      label: l10n.settingLanguage,
+                      value: stats.language == null ? l10n.languageSystem : languageNames[stats.language],
+                      onTap: () => _pickLanguage(context),
                     ),
                   ]),
                 ),
@@ -166,6 +175,43 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ]),
     );
   }
+}
+
+/// The languages the app speaks, by their own name (never translated).
+const languageNames = {'en': 'English', 'fr': 'Français', 'es': 'Español'};
+
+/// Picks the app language: the phone's, or one of [languageNames]. Applies at once and re-plans the reminders
+/// so they speak the new language too.
+Future<void> _pickLanguage(BuildContext context) async {
+  final l10n = AppLocalizations.of(context);
+  final services = Services.of(context);
+  final stats = services.stats;
+  final current = stats.language;
+  Widget option(String? code, String label) => ChunkyButton(
+        key: Key('lang-${code ?? 'system'}'),
+        label: label,
+        expand: true,
+        color: code == current ? leaf : paper,
+        edge: code == current ? null : paperEdge,
+        textColor: code == current ? Colors.white : ink,
+        onPressed: () => Navigator.of(context).pop(code ?? ''),
+      );
+  final picked = await showSoftDialog<String>(
+    context,
+    title: l10n.settingLanguage,
+    actions: [
+      option(null, l10n.languageSystem),
+      for (final e in languageNames.entries) option(e.key, e.value),
+    ],
+  );
+  if (picked == null) return;
+  final code = picked.isEmpty ? null : picked;
+  if (code == current) return;
+  await stats.setLanguage(code);
+  await services.analytics.log('language', {'code': code ?? 'system'});
+  // Let the app rebuild in the new language before reading its strings.
+  await WidgetsBinding.instance.endOfFrame;
+  if (context.mounted) await planReminders(stats, services.reminders, AppLocalizations.of(context), services.today());
 }
 
 class _Divider extends StatelessWidget {
@@ -272,11 +318,14 @@ class CandySwitch extends StatelessWidget {
 }
 
 class _Link extends StatelessWidget {
-  const _Link({super.key, required this.icon, required this.tint, required this.label, this.onTap});
+  const _Link({super.key, required this.icon, required this.tint, required this.label, this.value, this.onTap});
 
   final IconData icon;
   final Color tint;
   final String label;
+
+  /// Current choice, shown before the chevron.
+  final String? value;
   final VoidCallback? onTap;
 
   @override
@@ -289,6 +338,11 @@ class _Link extends StatelessWidget {
             _Badge(icon: icon, tint: tint),
             const SizedBox(width: 12),
             Expanded(child: Text(label, style: chunky(17))),
+            if (value != null)
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 150),
+                child: Text(value!, textAlign: TextAlign.end, style: chunky(15, color: inkSoft, weight: FontWeight.w600)),
+              ),
             const Icon(Icons.chevron_right_rounded, color: woodDark, size: 28),
           ]),
         ),

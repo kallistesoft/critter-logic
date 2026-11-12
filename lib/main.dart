@@ -107,8 +107,11 @@ Future<void> main() async {
   updates?.retention.addListener(() => retention.value = makeRetention());
 
   final music = kIsWeb ? NoMusic(enabled: stats.musicOn) : AudioMusicService(enabled: stats.musicOn, persist: stats.setMusicOn);
-  final l10n = lookupAppLocalizations(
-      basicLocaleListResolution(PlatformDispatcher.instance.locales, AppLocalizations.supportedLocales));
+  // The language picked in Settings, else the phone's.
+  final chosen = stats.language;
+  final l10n = lookupAppLocalizations(chosen != null
+      ? Locale(chosen)
+      : basicLocaleListResolution(PlatformDispatcher.instance.locales, AppLocalizations.supportedLocales));
   planReminders(stats, reminders, l10n, DateTime.now());
   music.start();
 
@@ -175,7 +178,8 @@ class CritterLogicApp extends StatelessWidget {
   final VoidCallback? onUpdate;
   final DateTime Function() today;
 
-  /// Forces a language (tests); null follows the phone, falling back to English.
+  /// Forces a language (tests); null uses the one picked in Settings ([StatsStore.language]), else the phone's,
+  /// falling back to English.
   final Locale? locale;
 
   /// Dailies and levels; null uses the built-in development puzzles.
@@ -210,32 +214,35 @@ class CritterLogicApp extends StatelessWidget {
       privacyOptionsRequired: privacyOptionsRequired,
       showPrivacyOptions: showPrivacyOptions,
       today: today,
-      child: MaterialApp(
-        title: 'Critter Logic',
-        debugShowCheckedModeBanner: false,
-        locale: locale,
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        theme: ThemeData(
-          useMaterial3: true,
-          brightness: Brightness.light,
-          colorSchemeSeed: leaf,
-          fontFamily: displayFont,
-          scaffoldBackgroundColor: Colors.transparent,
-          snackBarTheme: SnackBarThemeData(
-            behavior: SnackBarBehavior.floating,
-            backgroundColor: woodEdge,
-            contentTextStyle: const TextStyle(fontFamily: displayFont, fontSize: 16, color: Colors.white),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: ValueListenableBuilder(
+        valueListenable: stats.languageChanges,
+        builder: (context, language, _) => MaterialApp(
+          title: 'Critter Logic',
+          debugShowCheckedModeBanner: false,
+          locale: locale ?? (language == null ? null : Locale(language)),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          theme: ThemeData(
+            useMaterial3: true,
+            brightness: Brightness.light,
+            colorSchemeSeed: leaf,
+            fontFamily: displayFont,
+            scaffoldBackgroundColor: Colors.transparent,
+            snackBarTheme: SnackBarThemeData(
+              behavior: SnackBarBehavior.floating,
+              backgroundColor: woodEdge,
+              contentTextStyle: const TextStyle(fontFamily: displayFont, fontSize: 16, color: Colors.white),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            ),
           ),
+          navigatorKey: _navigator,
+          builder: (context, child) => MeadowWorld(
+            child: updateStatus == null
+                ? child!
+                : UpdateGate(status: updateStatus!, onUpdate: onUpdate!, navigatorKey: _navigator, child: child!),
+          ),
+          home: const HomeScreen(),
         ),
-        navigatorKey: _navigator,
-        builder: (context, child) => MeadowWorld(
-          child: updateStatus == null
-              ? child!
-              : UpdateGate(status: updateStatus!, onUpdate: onUpdate!, navigatorKey: _navigator, child: child!),
-        ),
-        home: const HomeScreen(),
       ),
     );
   }

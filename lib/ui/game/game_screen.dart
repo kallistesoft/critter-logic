@@ -673,7 +673,7 @@ class _ToolButton extends StatelessWidget {
           Center(
             child: Column(mainAxisSize: MainAxisSize.min, children: [
               Icon(icon, color: Colors.white, size: 26, shadows: [Shadow(color: rim, offset: const Offset(0, 2))]),
-              Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: outlinedText(14, stroke: rim, width: 1.3)),
+              FittedBox(fit: BoxFit.scaleDown, alignment: AlignmentDirectional.centerStart, child: Text(label, maxLines: 1, style: outlinedText(14, stroke: rim, width: 1.3))),
             ]),
           ),
           if (free > 0)

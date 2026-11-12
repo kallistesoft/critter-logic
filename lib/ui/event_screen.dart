@@ -76,12 +76,11 @@ class EventBanner extends StatelessWidget {
                     Row(
                       children: [
                         Expanded(
-                          child: Text(
+                          child: FittedBox(fit: BoxFit.scaleDown, alignment: AlignmentDirectional.centerStart, child: Text(
                             eventName(l10n, state.theme.id),
                             maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
                             style: chunky(18, color: coralEdge),
-                          ),
+                          )),
                         ),
                         Text(
                           timeLeft(l10n, state.remaining(now)),
@@ -294,7 +293,7 @@ class _EventScreenState extends State<EventScreen> {
           ),
           Expanded(
             child: ListView(
-              padding: const EdgeInsets.fromLTRB(16, 14, 16, 24),
+              padding: EdgeInsets.fromLTRB(16, 14, 16, 24 + MediaQuery.viewPaddingOf(context).bottom),
               children: [
                 SoftCard(
                   color: const Color(0xFFFFF3E6),

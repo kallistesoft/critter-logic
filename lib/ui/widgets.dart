@@ -265,14 +265,17 @@ class ChunkyButton extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         if (icon != null) ...[icon!, SizedBox(width: small ? 6 : 8)],
+        // Shrink a long label (narrow cards, big system font) instead of cutting it to "Pl…".
         Flexible(
-          child: Text(label,
-              textAlign: TextAlign.center,
-              overflow: TextOverflow.ellipsis,
-              maxLines: 1,
-              style: light
-                  ? outlinedText(fontSize, color: textColor, stroke: rim, width: 1.6)
-                  : chunky(fontSize, color: textColor)),
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(label,
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                style: light
+                    ? outlinedText(fontSize, color: textColor, stroke: rim, width: 1.6)
+                    : chunky(fontSize, color: textColor)),
+          ),
         ),
       ],
     );
@@ -663,16 +666,14 @@ class WoodLabel extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 6, 16, 8),
           child: Column(mainAxisSize: MainAxisSize.min, children: [
-            Text(text,
+            FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.center, child: Text(text,
                 maxLines: 1,
-                overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.center,
-                style: outlinedText(fontSize, color: const Color(0xFFFFF4D6), stroke: woodEdge, width: 2)),
+                style: outlinedText(fontSize, color: const Color(0xFFFFF4D6), stroke: woodEdge, width: 2))),
             if (subtitle != null)
-              Text(subtitle!,
+              FittedBox(fit: BoxFit.scaleDown, alignment: AlignmentDirectional.centerStart, child: Text(subtitle!,
                   maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: chunky(14, color: const Color(0xFFFFE6BC), weight: FontWeight.w600)),
+                  style: chunky(14, color: const Color(0xFFFFE6BC), weight: FontWeight.w600))),
           ]),
         ),
       );

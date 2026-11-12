@@ -889,6 +889,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingReminders => 'Daily reminder';
 
   @override
+  String get settingLanguage => 'Language';
+
+  @override
+  String get languageSystem => 'System default';
+
+  @override
+  String get reminderChannel => 'Daily puzzle';
+
+  @override
   String get credits => 'Art and sounds: Kenney (kenney.nl), CC0';
 
   @override
@@ -1025,4 +1034,8 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get fontCredit => 'Font: Fredoka (SIL Open Font License)';
+
+  @override
+  String get coinsPreview =>
+      'Store not available in the dev build: this is a preview.';
 }

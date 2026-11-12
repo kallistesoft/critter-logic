@@ -235,6 +235,9 @@
   "settingAutoCross": "Croix automatiques",
   "settingAutoCrossInfo": "Nids : grise les cases exclues par une bestiole",
   "settingReminders": "Rappel quotidien",
+  "settingLanguage": "Langue",
+  "languageSystem": "Langue du système",
+  "reminderChannel": "Défi du jour",
   "credits": "Dessins et sons : Kenney (kenney.nl), CC0",
   "critterChick": "Poussin",
   "critterChicken": "Poule",
@@ -275,5 +278,6 @@
   "levelLocked": "Termine d’abord le niveau {level}",
   "levelPathTitle": "Niveaux {game}",
   "levelDone": "Niveau {level} : {stars}/3 étoiles",
-  "fontCredit": "Police : Fredoka (licence SIL Open Font)"
+  "fontCredit": "Police : Fredoka (licence SIL Open Font)",
+  "coinsPreview": "Boutique indisponible dans la version de développement : ceci est un aperçu."
 }

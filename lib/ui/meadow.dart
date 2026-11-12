@@ -92,8 +92,9 @@ class _MeadowBackgroundState extends State<MeadowBackground> with SingleTickerPr
   static double _sunBox(Size s) => min(s.width, 700) * 0.42;
 
   static const _clouds = [
-    _Cloud(y: 0.04, scale: 1.0, speed: 1, start: 0.1, alpha: 0.95),
-    _Cloud(y: 0.17, scale: 0.7, speed: 2, start: 0.55, alpha: 0.85),
+    // None in the top bar: a cloud behind the round buttons looked like a white pad stuck to them.
+    _Cloud(y: 0.14, scale: 1.0, speed: 1, start: 0.1, alpha: 0.95),
+    _Cloud(y: 0.22, scale: 0.7, speed: 2, start: 0.55, alpha: 0.85),
     _Cloud(y: 0.29, scale: 0.85, speed: 1, start: 0.8, alpha: 0.8),
     _Cloud(y: 0.42, scale: 0.55, speed: 3, start: 0.3, alpha: 0.7),
   ];

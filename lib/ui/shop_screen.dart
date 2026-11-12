@@ -96,6 +96,11 @@ class _ShopScreenState extends State<ShopScreen> {
 
   Future<void> _buyPack(CoinPack pack) async {
     final store = Services.of(context).coinStore;
+    if (store.preview) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(AppLocalizations.of(context).coinsPreview)));
+      return;
+    }
     if (await askParent(context, widget.random ?? Random())) await store.buy(pack);
   }
 
@@ -150,7 +155,7 @@ class _ShopScreenState extends State<ShopScreen> {
           Expanded(
             child: ListView(
               key: ValueKey(_tab),
-              padding: const EdgeInsets.fromLTRB(16, 14, 16, 24),
+              padding: EdgeInsets.fromLTRB(16, 14, 16, 24 + MediaQuery.viewPaddingOf(context).bottom),
               children: switch (_tab) {
                 ShopTab.capsules => [
                   if (deal != null && deal.item.category != ShopCategory.capsule) ...[
@@ -163,23 +168,20 @@ class _ShopScreenState extends State<ShopScreen> {
                   ],
                 ],
                 ShopTab.hats => [
-                  LayoutBuilder(
-                    builder: (context, box) {
-                      const gap = 12.0;
-                      final w = (box.maxWidth - gap) / 2;
-                      return Wrap(
-                        spacing: gap,
-                        runSpacing: gap,
-                        children: [
-                          for (final o in offers.where((o) => o.item.category == ShopCategory.hat))
-                            SizedBox(
-                              width: w,
-                              child: _HatCard(offer: o, onBuy: () => _buy(o), onEquip: () => _equip(o.item.id)),
-                            ),
-                        ],
-                      );
-                    },
-                  ),
+                  // Rows of two cards of equal height, so names, notes and buttons line up.
+                  for (final row in _pairs(offers.where((o) => o.item.category == ShopCategory.hat).toList()))
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 14),
+                      child: IntrinsicHeight(
+                        child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                          for (final (i, o) in row.indexed) ...[
+                            if (i > 0) const SizedBox(width: 12),
+                            Expanded(child: _HatCard(offer: o, onBuy: () => _buy(o), onEquip: () => _equip(o.item.id))),
+                          ],
+                          if (row.length == 1) ...[const SizedBox(width: 12), const Expanded(child: SizedBox())],
+                        ]),
+                      ),
+                    ),
                 ],
                 ShopTab.coins => [
                   Text(
@@ -190,7 +192,8 @@ class _ShopScreenState extends State<ShopScreen> {
                   const SizedBox(height: 12),
                   for (final (pack, price) in services.coinStore.packs) ...[
                     _PackRow(pack: pack, price: price, onBuy: () => _buyPack(pack)),
-                    const SizedBox(height: 14),
+                    // Room for the next card's ribbon, which sticks out above it.
+                    const SizedBox(height: 28),
                   ],
                 ],
               },
@@ -222,12 +225,11 @@ class _TabChip extends StatelessWidget {
         boxShadow: [BoxShadow(color: selected ? woodEdge : paperEdge, offset: const Offset(0, 3))],
       ),
       alignment: Alignment.center,
-      child: Text(
+      child: FittedBox(fit: BoxFit.scaleDown, alignment: AlignmentDirectional.centerStart, child: Text(
         label,
         maxLines: 1,
-        overflow: TextOverflow.ellipsis,
         style: selected ? outlinedText(16, stroke: woodEdge, width: 1.4) : chunky(16, color: woodDark),
-      ),
+      )),
     ),
   );
 }
@@ -474,7 +476,7 @@ class _HatCard extends StatelessWidget {
         children: [
           _HatShowcase(hat: offer.item.id),
           const SizedBox(height: 6),
-          Text(cosmeticName(l10n, offer.item.id), maxLines: 1, overflow: TextOverflow.ellipsis, style: chunky(17)),
+          FittedBox(fit: BoxFit.scaleDown, alignment: AlignmentDirectional.centerStart, child: Text(cosmeticName(l10n, offer.item.id), maxLines: 1, style: chunky(17))),
           if (offer.equipped)
             Text(l10n.shopEquipped, style: chunky(13, color: leafEdge))
           else if (!offer.owned && set != null)
@@ -487,6 +489,7 @@ class _HatCard extends StatelessWidget {
           else
             const SizedBox(height: 15),
           const SizedBox(height: 8),
+          const Spacer(),
           action,
         ],
       ),
@@ -494,6 +497,7 @@ class _HatCard extends StatelessWidget {
     if (!offer.deal) return card;
     return Stack(
       clipBehavior: Clip.none,
+      fit: StackFit.expand,
       children: [
         card,
         Positioned(left: -4, top: -10, child: Ribbon(text: l10n.shopDeal)),
@@ -527,8 +531,8 @@ class _PackRow extends StatelessWidget {
               children: [
                 for (var i = 0; i < pile; i++)
                   Positioned(
-                    left: 4.0 + (i % 3) * 14,
-                    bottom: (i ~/ 3) * 14.0 + (i.isOdd ? 6 : 0),
+                    left: pile == 1 ? 18 : 4.0 + (i % 3) * 14,
+                    bottom: pile == 1 ? 10 : (i ~/ 3) * 14.0 + (i.isOdd ? 6 : 0),
                     child: const CoinIcon(size: 34),
                   ),
               ],
@@ -560,14 +564,7 @@ class _PackRow extends StatelessWidget {
       clipBehavior: Clip.none,
       children: [
         card,
-        if (pack.bestValue)
-          Positioned(left: -4, top: -10, child: Ribbon(text: l10n.coinPackBest))
-        else if (pack.bonusPercent > 0)
-          Positioned(
-            left: -4,
-            top: -10,
-            child: Ribbon(text: l10n.coinPackBonus(pack.bonusPercent), color: leaf),
-          ),
+        if (pack.bestValue) Positioned(left: -4, top: -10, child: Ribbon(text: l10n.coinPackBest)),
       ],
     );
   }
@@ -576,3 +573,8 @@ class _PackRow extends StatelessWidget {
 /// Opens the shop on a tab.
 Future<void> openShop(BuildContext context, {ShopTab tab = ShopTab.capsules}) =>
     Navigator.of(context).push(softRoute(ShopScreen(initialTab: tab)));
+
+/// [items] two by two (the last row may hold one).
+List<List<T>> _pairs<T>(List<T> items) => [
+      for (var i = 0; i < items.length; i += 2) items.sublist(i, i + 2 > items.length ? items.length : i + 2),
+    ];

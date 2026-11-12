@@ -434,7 +434,13 @@
   "calendarSubtitle": "A gift for every day you visit",
   "@calendarSubtitle": {},
   "calendarDay": "Day {day}",
-  "@calendarDay": {"placeholders": {"day": {"type": "int"}}},
+  "@calendarDay": {
+    "placeholders": {
+      "day": {
+        "type": "int"
+      }
+    }
+  },
   "calendarClaim": "Claim",
   "@calendarClaim": {},
   "calendarDouble": "x2",
@@ -460,71 +466,173 @@
   "achievementDailies": "Daily habit",
   "@achievementDailies": {},
   "achievementDailiesDesc": "Solve {n} dailies",
-  "@achievementDailiesDesc": {"placeholders": {"n": {"type": "int"}}},
+  "@achievementDailiesDesc": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
   "achievementStreak": "On fire",
   "@achievementStreak": {},
   "achievementStreakDesc": "Reach a {n}-day streak",
-  "@achievementStreakDesc": {"placeholders": {"n": {"type": "int"}}},
+  "@achievementStreakDesc": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
   "achievementBothDailies": "Double up",
   "@achievementBothDailies": {},
   "achievementBothDailiesDesc": "Solve both dailies on {n} days",
-  "@achievementBothDailiesDesc": {"placeholders": {"n": {"type": "int"}}},
+  "@achievementBothDailiesDesc": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
   "achievementPerfectDaily": "Flawless",
   "@achievementPerfectDaily": {},
   "achievementPerfectDailyDesc": "Solve {n} dailies with no mistake and no hint",
-  "@achievementPerfectDailyDesc": {"placeholders": {"n": {"type": "int"}}},
+  "@achievementPerfectDailyDesc": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
   "achievementFastNests": "Speedy nests",
   "@achievementFastNests": {},
   "achievementFastNestsDesc": "{n, plural, =1{Solve a Nests daily in under a minute} other{Solve {n} Nests dailies in under a minute}}",
-  "@achievementFastNestsDesc": {"placeholders": {"n": {"type": "int"}}},
+  "@achievementFastNestsDesc": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
   "achievementFastPairs": "Speedy pairs",
   "@achievementFastPairs": {},
   "achievementFastPairsDesc": "{n, plural, =1{Solve a Pairs daily in under a minute} other{Solve {n} Pairs dailies in under a minute}}",
-  "@achievementFastPairsDesc": {"placeholders": {"n": {"type": "int"}}},
+  "@achievementFastPairsDesc": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
   "achievementNestsLevels": "Nest builder",
   "@achievementNestsLevels": {},
   "achievementNestsLevelsDesc": "Win {n} Nests levels",
-  "@achievementNestsLevelsDesc": {"placeholders": {"n": {"type": "int"}}},
+  "@achievementNestsLevelsDesc": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
   "achievementPairsLevels": "Stone hopper",
   "@achievementPairsLevels": {},
   "achievementPairsLevelsDesc": "Win {n} Pairs levels",
-  "@achievementPairsLevelsDesc": {"placeholders": {"n": {"type": "int"}}},
+  "@achievementPairsLevelsDesc": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
   "achievementLevels": "Level climber",
   "@achievementLevels": {},
   "achievementLevelsDesc": "Win {n} levels",
-  "@achievementLevelsDesc": {"placeholders": {"n": {"type": "int"}}},
+  "@achievementLevelsDesc": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
   "achievementNoHint": "No help needed",
   "@achievementNoHint": {},
   "achievementNoHintDesc": "Solve {n} puzzles without a hint",
-  "@achievementNoHintDesc": {"placeholders": {"n": {"type": "int"}}},
+  "@achievementNoHintDesc": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
   "achievementCritters": "Collector",
   "@achievementCritters": {},
   "achievementCrittersDesc": "Collect {n} critters",
-  "@achievementCrittersDesc": {"placeholders": {"n": {"type": "int"}}},
+  "@achievementCrittersDesc": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
   "achievementSets": "Set master",
   "@achievementSets": {},
   "achievementSetsDesc": "{n, plural, =1{Complete an album set} other{Complete {n} album sets}}",
-  "@achievementSetsDesc": {"placeholders": {"n": {"type": "int"}}},
+  "@achievementSetsDesc": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
   "achievementGolden": "Golden touch",
   "@achievementGolden": {},
   "achievementGoldenDesc": "{n, plural, =1{Find a golden critter} other{Find {n} golden critters}}",
-  "@achievementGoldenDesc": {"placeholders": {"n": {"type": "int"}}},
+  "@achievementGoldenDesc": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
   "achievementCapsules": "Egg cracker",
   "@achievementCapsules": {},
   "achievementCapsulesDesc": "Open {n} capsules",
-  "@achievementCapsulesDesc": {"placeholders": {"n": {"type": "int"}}},
+  "@achievementCapsulesDesc": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
   "achievementShares": "Show-off",
   "@achievementShares": {},
   "achievementSharesDesc": "{n, plural, =1{Share a result} other{Share {n} results}}",
-  "@achievementSharesDesc": {"placeholders": {"n": {"type": "int"}}},
+  "@achievementSharesDesc": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
   "achievementCalendar": "Regular visitor",
   "@achievementCalendar": {},
   "achievementCalendarDesc": "Claim {n} daily gifts",
-  "@achievementCalendarDesc": {"placeholders": {"n": {"type": "int"}}},
+  "@achievementCalendarDesc": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
   "achievementEvents": "Event star",
   "@achievementEvents": {},
   "achievementEventsDesc": "{n, plural, =1{Finish a weekly event} other{Finish {n} weekly events}}",
-  "@achievementEventsDesc": {"placeholders": {"n": {"type": "int"}}},
+  "@achievementEventsDesc": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
   "eventPolar": "Polar Week",
   "@eventPolar": {},
   "eventPanda": "Panda Week",
@@ -538,19 +646,67 @@
   "eventWinter": "Winter Week",
   "@eventWinter": {},
   "eventEndsDays": "{days}d {hours}h left",
-  "@eventEndsDays": {"placeholders": {"days": {"type": "int"}, "hours": {"type": "int"}}},
+  "@eventEndsDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      },
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
   "eventEndsHours": "{hours}h {minutes}m left",
-  "@eventEndsHours": {"placeholders": {"hours": {"type": "int"}, "minutes": {"type": "int"}}},
+  "@eventEndsHours": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
   "eventTokens": "+{n} event tokens",
-  "@eventTokens": {"placeholders": {"n": {"type": "int"}}},
+  "@eventTokens": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
   "eventTokensShort": "+{n} 🐾 {event}",
-  "@eventTokensShort": {"placeholders": {"n": {"type": "int"}, "event": {"type": "String"}}},
+  "@eventTokensShort": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "event": {
+        "type": "String"
+      }
+    }
+  },
   "eventPrizeReady": "Event prize ready!",
   "@eventPrizeReady": {},
   "eventHowTo": "Solve a daily: +{daily} 🐾 · Win a level: +{level} 🐾",
-  "@eventHowTo": {"placeholders": {"daily": {"type": "int"}, "level": {"type": "int"}}},
+  "@eventHowTo": {
+    "placeholders": {
+      "daily": {
+        "type": "int"
+      },
+      "level": {
+        "type": "int"
+      }
+    }
+  },
   "eventPrizeCritter": "A new {set} critter + a frame",
-  "@eventPrizeCritter": {"placeholders": {"set": {"type": "String"}}},
+  "@eventPrizeCritter": {
+    "placeholders": {
+      "set": {
+        "type": "String"
+      }
+    }
+  },
   "eventLastDay": "Last day! Claim your prizes before midnight.",
   "@eventLastDay": {},
   "eventSetCritters": "This week's critters",
@@ -584,19 +740,43 @@
   "shopStreakRepairNone": "Your streak is safe",
   "@shopStreakRepairNone": {},
   "shopNotEnough": "You need {n} more coins.",
-  "@shopNotEnough": {"placeholders": {"n": {"type": "int"}}},
+  "@shopNotEnough": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
   "shopBought": "It's yours!",
   "@shopBought": {},
   "shopOrSet": "Free with the {set} set",
-  "@shopOrSet": {"placeholders": {"set": {"type": "String"}}},
+  "@shopOrSet": {
+    "placeholders": {
+      "set": {
+        "type": "String"
+      }
+    }
+  },
   "shopOrAlbum": "Free with the full album",
   "@shopOrAlbum": {},
   "shopCoinsNote": "Coins help with hints, capsules and new looks. Ask a grown-up first.",
   "@shopCoinsNote": {},
   "coinPackCoins": "{n} coins",
-  "@coinPackCoins": {"placeholders": {"n": {"type": "int"}}},
+  "@coinPackCoins": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
   "coinPackBonus": "+{percent}%",
-  "@coinPackBonus": {"placeholders": {"percent": {"type": "int"}}},
+  "@coinPackBonus": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
   "coinPackBest": "Best value",
   "@coinPackBest": {},
   "hatFlowers": "Flower crown",
@@ -628,7 +808,16 @@
   "luckyPrizeCapsule": "Capsule",
   "@luckyPrizeCapsule": {},
   "luckyPrizeCoins": "{min}–{max} coins",
-  "@luckyPrizeCoins": {"placeholders": {"min": {"type": "int"}, "max": {"type": "int"}}},
+  "@luckyPrizeCoins": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
   "luckyPrizeHint": "Free hint",
   "@luckyPrizeHint": {},
   "luckyPrizeFeather": "A feather",
@@ -644,15 +833,33 @@
   "luckyOpenCapsule": "Open it",
   "@luckyOpenCapsule": {},
   "freeHintUsed": "Free hint used ({n} left)",
-  "@freeHintUsed": {"placeholders": {"n": {"type": "int"}}},
+  "@freeHintUsed": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
   "setCompleteTitle": "Set complete!",
   "@setCompleteTitle": {},
   "albumCompleteTitle": "Album complete!",
   "@albumCompleteTitle": {},
   "setUnlockedItem": "{item} unlocked",
-  "@setUnlockedItem": {"placeholders": {"item": {"type": "String"}}},
+  "@setUnlockedItem": {
+    "placeholders": {
+      "item": {
+        "type": "String"
+      }
+    }
+  },
   "setRewardLabel": "Reward: {item}",
-  "@setRewardLabel": {"placeholders": {"item": {"type": "String"}}},
+  "@setRewardLabel": {
+    "placeholders": {
+      "item": {
+        "type": "String"
+      }
+    }
+  },
   "setUnlockedBadge": "Unlocked!",
   "@setUnlockedBadge": {},
   "later": "Later",
@@ -669,6 +876,12 @@
   "@settingAutoCrossInfo": {},
   "settingReminders": "Daily reminder",
   "@settingReminders": {},
+  "settingLanguage": "Language",
+  "@settingLanguage": {"description": "Settings row: picks the app language"},
+  "languageSystem": "System default",
+  "@languageSystem": {"description": "Language picker: follow the phone's language"},
+  "reminderChannel": "Daily puzzle",
+  "@reminderChannel": {"description": "Android notification channel name for the daily reminder, shown in the phone's settings"},
   "credits": "Art and sounds: Kenney (kenney.nl), CC0",
   "@credits": {},
   "critterChick": "Chick",
@@ -853,5 +1066,9 @@
   "fontCredit": "Font: Fredoka (SIL Open Font License)",
   "@fontCredit": {
     "description": "Settings credits line for the bundled font"
+  },
+  "coinsPreview": "Store not available in the dev build: this is a preview.",
+  "@coinsPreview": {
+    "description": "Snackbar when tapping a coin pack in a dev build (no store)"
   }
 }
