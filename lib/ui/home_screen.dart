@@ -13,6 +13,7 @@ import 'critter_actor.dart';
 import 'critter_image.dart';
 import 'game/game_screen.dart';
 import 'game/pairs_board.dart';
+import 'game/trail_board.dart';
 import 'level_path_screen.dart';
 import 'meadow.dart';
 import 'navigation.dart';
@@ -383,17 +384,30 @@ class _DailyCard extends StatelessWidget {
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: kind == GameKind.nests
-                    ? const [Color(0xFFDDF5C6), Color(0xFFB9E596)]
-                    : const [Color(0xFFD6ECFF), Color(0xFFB4D8F7)],
+                colors: switch (kind) {
+                  GameKind.nests => const [Color(0xFFDDF5C6), Color(0xFFB9E596)],
+                  GameKind.pairs => const [Color(0xFFD6ECFF), Color(0xFFB4D8F7)],
+                  GameKind.trail => const [Color(0xFFFFEBC9), Color(0xFFF6D49C)],
+                },
               ),
               borderRadius: BorderRadius.circular(14),
               border: Border.all(color: paperEdge, width: 2),
             ),
-            child: Center(child: kind == GameKind.nests ? const _NestsArt() : const _PairsArt()),
+            padding: const EdgeInsets.all(6),
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: switch (kind) {
+                GameKind.nests => const _NestsArt(),
+                GameKind.pairs => const _PairsArt(),
+                GameKind.trail => const _TrailArt(),
+              },
+            ),
           ),
           const SizedBox(height: 8),
-          Text(gameName(l10n, kind), textAlign: TextAlign.center, style: chunky(22)),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(gameName(l10n, kind), textAlign: TextAlign.center, style: chunky(22)),
+          ),
           const SizedBox(height: 6),
           if (r == null)
             ChunkyButton(
@@ -406,22 +420,28 @@ class _DailyCard extends StatelessWidget {
           else
             Column(
               children: [
-                StarRow(
-                  stars: starsFor(hints: r.hints, mistakes: r.mistakes),
-                  size: 22,
-                  animate: false,
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: StarRow(
+                    stars: starsFor(hints: r.hints, mistakes: r.mistakes),
+                    size: 22,
+                    animate: false,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Container(
                   padding: const EdgeInsets.symmetric(vertical: 5),
                   decoration: BoxDecoration(color: goodSoft, borderRadius: BorderRadius.circular(14)),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.check_circle_rounded, color: leafEdge, size: 20),
-                      const SizedBox(width: 4),
-                      Text(formatTime(r.millis), style: chunky(17, color: leafEdge)),
-                    ],
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.check_circle_rounded, color: leafEdge, size: 20),
+                        const SizedBox(width: 4),
+                        Text(formatTime(r.millis), style: chunky(17, color: leafEdge)),
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -447,27 +467,32 @@ class _LevelCard extends StatelessWidget {
       child: CustomPaint(
         painter: const WoodPainter(radius: 18),
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(14, 12, 10, 14),
-          child: Row(
+          padding: const EdgeInsets.fromLTRB(12, 10, 8, 12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      gameName(l10n, kind),
-                      overflow: TextOverflow.ellipsis,
-                      style: outlinedText(19, color: const Color(0xFFFFF4D6)),
-                    ),
-                    Text(
-                      l10n.levelTitle(stats.level(kind)),
-                      overflow: TextOverflow.ellipsis,
-                      style: chunky(15, color: const Color(0xFFFFE6BC), weight: FontWeight.w600),
-                    ),
-                  ],
-                ),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Text(gameName(l10n, kind), style: outlinedText(19, color: const Color(0xFFFFF4D6))),
               ),
-              const _MapPin(),
+              const SizedBox(height: 2),
+              Row(
+                children: [
+                  Expanded(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        l10n.levelTitle(stats.level(kind)),
+                        style: chunky(15, color: const Color(0xFFFFE6BC), weight: FontWeight.w600),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  const _MapPin(),
+                ],
+              ),
             ],
           ),
         ),
@@ -482,14 +507,14 @@ class _MapPin extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    width: 40,
-    height: 40,
+    width: 32,
+    height: 32,
     decoration: BoxDecoration(
       color: leaf,
       shape: BoxShape.circle,
-      border: Border.all(color: leafEdge, width: 3),
+      border: Border.all(color: leafEdge, width: 2.5),
     ),
-    child: const Icon(Icons.flag_rounded, color: Colors.white, size: 22),
+    child: const Icon(Icons.flag_rounded, color: Colors.white, size: 18),
   );
 }
 
@@ -557,6 +582,53 @@ class _PairsArt extends StatelessWidget {
       ],
     ],
   );
+}
+
+/// A little dirt path of numbered stepping stones.
+class _TrailArt extends StatelessWidget {
+  const _TrailArt();
+
+  static const _stones = [(Offset(12, 50), 1), (Offset(46, 22), 2), (Offset(82, 46), 3)];
+
+  @override
+  Widget build(BuildContext context) => SizedBox(
+    width: 96,
+    height: 72,
+    child: Stack(
+      clipBehavior: Clip.none,
+      children: [
+        const Positioned.fill(child: CustomPaint(painter: _TrailArtPainter())),
+        for (final (p, n) in _stones)
+          Positioned(
+            left: p.dx - 13,
+            top: p.dy - 13,
+            child: TrailPebble(number: n, size: 26, reached: n < 3, finish: n == 3),
+          ),
+      ],
+    ),
+  );
+}
+
+class _TrailArtPainter extends CustomPainter {
+  const _TrailArtPainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final path = Path()
+      ..moveTo(12, 50)
+      ..cubicTo(20, 30, 34, 18, 46, 22)
+      ..cubicTo(60, 26, 64, 52, 82, 46);
+    Paint stroke(Color color, double width) => Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = width
+      ..strokeCap = StrokeCap.round;
+    canvas.drawPath(path, stroke(const Color(0xFFB8874F), 15));
+    canvas.drawPath(path, stroke(const Color(0xFFE9CB97), 11));
+  }
+
+  @override
+  bool shouldRepaint(_TrailArtPainter old) => false;
 }
 
 class _RepairCard extends StatelessWidget {

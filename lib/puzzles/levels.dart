@@ -76,7 +76,7 @@ PuzzleSpec pairsLevelSpec(int level) {
   };
 }
 
-/// Trail track (its own, not a [GameKind] yet): 5×5 easy at first, 8×8 hard from level 60.
+/// Trail track: 5×5 easy at first, 8×8 hard from level 60.
 PuzzleSpec trailLevelSpec(int level) {
   if (isBreatherLevel(level)) {
     return switch (level) {
@@ -132,7 +132,11 @@ PuzzleSpec trailDailySpec(int number) => const [
 
 /// Stable seed of a puzzle; never uses enum indices or String.hashCode, so it can't drift between app versions.
 int puzzleSeed(GameKind game, {required bool daily, required int number}) =>
-    mixSeed([game == GameKind.nests ? 1 : 2, daily ? 2 : 1, number]);
+    switch (game) {
+      GameKind.nests => mixSeed([1, daily ? 2 : 1, number]),
+      GameKind.pairs => mixSeed([2, daily ? 2 : 1, number]),
+      GameKind.trail => trailSeed(daily: daily, number: number),
+    };
 
 /// Stable seed of a Trail puzzle (game id 3; Nests and Pairs are 1 and 2 in [puzzleSeed]).
 int trailSeed({required bool daily, required int number}) => mixSeed([3, daily ? 2 : 1, number]);

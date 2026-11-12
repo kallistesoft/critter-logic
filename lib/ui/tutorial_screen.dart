@@ -5,12 +5,14 @@ import '../l10n/app_localizations.dart';
 import '../puzzles/nests/nests.dart';
 import '../puzzles/pairs/pairs.dart';
 import '../puzzles/puzzle.dart';
+import '../puzzles/trail/trail.dart';
 import '../services/sound_service.dart';
 import 'critter_actor.dart';
 import 'game/game_screen.dart';
 import 'game/nests_board.dart';
 import 'game/pairs_board.dart';
 import 'game/session.dart';
+import 'game/trail_board.dart';
 import 'meadow.dart';
 import 'palette.dart';
 import 'services.dart';
@@ -18,7 +20,7 @@ import 'widgets.dart';
 
 /// One tutorial step: a tiny board with a few cells to fill, introducing one rule.
 class _Step {
-  const _Step(this.text, this.initial, this.editable, {this.links = const []});
+  const _Step(this.text, this.initial, this.editable, {this.links = const [], this.path = const [], this.goal});
 
   final String Function(AppLocalizations) text;
 
@@ -26,6 +28,10 @@ class _Step {
   final String initial;
   final Set<int> editable;
   final List<PairsLink> links;
+
+  /// Trail: the trail drawn at the start, and the cell to reach (null: finish the puzzle).
+  final List<int> path;
+  final int? goal;
 }
 
 // 4×4 Nests: zones by row with a twist, so each rule decides one step. Solution columns 1, 3, 0, 2.
@@ -55,6 +61,22 @@ final _pairsSteps = <_Step>[
   ),
 ];
 
+// 4×4 Trail: stones 1–5 at cells 0, 3, 4, 13, 11; the hedge between 8 and 9 forces the way round by 12, the one
+// between 5 and 9 is just scenery.
+final _trailPuzzle = TrailPuzzle(
+  size: 4,
+  stones: const [0, 3, 4, 13, 11],
+  walls: const [(8, 9), (5, 9)],
+  solution: const [0, 1, 2, 3, 7, 6, 5, 4, 8, 12, 13, 9, 10, 14, 15, 11],
+);
+
+final _trailSteps = <_Step>[
+  _Step((l) => l.tutTrailStart, '', const {}, goal: 3),
+  _Step((l) => l.tutTrailOrder, '', const {}, path: const [0, 1, 2, 3], goal: 4),
+  _Step((l) => l.tutTrailWalls, '', const {}, path: const [0, 1, 2, 3, 7, 6, 5, 4], goal: 13),
+  _Step((l) => l.tutTrailFill, '', const {}, path: const [0, 1, 2, 3, 7, 6, 5, 4, 8, 12, 13]),
+];
+
 /// First-time tutorial: learn each rule by doing, on tiny boards. Pops `true` when finished or skipped.
 class TutorialScreen extends StatefulWidget {
   const TutorialScreen({super.key, required this.kind});
@@ -70,7 +92,14 @@ class _TutorialScreenState extends State<TutorialScreen> {
   late GameSession _session;
   bool _stepDone = false;
 
-  List<_Step> get _steps => widget.kind == GameKind.nests ? _nestsSteps : _pairsSteps;
+  /// Trail: the last move was refused.
+  bool _refused = false;
+
+  List<_Step> get _steps => switch (widget.kind) {
+    GameKind.nests => _nestsSteps,
+    GameKind.pairs => _pairsSteps,
+    GameKind.trail => _trailSteps,
+  };
 
   @override
   void initState() {
@@ -80,7 +109,9 @@ class _TutorialScreenState extends State<TutorialScreen> {
 
   GameSession _build(_Step step) {
     final GameSession session;
-    if (widget.kind == GameKind.nests) {
+    if (widget.kind == GameKind.trail) {
+      return TrailSession(_trailPuzzle, path: step.path);
+    } else if (widget.kind == GameKind.nests) {
       session = NestsSession(
         _nestsPuzzle,
         initial: [
@@ -96,6 +127,11 @@ class _TutorialScreenState extends State<TutorialScreen> {
   }
 
   bool _isDone() {
+    final s = _session;
+    if (s is TrailSession) {
+      final goal = _steps[_step].goal;
+      return goal == null ? s.solved : s.head == goal;
+    }
     final cells = _session.cells;
     for (final i in _steps[_step].editable) {
       final ok = widget.kind == GameKind.nests
@@ -108,11 +144,13 @@ class _TutorialScreenState extends State<TutorialScreen> {
 
   void _onMove(MoveOutcome outcome, int cell) {
     final sound = Services.of(context).sound;
+    final s = _session;
+    _refused = outcome == MoveOutcome.mistake;
     if (outcome == MoveOutcome.mistake) {
       sound.play(Sfx.conflict);
       HapticFeedback.mediumImpact();
     } else {
-      sound.play(Sfx.place);
+      sound.play(s is TrailSession && !s.onPath(cell) ? Sfx.erase : Sfx.place);
       HapticFeedback.lightImpact();
     }
     if (_isDone()) {
@@ -129,6 +167,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
         _step++;
         _session = _build(_steps[_step]);
         _stepDone = false;
+        _refused = false;
       });
     } else {
       _finish(skipped: false);
@@ -143,12 +182,25 @@ class _TutorialScreenState extends State<TutorialScreen> {
     nav.pop(true);
   }
 
+  String get _mascot => switch (widget.kind) {
+    GameKind.nests => 'chick',
+    GameKind.pairs => 'owl',
+    GameKind.trail => 'rabbit',
+  };
+
+  /// Trail: the hand points where to start dragging (the trail's end), then at the cell to reach.
+  Set<int> _trailTargets(TrailSession s, _Step step) {
+    final goal = step.goal ?? _trailPuzzle.stones.last;
+    return s.isPristine ? {s.head ?? _trailPuzzle.stones.first, goal} : {goal};
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final step = _steps[_step];
     final last = _step == _steps.length - 1;
-    final oops = _session.conflicts.isNotEmpty;
+    final trail = widget.kind == GameKind.trail;
+    final oops = trail ? _refused : _session.conflicts.isNotEmpty;
     return MeadowScaffold(
       child: Column(children: [
         MeadowTopBar(
@@ -184,7 +236,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 14),
           child: Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
-            CritterBuddy(widget.kind == GameKind.nests ? 'chick' : 'owl', size: 76, seed: 1),
+            CritterBuddy(_mascot, size: 76, seed: 1),
             const SizedBox(width: 4),
             Expanded(
               child: PopIn(
@@ -226,6 +278,15 @@ class _TutorialScreenState extends State<TutorialScreen> {
                         targets: _stepDone ? const {} : step.editable,
                         onMove: _onMove,
                       ),
+                      final TrailSession s => TrailBoard(
+                        key: ValueKey('tut$_step'),
+                        session: s,
+                        critter: _mascot,
+                        readOnly: _stepDone,
+                        targets: _stepDone ? const {} : _trailTargets(s, step),
+                        onMove: _onMove,
+                        onStrokeEnd: () => setState(() {}),
+                      ),
                       _ => const SizedBox.shrink(),
                     },
                   ),
@@ -252,7 +313,12 @@ class _TutorialScreenState extends State<TutorialScreen> {
                                 border: Border.all(color: oops ? bad : paperEdge, width: 2),
                               ),
                               child: Text(
-                                oops ? l10n.tutorialOops : l10n.tutorialTapHint,
+                                switch ((oops, trail)) {
+                                  (true, true) => l10n.tutTrailOops,
+                                  (true, false) => l10n.tutorialOops,
+                                  (false, true) => l10n.tutTrailDragHint,
+                                  (false, false) => l10n.tutorialTapHint,
+                                },
                                 textAlign: TextAlign.center,
                                 style: chunky(15, color: oops ? bad : inkSoft, weight: FontWeight.w600),
                               ),

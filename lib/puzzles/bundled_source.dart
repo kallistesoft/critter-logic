@@ -12,7 +12,7 @@ import 'trail/trail.dart';
 /// Dailies from assets/dailies/*.json (made by tools/gen_dailies.dart), generated on the device past the end of
 /// the bundle; levels generated on demand. Nests 7×7 and up can take tens of ms on a slow phone, so they are
 /// generated in a background isolate; Pairs and Trail take a few ms and run inline.
-class BundledPuzzleSource implements PuzzleSource, TrailSource {
+class BundledPuzzleSource implements PuzzleSource {
   BundledPuzzleSource({Future<String> Function(String key)? load, this.useIsolate = true})
       : _load = load ?? rootBundle.loadString;
 

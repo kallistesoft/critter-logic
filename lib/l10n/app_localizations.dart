@@ -236,6 +236,12 @@ abstract class AppLocalizations {
   /// **'Pairs'**
   String get gamePairs;
 
+  /// Name of the Zip-like game: one path through every cell, numbered stones in order
+  ///
+  /// In en, this message translates to:
+  /// **'Trail'**
+  String get gameTrail;
+
   /// Home subtitle under the game name
   ///
   /// In en, this message translates to:
@@ -257,7 +263,7 @@ abstract class AppLocalizations {
   /// No description provided for @allDailiesDone.
   ///
   /// In en, this message translates to:
-  /// **'Both dailies done — see you tomorrow! 🎉'**
+  /// **'All three dailies done — see you tomorrow! 🎉'**
   String get allDailiesDone;
 
   /// Home section: endless level tracks
@@ -367,6 +373,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'As many ☀️ as 🌙 in each line, never 3 alike in a row.'**
   String get pairsRulesShort;
+
+  /// No description provided for @trailRulesShort.
+  ///
+  /// In en, this message translates to:
+  /// **'One trail through every square, stones in order, from 1 to the 🚩.'**
+  String get trailRulesShort;
 
   /// No description provided for @hintNoCoinsTitle.
   ///
@@ -491,7 +503,7 @@ abstract class AppLocalizations {
   /// No description provided for @rewardDailyCapsule.
   ///
   /// In en, this message translates to:
-  /// **'Both dailies done: +1 capsule'**
+  /// **'All dailies done: +1 capsule'**
   String get rewardDailyCapsule;
 
   /// No description provided for @rewardCapsule.
@@ -602,6 +614,42 @@ abstract class AppLocalizations {
   /// **'= means the same, × means opposite.'**
   String get tutPairsLinks;
 
+  /// No description provided for @tutTrailStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Put your finger on stone 1 and drag to stone 2. The trail goes up, down, left or right.'**
+  String get tutTrailStart;
+
+  /// No description provided for @tutTrailOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Visit the stones in order: 1, 2, 3… Drag back over the trail to undo a step.'**
+  String get tutTrailOrder;
+
+  /// No description provided for @tutTrailWalls.
+  ///
+  /// In en, this message translates to:
+  /// **'Hedges block the way. Go around them!'**
+  String get tutTrailWalls;
+
+  /// No description provided for @tutTrailFill.
+  ///
+  /// In en, this message translates to:
+  /// **'Cover every square, then end on the last stone 🚩.'**
+  String get tutTrailFill;
+
+  /// No description provided for @tutTrailDragHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag from the highlighted cell.'**
+  String get tutTrailDragHint;
+
+  /// No description provided for @tutTrailOops.
+  ///
+  /// In en, this message translates to:
+  /// **'Oops, that way breaks a rule. Try another cell.'**
+  String get tutTrailOops;
+
   /// Album set badge
   ///
   /// In en, this message translates to:
@@ -617,7 +665,7 @@ abstract class AppLocalizations {
   /// No description provided for @capsulesHowTo.
   ///
   /// In en, this message translates to:
-  /// **'Solve both dailies to earn a capsule each day.'**
+  /// **'Solve all three dailies to earn a capsule each day.'**
   String get capsulesHowTo;
 
   /// No description provided for @noCapsules.

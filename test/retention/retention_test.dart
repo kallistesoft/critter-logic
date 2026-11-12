@@ -85,9 +85,17 @@ void main() {
     expect(update.thresholdsReached, [5]);
     expect(progress.count(Counter.fastPairs), 0);
     expect(progress.count(Counter.perfectDailies), 1);
-    expect(progress.count(Counter.bothDailiesDays), 1);
+    expect(progress.count(Counter.bothDailiesDays), 0, reason: 'Trail still to play');
     expect(retention.event.current(now)!.tokens, 6);
     expect(logged('event_threshold').single.$2, {'theme': 'polar', 'week': '2026-11-30', 'threshold': 5});
+
+    // A fast Trail: no fast-solve counter of its own (nor Pairs'); now every daily of the day is done.
+    final trail = DailyResult(kind: GameKind.trail, number: day, millis: 30000);
+    await stats.recordDaily(trail);
+    await retention.recordEvent(DailySolved(trail), now);
+    expect(progress.count(Counter.bothDailiesDays), 1);
+    expect(progress.count(Counter.fastNests), 1);
+    expect(progress.count(Counter.fastPairs), 0);
   });
 
   test('levels, shares and capsules', () async {

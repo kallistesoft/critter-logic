@@ -37,7 +37,7 @@ class DailyRewards {
 }
 
 /// Pays the rewards of a daily solved for the first time (call only when [StatsStore.recordDaily] returned true):
-/// coins, the day's capsule once both dailies are done, the streak chest, and the best streak.
+/// coins, the day's capsule once all dailies are done, the streak chest, and the best streak.
 Future<DailyRewards> grantDailyRewards(StatsStore stats, int day) async {
   await stats.addCoins(Economy.dailyWin);
   var capsule = false;
