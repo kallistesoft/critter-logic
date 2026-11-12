@@ -21,8 +21,8 @@ Exact source file → effect mapping: `tools/import_sfx.py` (`EFFECTS`). Critter
 
 ## Font
 
-- `assets/fonts/Fredoka-{Medium,SemiBold,Bold}.ttf` — **Fredoka** by the Fredoka Project Authors (Milena Brandão,
-  Hafontia), from the official Google Fonts repository (<https://github.com/google/fonts/tree/main/ofl/fredoka>),
+- `assets/fonts/Fredoka-{Medium,SemiBold,Bold}.ttf` — **Fredoka**, Copyright 2016 The Fredoka Project Authors
+  (github.com/hafontia/Fredoka-One), from the official Google Fonts repository (<https://github.com/google/fonts/tree/main/ofl/fredoka>),
   licensed under the **SIL Open Font License 1.1** (full text in `assets/fonts/OFL.txt`). The three files are static
   instances (weights 500/600/700, width 100) cut from the variable `Fredoka[wdth,wght].ttf` with fontTools; the font
   is unmodified otherwise and keeps its name, as the OFL allows for instances.
