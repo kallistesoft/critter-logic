@@ -15,6 +15,7 @@ Future<void> planReminders(StatsStore stats, ReminderService reminders, AppLocal
       title: l10n.reminderTitle,
       body: l10n.reminderBody,
       streakBody: streak > 0 && !stats.dayCounts(today) ? l10n.reminderStreak(streak) : null,
+      channel: l10n.reminderChannel,
     ),
   );
 }

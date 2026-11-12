@@ -188,7 +188,7 @@ void main() {
       expect(find.text('Turn on notifications for Critter Logic in your phone settings.'), findsOneWidget);
     });
 
-    for (final locale in const [Locale('en'), Locale('fr')]) {
+    for (final locale in const [Locale('en'), Locale('fr'), Locale('es')]) {
       testWidgets('every screen fits a 360×640 phone ($locale)', (tester) async {
         await stats.addCapsule();
         await app.pump(tester, locale: locale, size: const Size(360, 640));

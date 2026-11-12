@@ -6,6 +6,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart' as intl;
 
 import 'app_localizations_en.dart';
+import 'app_localizations_es.dart';
 import 'app_localizations_fr.dart';
 
 // ignore_for_file: type=lint
@@ -95,6 +96,7 @@ abstract class AppLocalizations {
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
     Locale('en'),
+    Locale('es'),
     Locale('fr'),
   ];
 
@@ -1508,6 +1510,24 @@ abstract class AppLocalizations {
   /// **'Daily reminder'**
   String get settingReminders;
 
+  /// Settings row: picks the app language
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get settingLanguage;
+
+  /// Language picker: follow the phone's language
+  ///
+  /// In en, this message translates to:
+  /// **'System default'**
+  String get languageSystem;
+
+  /// Android notification channel name for the daily reminder, shown in the phone's settings
+  ///
+  /// In en, this message translates to:
+  /// **'Daily puzzle'**
+  String get reminderChannel;
+
   /// No description provided for @credits.
   ///
   /// In en, this message translates to:
@@ -1766,7 +1786,7 @@ class _AppLocalizationsDelegate
 
   @override
   bool isSupported(Locale locale) =>
-      <String>['en', 'fr'].contains(locale.languageCode);
+      <String>['en', 'es', 'fr'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
@@ -1777,6 +1797,8 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
   switch (locale.languageCode) {
     case 'en':
       return AppLocalizationsEn();
+    case 'es':
+      return AppLocalizationsEs();
     case 'fr':
       return AppLocalizationsFr();
   }

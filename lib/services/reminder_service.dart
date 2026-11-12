@@ -21,13 +21,16 @@ List<DateTime> plannedReminders(DateTime now, {required bool todayDone}) {
 
 /// What a reminder says; the first one mentions the streak when there is one at stake.
 class ReminderText {
-  const ReminderText({required this.title, required this.body, required this.streakBody});
+  const ReminderText({required this.title, required this.body, required this.streakBody, this.channel = 'Daily puzzle'});
 
   final String title;
   final String body;
 
   /// Shown on the first reminder when the player has a streak to keep, e.g. "Your 🔥 5-day streak ends tonight".
   final String? streakBody;
+
+  /// Android notification channel name, shown in the phone's app notification settings.
+  final String channel;
 }
 
 /// Local scheduled notifications (no server, no background job).
@@ -98,10 +101,10 @@ class LocalReminderService implements ReminderService {
       await _init();
       await _plugin.cancelAll();
       if (!enabled) return;
-      const details = NotificationDetails(
-        android: AndroidNotificationDetails('daily', 'Daily puzzle',
+      final details = NotificationDetails(
+        android: AndroidNotificationDetails('daily', text.channel,
             importance: Importance.defaultImportance, priority: Priority.defaultPriority),
-        iOS: DarwinNotificationDetails(),
+        iOS: const DarwinNotificationDetails(),
       );
       final times = plannedReminders(DateTime.now(), todayDone: todayDone);
       for (final (i, at) in times.indexed) {

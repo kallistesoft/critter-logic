@@ -889,6 +889,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingReminders => 'Daily reminder';
 
   @override
+  String get settingLanguage => 'Language';
+
+  @override
+  String get languageSystem => 'System default';
+
+  @override
+  String get reminderChannel => 'Daily puzzle';
+
+  @override
   String get credits => 'Art and sounds: Kenney (kenney.nl), CC0';
 
   @override

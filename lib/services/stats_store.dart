@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../meta/economy.dart';
@@ -196,6 +197,17 @@ class StatsStore {
   Future<void> setRemindersOn(bool value) => _prefs.setBool('reminders', value);
   int get unansweredReminders => _prefs.getInt('unansweredReminders') ?? 0;
   Future<void> setUnansweredReminders(int value) => _prefs.setInt('unansweredReminders', value);
+
+  /// App language chosen in Settings ('en', 'fr', 'es'); null follows the phone.
+  String? get language => languageChanges.value;
+  Future<void> setLanguage(String? code) async {
+    code == null ? await _prefs.remove('language') : await _prefs.setString('language', code);
+    _language.value = code;
+  }
+
+  /// Notifies when [language] changes, so the app switches language at once.
+  ValueListenable<String?> get languageChanges => _language;
+  late final _language = ValueNotifier<String?>(_prefs.getString('language'));
 
   // Puzzle in progress, one slot per game and mode (e.g. 'nests.daily', 'pairs.level').
   Map<String, dynamic>? savedGame(String slot) {
