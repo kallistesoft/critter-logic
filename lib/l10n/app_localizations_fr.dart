@@ -96,6 +96,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get gamePairs => 'Paires';
 
   @override
+  String get gameTrail => 'Sentier';
+
+  @override
   String get tagline => 'Casse-tête logiques du jour';
 
   @override
@@ -105,7 +108,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get todaysPuzzles => 'Défis du jour';
 
   @override
-  String get allDailiesDone => 'Les deux défis sont faits — à demain ! 🎉';
+  String get allDailiesDone => 'Les trois défis sont faits — à demain ! 🎉';
 
   @override
   String get levels => 'Niveaux';
@@ -176,6 +179,10 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get pairsRulesShort =>
       'Autant de ☀️ que de 🌙 par ligne, jamais 3 pareils de suite.';
+
+  @override
+  String get trailRulesShort =>
+      'Un seul sentier par toutes les cases, pierres dans l’ordre, de 1 au 🚩.';
 
   @override
   String get hintNoCoinsTitle => 'Pas assez de pièces';
@@ -250,7 +257,7 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get rewardDailyCapsule => 'Les deux défis faits : +1 capsule';
+  String get rewardDailyCapsule => 'Tous les défis faits : +1 capsule';
 
   @override
   String get rewardCapsule => '+1 capsule';
@@ -317,6 +324,28 @@ class AppLocalizationsFr extends AppLocalizations {
   String get tutPairsLinks => '= veut dire pareil, × veut dire l’inverse.';
 
   @override
+  String get tutTrailStart =>
+      'Pose ton doigt sur la pierre 1 et glisse jusqu’à la pierre 2. Le sentier va en haut, en bas, à gauche ou à droite.';
+
+  @override
+  String get tutTrailOrder =>
+      'Passe par les pierres dans l’ordre : 1, 2, 3… Reviens sur le sentier pour effacer un pas.';
+
+  @override
+  String get tutTrailWalls => 'Les haies bloquent le passage. Contourne-les !';
+
+  @override
+  String get tutTrailFill =>
+      'Passe par toutes les cases, puis termine sur la dernière pierre 🚩.';
+
+  @override
+  String get tutTrailDragHint => 'Glisse depuis la case en surbrillance.';
+
+  @override
+  String get tutTrailOops =>
+      'Oups, ce chemin enfreint une règle. Essaie une autre case.';
+
+  @override
   String get setComplete => 'Complète';
 
   @override
@@ -332,7 +361,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get capsulesHowTo =>
-      'Résous les deux défis pour gagner une capsule chaque jour.';
+      'Résous les trois défis pour gagner une capsule chaque jour.';
 
   @override
   String get noCapsules => 'Pas de capsule pour l’instant';

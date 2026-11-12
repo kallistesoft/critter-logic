@@ -13,7 +13,11 @@ void main() {
   late TestApp app;
 
   setUp(() async {
-    SharedPreferences.setMockInitialValues({'flutter.tutorial.nests': true, 'flutter.tutorial.pairs': true});
+    SharedPreferences.setMockInitialValues({
+      'flutter.tutorial.nests': true,
+      'flutter.tutorial.pairs': true,
+      'flutter.tutorial.trail': true,
+    });
     stats = await StatsStore.open();
     app = TestApp(stats);
   });
@@ -23,15 +27,18 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('home shows both dailies, streak, coins and levels', (tester) async {
+  testWidgets('home shows the three dailies, streak, coins and levels', (tester) async {
     await app.pump(tester);
     expect(find.text('Critter Logic'), findsOneWidget);
     expect(find.byKey(const Key('daily-nests')), findsOneWidget);
     expect(find.byKey(const Key('daily-pairs')), findsOneWidget);
+    expect(find.byKey(const Key('daily-trail')), findsOneWidget);
+    expect(find.text('Trail'), findsNWidgets(2), reason: 'daily card and level card');
+    expect(find.byKey(const Key('level-trail')), findsOneWidget);
     expect(find.text('Daily #12'), findsOneWidget);
     expect(find.text('${Economy.starting}'), findsOneWidget);
-    expect(find.text('Play'), findsNWidgets(2));
-    expect(find.text('Level 1'), findsNWidgets(2));
+    expect(find.text('Play'), findsNWidgets(3));
+    expect(find.text('Level 1'), findsNWidgets(3));
     expect(find.byKey(const Key('capsuleBadge')), findsNothing);
   });
 
@@ -70,7 +77,7 @@ void main() {
     expect(app.ads.interstitials, 1, reason: 'no interstitial after a read-only view');
   });
 
-  testWidgets('solving both dailies gives the day\'s capsule', (tester) async {
+  testWidgets('solving all three dailies gives the day\'s capsule', (tester) async {
     await app.pump(tester);
     await openDaily(tester, GameKind.pairs);
     await solvePairs(tester);
@@ -85,11 +92,22 @@ void main() {
     await tester.pumpAndSettle();
     await solveNests(tester);
     await tester.pumpAndSettle();
+    expect(stats.capsules, 0, reason: 'Trail still to play');
+    expect(stats.dailyCapsuleGiven(today), isFalse);
+
+    // "Play Trail": the one daily left.
+    await scrollTo(tester, find.byKey(const Key('playOther')));
+    expect(find.text('Play Trail'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('playOther')));
+    await tester.pumpAndSettle();
+    await solveTrail(tester);
+    await tester.pumpAndSettle();
     expect(stats.capsules, 1);
     expect(stats.dailyCapsuleGiven(today), isTrue);
-    expect(find.text('Both dailies done: +1 capsule'), findsOneWidget);
-    expect(app.leaderboard.submits, hasLength(2));
-    expect(app.ads.interstitials, 1, reason: 'leaving the first result for the other daily');
+    expect(find.text('All dailies done: +1 capsule'), findsOneWidget);
+    expect(find.byKey(const Key('playOther')), findsNothing);
+    expect(app.leaderboard.submits.map((s) => s.$1), [GameKind.pairs, GameKind.nests, GameKind.trail]);
+    expect(app.ads.interstitials, 2, reason: 'leaving each result for the next daily');
   });
 
   testWidgets('daily mistakes add 10 s and hints 30 s to the ranked time', (tester) async {

@@ -4,6 +4,8 @@ import '../../puzzles/nests/nests.dart';
 import '../../puzzles/pairs/pairs.dart';
 import '../../puzzles/puzzle.dart';
 import '../../puzzles/source.dart';
+import '../../puzzles/trail/solver.dart';
+import '../../puzzles/trail/trail.dart';
 
 /// What a move did.
 enum MoveOutcome { none, ok, mistake }
@@ -226,4 +228,206 @@ class PairsSession extends GameSession<int?> {
   String encodeCell(int? value) => value == null ? '.' : '$value';
   @override
   int? decodeCell(String char) => char == '.' ? null : int.parse(char);
+}
+
+/// What one step of a Trail drag did.
+enum TrailStep {
+  /// Nothing (the same cell, or a cell the drag can't reach from the path's end, like a diagonal).
+  none,
+
+  /// The path grew by the cell.
+  extended,
+
+  /// The path went back one cell (the drag moved back over it).
+  retracted,
+
+  /// A move that breaks a rule (wall, revisit, stone out of order, past the last stone): refused, a mistake.
+  refused,
+}
+
+/// Trail: [cells] holds each cell's step on the drawn path (1 for the first cell, 0 when not on the path), so undo,
+/// restart and saving work as in the other games. The path is always legal: wrong moves are refused (and counted
+/// as mistakes) instead of drawn.
+class TrailSession extends GameSession<int> {
+  TrailSession(this.puzzle, {List<int> path = const []})
+      : rules = TrailRules(puzzle),
+        super(_cellsOf(puzzle.cellCount, path));
+
+  final TrailPuzzle puzzle;
+  final TrailRules rules;
+
+  /// The cell of the last refused move, and how many moves were refused so far (to replay the wobble).
+  int? refusedCell;
+  int refusals = 0;
+
+  static List<int> _cellsOf(int count, List<int> path) {
+    final cells = List.filled(count, 0);
+    for (var i = 0; i < path.length; i++) {
+      cells[path[i]] = i + 1;
+    }
+    return cells;
+  }
+
+  /// The path in [cells], or null when the steps don't run 1, 2, … without a gap.
+  static List<int>? _pathOf(List<int> cells) {
+    final length = cells.where((v) => v > 0).length;
+    final path = List.filled(length, -1);
+    for (var i = 0; i < cells.length; i++) {
+      final v = cells[i];
+      if (v == 0) continue;
+      if (v < 0 || v > length || path[v - 1] != -1) return null;
+      path[v - 1] = i;
+    }
+    return path;
+  }
+
+  /// The drawn path, stone 1 first.
+  List<int> get path => _pathOf(cells) ?? const [];
+
+  /// The path's last cell (where the critter stands), or null before the first move.
+  int? get head {
+    final p = path;
+    return p.isEmpty ? null : p.last;
+  }
+
+  bool onPath(int cell) => cells[cell] > 0;
+
+  @override
+  GameKind get kind => GameKind.trail;
+  @override
+  int get size => puzzle.size;
+
+  @override
+  int cycle(int value) => value;
+  @override
+  Set<int> findConflicts(List<int> cells) => rules.conflicts(_pathOf(cells) ?? const []);
+  @override
+  bool checkSolved(List<int> cells) {
+    final p = _pathOf(cells);
+    return p != null && rules.isSolved(p);
+  }
+
+  @override
+  Hint<int>? findHint() => trailHint(puzzle, path);
+
+  // One char per cell: '0' + the step (up to 8×8 = 64 steps, still plain ASCII).
+  @override
+  String encodeCell(int value) => String.fromCharCode(48 + value);
+  @override
+  int decodeCell(String char) => char.codeUnitAt(0) - 48;
+
+  void _setPath(List<int> path) {
+    final next = _cellsOf(cells.length, path);
+    for (var i = 0; i < next.length; i++) {
+      cells[i] = next[i];
+    }
+  }
+
+  /// A one-step, undoable change outside a drag.
+  MoveOutcome _apply(List<int> path) {
+    _history.add(List.of(cells));
+    _setPath(path);
+    hintCell = null;
+    return _commit(countMistake: false);
+  }
+
+  void _refuse(int cell) {
+    mistakes++;
+    refusedCell = cell;
+    refusals++;
+    notifyListeners();
+  }
+
+  /// One tap on [cell]: on the path, cuts it back to there; on stone 1 with no path yet, starts it; next to the
+  /// path's end, extends it; a move that breaks a rule is refused (a mistake).
+  @override
+  MoveOutcome tap(int cell) {
+    if (solved || isLocked(cell)) return MoveOutcome.none;
+    final p = path;
+    if (onPath(cell)) {
+      final keep = cells[cell];
+      return keep == p.length ? MoveOutcome.none : _apply(p.sublist(0, keep));
+    }
+    if (p.isEmpty) return cell == puzzle.stones.first ? _apply([cell]) : MoveOutcome.none;
+    if (rules.canExtend(p, cell)) return _apply([...p, cell]);
+    _refuse(cell);
+    return MoveOutcome.mistake;
+  }
+
+  /// Where a drag starts: on the path (cut back to there), on stone 1, or next to the path's end. False when a drag
+  /// can't start on [cell]. Call [endStroke] when the drag ends.
+  bool startDrag(int cell) {
+    if (solved || isLocked(cell)) return false;
+    final p = path;
+    final List<int> next;
+    if (onPath(cell)) {
+      next = p.sublist(0, cells[cell]);
+    } else if (cell == puzzle.stones.first) {
+      next = [cell];
+    } else if (p.isNotEmpty && rules.canExtend(p, cell)) {
+      next = [...p, cell];
+    } else {
+      return false;
+    }
+    beginStroke();
+    if (!listEquals(next, p)) {
+      _setPath(next);
+      hintCell = null;
+      notifyListeners();
+    }
+    return true;
+  }
+
+  /// The drag moved onto [cell]: back over the path retracts, a legal step extends, a rule break is refused. A step
+  /// that solves the puzzle ends the stroke.
+  TrailStep dragTo(int cell) {
+    if (solved || _strokeStart == null) return TrailStep.none;
+    final p = path;
+    if (p.isEmpty || cell == p.last) return TrailStep.none;
+    if (p.length >= 2 && cell == p[p.length - 2]) {
+      if (isLocked(p.last)) return TrailStep.none;
+      cells[p.last] = 0;
+      hintCell = null;
+      notifyListeners();
+      return TrailStep.retracted;
+    }
+    if (isLocked(cell)) return TrailStep.none;
+    final error = rules.firstError([...p, cell]);
+    if (error == null) {
+      cells[cell] = p.length + 1;
+      hintCell = null;
+      if (rules.isSolved([...p, cell])) {
+        endStroke();
+      } else {
+        notifyListeners();
+      }
+      return TrailStep.extended;
+    }
+    if (error.$2 == TrailError.jump) return TrailStep.none;
+    _refuse(cell);
+    return TrailStep.refused;
+  }
+
+  @override
+  int? applyHint() {
+    if (solved) return null;
+    final hint = findHint();
+    if (hint == null) return null;
+    final p = path;
+    _history.add(List.of(cells));
+    _setPath(hint.wrong ? p.sublist(0, hint.value) : [...p, hint.cell]);
+    hints++;
+    hintCell = hint.cell;
+    _commit(countMistake: false);
+    return hint.cell;
+  }
+
+  @override
+  bool restore(Map<String, dynamic> json) {
+    final raw = json['c'];
+    if (raw is! String || raw.length != cells.length) return false;
+    final p = _pathOf([for (final c in raw.split('')) decodeCell(c)]);
+    if (p == null || !rules.isValid(p)) return false;
+    return super.restore(json);
+  }
 }

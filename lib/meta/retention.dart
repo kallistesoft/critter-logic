@@ -164,7 +164,13 @@ class Retention {
         if (result.hints == 0) await progress.increment(Counter.noHintSolves);
         if (result.hints == 0 && result.mistakes == 0) await progress.increment(Counter.perfectDailies);
         if (result.millis < fastDailyMillis) {
-          await progress.increment(result.kind == GameKind.nests ? Counter.fastNests : Counter.fastPairs);
+          // Trail has no fast-solve trophy (yet).
+          final fast = switch (result.kind) {
+            GameKind.nests => Counter.fastNests,
+            GameKind.pairs => Counter.fastPairs,
+            GameKind.trail => null,
+          };
+          if (fast != null) await progress.increment(fast);
         }
         if (stats.allDailiesDone(result.number)) await progress.increment(Counter.bothDailiesDays);
         tokens = settings.events.tokensPerDaily;

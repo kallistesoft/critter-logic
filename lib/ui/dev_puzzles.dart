@@ -1,6 +1,8 @@
 import '../puzzles/nests/nests.dart';
 import '../puzzles/pairs/pairs.dart';
+import '../puzzles/levels.dart';
 import '../puzzles/source.dart';
+import '../puzzles/trail/trail.dart';
 
 /// A few hand-checked puzzles (unique solutions) to run the app before the bundled source lands.
 class DevPuzzleSource implements PuzzleSource {
@@ -76,4 +78,11 @@ class DevPuzzleSource implements PuzzleSource {
 
   @override
   Future<PairsPuzzle> levelPairs(int level) async => _pairs[(level - 1) % _pairs.length];
+
+  // Trail puzzles are quick to make: the real generator.
+  @override
+  Future<TrailPuzzle> dailyTrail(int number) async => generateTrailDaily(number);
+
+  @override
+  Future<TrailPuzzle> levelTrail(int level) async => generateTrailLevel(level);
 }

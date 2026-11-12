@@ -5,6 +5,7 @@ import 'package:critter_logic/puzzles/nests/nests.dart';
 import 'package:critter_logic/puzzles/pairs/pairs.dart';
 import 'package:critter_logic/puzzles/puzzle.dart';
 import 'package:critter_logic/puzzles/source.dart';
+import 'package:critter_logic/puzzles/trail/trail.dart';
 import 'package:critter_logic/services/ad_service.dart';
 import 'package:critter_logic/services/analytics_service.dart';
 import 'package:critter_logic/services/coin_store_service.dart';
@@ -29,12 +30,23 @@ final fakePairs = PairsPuzzle.fromJson(const {
   'x': '0101010110101010',
 });
 
+/// 4×4 Trail with a unique solution: a snake row by row, stones 1–5 at cells 0, 3, 4, 11 and 12.
+final fakeTrail = TrailPuzzle(
+  size: 4,
+  stones: const [0, 3, 4, 11, 12],
+  solution: const [0, 1, 2, 3, 7, 6, 5, 4, 8, 9, 10, 11, 15, 14, 13, 12],
+);
+
 /// The same tiny puzzles for every daily and level.
 class FakePuzzleSource implements PuzzleSource {
   @override
   Future<NestsPuzzle> dailyNests(int number) async => fakeNests;
   @override
   Future<PairsPuzzle> dailyPairs(int number) async => fakePairs;
+  @override
+  Future<TrailPuzzle> dailyTrail(int number) async => fakeTrail;
+  @override
+  Future<TrailPuzzle> levelTrail(int level) async => fakeTrail;
   @override
   Future<NestsPuzzle> levelNests(int level) async => fakeNests;
   @override
@@ -167,6 +179,20 @@ Future<void> solvePairs(WidgetTester tester) async {
     await tapCell(tester, i, times: fakePairs.solution[i] == sun ? 1 : 2);
   }
 }
+
+/// Drags one finger along [cells] on the board, center to center, in one gesture.
+Future<void> dragPath(WidgetTester tester, List<int> cells) async {
+  final gesture = await tester.startGesture(tester.getCenter(find.byKey(Key('cell-${cells.first}'))));
+  for (final c in cells.skip(1)) {
+    await gesture.moveTo(tester.getCenter(find.byKey(Key('cell-$c'))));
+    await tester.pump();
+  }
+  await gesture.up();
+  await tester.pump();
+}
+
+/// Solves the fake Trail board with one drag from stone 1.
+Future<void> solveTrail(WidgetTester tester) => dragPath(tester, fakeTrail.solution);
 
 Future<void> scrollTo(WidgetTester tester, Finder finder) async {
   await tester.scrollUntilVisible(finder, 120, scrollable: find.byType(Scrollable).first);

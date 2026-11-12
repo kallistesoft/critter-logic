@@ -104,8 +104,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     for (final kind in GameKind.values) ...[
                       if (kind != GameKind.values.first) const _Divider(),
                       _Link(
-                        icon: kind == GameKind.nests ? Icons.grid_view_rounded : Icons.wb_sunny_rounded,
-                        tint: kind == GameKind.nests ? leaf : gold,
+                        icon: switch (kind) {
+                          GameKind.nests => Icons.grid_view_rounded,
+                          GameKind.pairs => Icons.wb_sunny_rounded,
+                          GameKind.trail => Icons.pets_rounded,
+                        },
+                        tint: switch (kind) {
+                          GameKind.nests => leaf,
+                          GameKind.pairs => gold,
+                          GameKind.trail => coral,
+                        },
                         label: l10n.howToPlay(gameName(l10n, kind)),
                         onTap: () => Navigator.of(context).push(softRoute(TutorialScreen(kind: kind))),
                       ),

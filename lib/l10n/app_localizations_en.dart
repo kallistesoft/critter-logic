@@ -95,6 +95,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get gamePairs => 'Pairs';
 
   @override
+  String get gameTrail => 'Trail';
+
+  @override
   String get tagline => 'Daily logic puzzles';
 
   @override
@@ -104,7 +107,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get todaysPuzzles => 'Today\'s puzzles';
 
   @override
-  String get allDailiesDone => 'Both dailies done — see you tomorrow! 🎉';
+  String get allDailiesDone => 'All three dailies done — see you tomorrow! 🎉';
 
   @override
   String get levels => 'Levels';
@@ -175,6 +178,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get pairsRulesShort =>
       'As many ☀️ as 🌙 in each line, never 3 alike in a row.';
+
+  @override
+  String get trailRulesShort =>
+      'One trail through every square, stones in order, from 1 to the 🚩.';
 
   @override
   String get hintNoCoinsTitle => 'Not enough coins';
@@ -249,7 +256,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get rewardDailyCapsule => 'Both dailies done: +1 capsule';
+  String get rewardDailyCapsule => 'All dailies done: +1 capsule';
 
   @override
   String get rewardCapsule => '+1 capsule';
@@ -315,6 +322,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tutPairsLinks => '= means the same, × means opposite.';
 
   @override
+  String get tutTrailStart =>
+      'Put your finger on stone 1 and drag to stone 2. The trail goes up, down, left or right.';
+
+  @override
+  String get tutTrailOrder =>
+      'Visit the stones in order: 1, 2, 3… Drag back over the trail to undo a step.';
+
+  @override
+  String get tutTrailWalls => 'Hedges block the way. Go around them!';
+
+  @override
+  String get tutTrailFill =>
+      'Cover every square, then end on the last stone 🚩.';
+
+  @override
+  String get tutTrailDragHint => 'Drag from the highlighted cell.';
+
+  @override
+  String get tutTrailOops => 'Oops, that way breaks a rule. Try another cell.';
+
+  @override
   String get setComplete => 'Complete';
 
   @override
@@ -329,7 +357,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get capsulesHowTo => 'Solve both dailies to earn a capsule each day.';
+  String get capsulesHowTo =>
+      'Solve all three dailies to earn a capsule each day.';
 
   @override
   String get noCapsules => 'No capsules yet';

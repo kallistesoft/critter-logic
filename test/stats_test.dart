@@ -34,6 +34,8 @@ void main() {
     expect(stats.dailiesSolved, 1);
     expect(stats.allDailiesDone(10), isFalse);
     await stats.recordDaily(r(GameKind.pairs, 10));
+    expect(stats.allDailiesDone(10), isFalse, reason: 'Trail still to play');
+    await stats.recordDaily(r(GameKind.trail, 10));
     expect(stats.allDailiesDone(10), isTrue);
   });
 

@@ -148,11 +148,12 @@ void main() {
       await app.pump(tester, locale: const Locale('fr'));
       expect(find.text('Défis du jour'), findsOneWidget);
       expect(find.text('Défi #12'), findsOneWidget);
-      expect(find.text('Jouer'), findsNWidgets(2));
+      expect(find.text('Jouer'), findsNWidgets(3));
       expect(find.text('Niveaux'), findsOneWidget);
-      expect(find.text('Niveau 1'), findsNWidgets(2));
+      expect(find.text('Niveau 1'), findsNWidgets(3));
       expect(find.text('Nids'), findsWidgets);
       expect(find.text('Paires'), findsWidgets);
+      expect(find.text('Sentier'), findsWidgets);
       expect(find.text('À ouvrir !'), findsOneWidget);
       expect(find.text('0 jour'), findsOneWidget);
       await tester.tap(find.byKey(const Key('daily-pairs')));
@@ -217,6 +218,14 @@ void main() {
         await tester.tap(find.byKey(const Key('tutorialSkip')));
         await tester.pumpAndSettle();
         await tapCell(tester, 1);
+        await back();
+        await visit(const Key('daily-trail')); // tutorial
+        expect(tester.takeException(), isNull);
+        await tester.tap(find.byKey(const Key('tutorialSkip')));
+        await tester.pumpAndSettle();
+        await dragPath(tester, [0, 1, 2]);
+        await back();
+        await visit(const Key('level-trail'));
         await back();
         await visit(const Key('settings'));
         await back();

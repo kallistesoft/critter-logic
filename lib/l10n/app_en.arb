@@ -95,6 +95,10 @@
   "@gamePairs": {
     "description": "Name of the Tango-like game: suns and moons"
   },
+  "gameTrail": "Trail",
+  "@gameTrail": {
+    "description": "Name of the Zip-like game: one path through every cell, numbered stones in order"
+  },
   "tagline": "Daily logic puzzles",
   "@tagline": {
     "description": "Home subtitle under the game name"
@@ -107,7 +111,7 @@
   "@todaysPuzzles": {
     "description": "Home section title"
   },
-  "allDailiesDone": "Both dailies done — see you tomorrow! 🎉",
+  "allDailiesDone": "All three dailies done — see you tomorrow! 🎉",
   "@allDailiesDone": {},
   "levels": "Levels",
   "@levels": {
@@ -181,6 +185,8 @@
   "@nestsRulesShort": {},
   "pairsRulesShort": "As many ☀️ as 🌙 in each line, never 3 alike in a row.",
   "@pairsRulesShort": {},
+  "trailRulesShort": "One trail through every square, stones in order, from 1 to the 🚩.",
+  "@trailRulesShort": {},
   "hintNoCoinsTitle": "Not enough coins",
   "@hintNoCoinsTitle": {},
   "hintNoCoinsBody": "A hint costs {cost} coins. Watch a short video for a free one?",
@@ -276,7 +282,7 @@
       }
     }
   },
-  "rewardDailyCapsule": "Both dailies done: +1 capsule",
+  "rewardDailyCapsule": "All dailies done: +1 capsule",
   "@rewardDailyCapsule": {},
   "rewardCapsule": "+1 capsule",
   "@rewardCapsule": {},
@@ -336,6 +342,18 @@
   "@tutPairsThree": {},
   "tutPairsLinks": "= means the same, × means opposite.",
   "@tutPairsLinks": {},
+  "tutTrailStart": "Put your finger on stone 1 and drag to stone 2. The trail goes up, down, left or right.",
+  "@tutTrailStart": {},
+  "tutTrailOrder": "Visit the stones in order: 1, 2, 3… Drag back over the trail to undo a step.",
+  "@tutTrailOrder": {},
+  "tutTrailWalls": "Hedges block the way. Go around them!",
+  "@tutTrailWalls": {},
+  "tutTrailFill": "Cover every square, then end on the last stone 🚩.",
+  "@tutTrailFill": {},
+  "tutTrailDragHint": "Drag from the highlighted cell.",
+  "@tutTrailDragHint": {},
+  "tutTrailOops": "Oops, that way breaks a rule. Try another cell.",
+  "@tutTrailOops": {},
   "setComplete": "Complete",
   "@setComplete": {
     "description": "Album set badge"
@@ -348,7 +366,7 @@
       }
     }
   },
-  "capsulesHowTo": "Solve both dailies to earn a capsule each day.",
+  "capsulesHowTo": "Solve all three dailies to earn a capsule each day.",
   "@capsulesHowTo": {},
   "noCapsules": "No capsules yet",
   "@noCapsules": {},
