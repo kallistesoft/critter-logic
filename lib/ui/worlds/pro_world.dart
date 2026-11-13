@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../l10n/app_localizations.dart';
 import '../critter_image.dart';
 import 'world.dart';
+import 'level_mark.dart';
 
 const _gold = Color(0xFFD4AF37);
 const _goldDeep = Color(0xFFA88A26);
@@ -280,6 +281,10 @@ class ProWorld extends GameWorld {
             child: Center(child: CritterSprite(id, size: size * 0.82)),
           ),
       };
+
+  @override
+  Widget levelMark(BuildContext context, int level, double size) =>
+      LevelMark(level: level, size: size, style: LevelMarkStyle.pips, color: _gold, edge: const Color(0xFF7A6220));
 
   @override
   void paintStreak(Canvas canvas, Size size, {required bool lit, int streak = 0}) {

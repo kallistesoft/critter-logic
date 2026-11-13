@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
 import '../meta/album.dart';
+import '../meta/collection.dart';
 import '../meta/economy.dart';
 import '../meta/set_rewards.dart';
 import 'capsule_screen.dart';
@@ -60,7 +61,9 @@ class _AlbumScreenState extends State<AlbumScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final stats = Services.of(context).stats;
-    final owned = stats.owned;
+    final copies = stats.critterCopies;
+    final owned = copies.keys.toSet();
+    final levels = Services.of(context).retention.settings.critterLevels;
     final waiting = stats.capsules + stats.goldenCapsules;
     final goldFrame = Services.of(context).retention.progress.cosmetics.contains('frame.album_gold');
     return MeadowScaffold(
@@ -114,7 +117,7 @@ class _AlbumScreenState extends State<AlbumScreen> {
                   const SizedBox(height: 22),
                   SlideIn(
                     delay: Duration(milliseconds: 80 * i),
-                    child: _SetPage(set: set, owned: owned, tilt: i.isEven ? -0.012 : 0.012),
+                    child: _SetPage(set: set, copies: copies, levels: levels, tilt: i.isEven ? -0.012 : 0.012),
                   ),
                 ],
               ]),
@@ -127,11 +130,14 @@ class _AlbumScreenState extends State<AlbumScreen> {
 }
 
 class _SetPage extends StatelessWidget {
-  const _SetPage({required this.set, required this.owned, required this.tilt});
+  const _SetPage({required this.set, required this.copies, required this.levels, required this.tilt});
 
   final String set;
-  final Set<String> owned;
+  final Map<String, int> copies;
+  final CritterLevels levels;
   final double tilt;
+
+  Set<String> get owned => copies.keys.toSet();
 
   @override
   Widget build(BuildContext context) {
@@ -140,7 +146,7 @@ class _SetPage extends StatelessWidget {
     final have = critters.where((c) => owned.contains(c.id)).length;
     final complete = have == critters.length;
     if (worldOf(context).journal) {
-      return _JournalPage(set: set, owned: owned, critters: critters, have: have, complete: complete, tilt: tilt);
+      return _JournalPage(set: set, copies: copies, levels: levels, critters: critters, have: have, complete: complete, tilt: tilt);
     }
     return Transform.rotate(
       angle: tilt,
@@ -165,7 +171,7 @@ class _SetPage extends StatelessWidget {
                 final w = (constraints.maxWidth - 2 * gap) / 3;
                 return Wrap(spacing: gap, runSpacing: gap, children: [
                   for (final (i, c) in critters.indexed)
-                    SizedBox(width: w, child: _Photo(critter: c, owned: owned.contains(c.id), tilt: ((i * 37) % 5 - 2) * 0.02)),
+                    SizedBox(width: w, child: _Photo(critter: c, copies: copies[c.id] ?? 0, levels: levels, tilt: ((i * 37) % 5 - 2) * 0.02)),
                 ]);
               }),
               const SizedBox(height: 12),
@@ -222,7 +228,8 @@ class _SetPage extends StatelessWidget {
 class _JournalPage extends StatelessWidget {
   const _JournalPage({
     required this.set,
-    required this.owned,
+    required this.copies,
+    required this.levels,
     required this.critters,
     required this.have,
     required this.complete,
@@ -230,7 +237,8 @@ class _JournalPage extends StatelessWidget {
   });
 
   final String set;
-  final Set<String> owned;
+  final Map<String, int> copies;
+  final CritterLevels levels;
   final List<Critter> critters;
   final int have;
   final bool complete;
@@ -271,7 +279,10 @@ class _JournalPage extends StatelessWidget {
                       width: w,
                       child: JournalEntry(
                         id: c.id,
-                        owned: owned.contains(c.id),
+                        owned: (copies[c.id] ?? 0) > 0,
+                        copies: copies[c.id] ?? 0,
+                        level: levels.level(c.rarity, copies[c.id] ?? 0),
+                        need: levels.nextAt(c.rarity, levels.level(c.rarity, copies[c.id] ?? 0)),
                         name: critterName(l10n, c.id),
                         golden: c.rarity == Rarity.golden,
                         rare: c.rarity == Rarity.rare,
@@ -381,21 +392,25 @@ class _RuledPainter extends CustomPainter {
 
 /// A critter photo taped on the page.
 class _Photo extends StatelessWidget {
-  const _Photo({required this.critter, required this.owned, required this.tilt});
+  const _Photo({required this.critter, required this.copies, required this.levels, required this.tilt});
 
   final Critter critter;
-  final bool owned;
+  final int copies;
+  final CritterLevels levels;
   final double tilt;
+
+  bool get owned => copies > 0;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final level = levels.level(critter.rarity, copies);
     final (bg, frame) = switch (critter.rarity) {
       Rarity.golden => (goldSoft, gold),
       Rarity.rare => (rareSoft, rareBlue),
       Rarity.common => (_darkPages() ? tileEmpty : const Color(0xFFF1EADB), null),
     };
-    Widget image = CritterImage(critter.id, size: 58);
+    Widget image = CritterImage(critter.id, size: 58, level: level);
     if (!owned) image = Silhouette(color: _darkPages() ? const Color(0x33FFFFFF) : const Color(0x404A3426), child: image);
     Widget photo = Container(
       padding: const EdgeInsets.fromLTRB(5, 5, 5, 4),
@@ -419,9 +434,20 @@ class _Photo extends StatelessWidget {
             key: Key('critter-${critter.id}'),
             maxLines: 1,
             style: chunky(12, color: owned ? ink : inkSoft))),
+        if (owned) ...[
+          const SizedBox(height: 2),
+          CritterLevelProgress(
+            copies: copies,
+            level: level,
+            need: levels.nextAt(critter.rarity, level),
+            ink: inkSoft,
+            track: _darkPages() ? const Color(0x22FFFFFF) : const Color(0x1F4A3426),
+            fill: level >= maxCritterLevel ? gold : (frame ?? leaf),
+          ),
+        ],
       ]),
     );
-    if (owned && critter.rarity == Rarity.golden) photo = Shimmer(child: photo);
+    if (owned && critter.rarity == Rarity.golden && level < maxCritterLevel) photo = Shimmer(child: photo);
     return Transform.rotate(
       angle: tilt,
       child: Stack(clipBehavior: Clip.none, alignment: Alignment.topCenter, children: [

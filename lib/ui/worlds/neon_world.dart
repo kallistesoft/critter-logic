@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import '../../l10n/app_localizations.dart';
 import '../critter_image.dart';
 import 'world.dart';
+import 'level_mark.dart';
 
 const _cyan = Color(0xFF2EF2FF);
 const _magenta = Color(0xFFFF3FD8);
@@ -348,6 +349,10 @@ class NeonWorld extends GameWorld {
   @override
   Widget critter(BuildContext context, String id, double size, {CritterRole role = CritterRole.collectible}) =>
       NeonCritter(id: id, size: size, glow: role != CritterRole.piece || size > 30);
+
+  @override
+  Widget levelMark(BuildContext context, int level, double size) =>
+      LevelMark(level: level, size: size, style: LevelMarkStyle.glow, color: _yellow);
 
   @override
   void paintStreak(Canvas canvas, Size size, {required bool lit, int streak = 0}) {

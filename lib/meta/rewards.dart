@@ -1,5 +1,7 @@
+import '../services/analytics_service.dart';
 import '../services/stats_store.dart';
 import 'album.dart';
+import 'collection.dart';
 import 'economy.dart';
 import 'progress_store.dart';
 
@@ -55,25 +57,24 @@ class Reward {
       'critter: $critter, cosmetic: $cosmetic)';
 }
 
-/// What [grantReward] actually paid: [reward] plus extra coins for a critter already owned
-/// ([Economy.duplicateCritter]) or a set it completed ([Economy.setComplete]).
+/// What [grantReward] actually paid: [reward] plus the coins its critter gave ([critterGrant]: a level-up bonus,
+/// [Economy.duplicateCritter] past ⭐5, or [Economy.setComplete] for a finished set).
 class GrantResult {
-  const GrantResult(this.reward, {this.extraCoins = 0, this.duplicate = false, this.completedSet});
+  const GrantResult(this.reward, {this.critterGrant});
 
   final Reward reward;
-  final int extraCoins;
-  final bool duplicate;
-  final String? completedSet;
+  final CritterGrant? critterGrant;
+
+  int get extraCoins => critterGrant?.coins ?? 0;
+  bool get duplicate => critterGrant?.duplicate ?? false;
+  String? get completedSet => critterGrant?.completedSet;
 
   int get totalCoins => reward.coins + extraCoins;
 }
 
-/// Pays [reward] into the stores. A given critter follows the capsule rules: a duplicate pays
-/// [Economy.duplicateCritter] coins instead, and finishing a set pays [Economy.setComplete].
-Future<GrantResult> grantReward(StatsStore stats, ProgressStore progress, Reward reward) async {
-  var extra = 0;
-  var duplicate = false;
-  String? completed;
+/// Pays [reward] into the stores. A given critter goes through [grantCritter], like a capsule's.
+Future<GrantResult> grantReward(StatsStore stats, ProgressStore progress, Reward reward,
+    {CritterLevels levels = const CritterLevels(), AnalyticsService? analytics}) async {
   if (reward.coins > 0) await stats.addCoins(reward.coins);
   for (var i = 0; i < reward.capsules; i++) {
     await stats.addCapsule();
@@ -82,22 +83,9 @@ Future<GrantResult> grantReward(StatsStore stats, ProgressStore progress, Reward
     await stats.addCapsule(golden: true);
   }
   final id = reward.critter;
-  if (id != null) {
-    final owned = stats.owned;
-    if (owned.contains(id)) {
-      duplicate = true;
-      extra += Economy.duplicateCritter;
-    } else {
-      await stats.addCritter(id);
-      final set = critterById[id]?.set;
-      final after = {...owned, id};
-      if (set != null && album.where((c) => c.set == set).every((c) => after.contains(c.id))) {
-        completed = set;
-        extra += Economy.setComplete;
-      }
-    }
-    if (extra > 0) await stats.addCoins(extra);
-  }
+  final grant = id == null || critterById[id] == null
+      ? null
+      : await grantCritter(stats, progress, id, levels: levels, analytics: analytics);
   if (reward.cosmetic != null) await progress.addCosmetic(reward.cosmetic!);
-  return GrantResult(reward, extraCoins: extra, duplicate: duplicate, completedSet: completed);
+  return GrantResult(reward, critterGrant: grant);
 }

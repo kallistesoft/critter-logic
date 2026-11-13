@@ -102,7 +102,6 @@
   "capsuleAlmost": "¡Un toque más!",
   "goldenCapsule": "¡Cápsula dorada!",
   "capsuleNew": "¡Nuevo en tu álbum! ✨",
-  "capsuleDuplicate": "Ya está en tu álbum: +{coins} monedas",
   "capsuleSetComplete": "¡Colección {set} completa! +{coins} monedas",
   "openAnother": "Abrir la siguiente ({count})",
   "seeAlbum": "Ver el álbum",
@@ -302,5 +301,15 @@
   "fieldJournal": "Diario de campo",
   "previewDaily": "Hoy",
   "settingWorld": "Mundo",
-  "settingWorldMore": "Más mundos en la tienda"
+  "settingWorldMore": "Más mundos en la tienda",
+  "achievementLevel3": "Estrella en ascenso",
+  "achievementLevel3Desc": "Sube un animalito a ⭐3",
+  "achievementLevel5": "Superestrella",
+  "achievementLevel5Desc": "{n, plural, =1{Sube un animalito a ⭐5} other{Sube {n} animalitos a ⭐5}}",
+  "capsuleLevelUp": "¡Sube de nivel! ⭐{level}",
+  "capsuleMaxLevel": "¡Nivel máximo! +{coins} monedas",
+  "capsuleCopy": "¡Uno más! {have}/{need} para ⭐{level}",
+  "critterLevelProgress": "{have}/{need} → ⭐{level}",
+  "critterLevelMax": "Máx ⭐5",
+  "critterLevelLabel": "Nivel {level}"
 }

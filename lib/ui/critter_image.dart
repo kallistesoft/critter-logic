@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
+import 'album_screen.dart' show Shimmer;
+import 'services.dart';
 import 'worlds/world.dart';
 
 /// Emoji stand-ins while (or if) a sprite is missing.
@@ -38,16 +40,39 @@ const critterEmoji = {
 };
 
 /// A critter drawn the World's way: the Kenney sprite in the Meadow, a wildlife badge in the Lodge, a glowing
-/// outline in Neon, and so on.
+/// outline in Neon, and so on. With a [level] (1–5) the World's level stars sit over it ([GameWorld.levelMark]),
+/// and ⭐5 sparkles; [showLevel] reads the player's level of this critter instead.
 class CritterImage extends StatelessWidget {
-  const CritterImage(this.id, {super.key, required this.size, this.role = CritterRole.collectible});
+  const CritterImage(this.id,
+      {super.key, required this.size, this.role = CritterRole.collectible, this.level, this.showLevel = false});
 
   final String id;
   final double size;
   final CritterRole role;
+  final int? level;
+  final bool showLevel;
 
   @override
-  Widget build(BuildContext context) => worldOf(context).critter(context, id, size, role: role);
+  Widget build(BuildContext context) {
+    final world = worldOf(context);
+    final image = world.critter(context, id, size, role: role);
+    final lvl = level ?? (showLevel ? critterLevel(context, id) : 0);
+    if (lvl <= 0) return image;
+    final marked = Semantics(
+      label: AppLocalizations.of(context).critterLevelLabel(lvl),
+      child: Stack(clipBehavior: Clip.none, children: [
+        image,
+        Positioned.fill(child: IgnorePointer(child: Center(child: world.levelMark(context, lvl, size)))),
+      ]),
+    );
+    return lvl >= 5 ? Shimmer(child: marked) : marked;
+  }
+}
+
+/// The player's level (0–5) of critter [id], from its copies and the Remote Config thresholds.
+int critterLevel(BuildContext context, String id) {
+  final services = Services.of(context);
+  return services.retention.settings.critterLevels.levelOf(id, services.stats.copies(id));
 }
 
 /// The critter's sprite (`assets/critters/<id>.png`), or its emoji when the sprite isn't there.
@@ -127,3 +152,48 @@ String setName(AppLocalizations l10n, String set) => switch (set) {
       'polar' => l10n.setPolar,
       _ => set,
     };
+
+/// Under an owned critter: a thin bar toward the next level and "2/4 → ⭐3" (or "Max ⭐5").
+class CritterLevelProgress extends StatelessWidget {
+  const CritterLevelProgress({
+    super.key,
+    required this.copies,
+    required this.level,
+    required this.need,
+    required this.ink,
+    required this.track,
+    required this.fill,
+  });
+
+  final int copies;
+  final int level;
+
+  /// Copies for the next level; null at ⭐5.
+  final int? need;
+  final Color ink, track, fill;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final need = this.need;
+    final text = need == null ? l10n.critterLevelMax : l10n.critterLevelProgress(copies, need, level + 1);
+    return Column(mainAxisSize: MainAxisSize.min, children: [
+      ClipRRect(
+        borderRadius: BorderRadius.circular(2),
+        child: SizedBox(
+          height: 4,
+          child: LinearProgressIndicator(
+            value: need == null ? 1 : (copies / need).clamp(0.0, 1.0),
+            backgroundColor: track,
+            valueColor: AlwaysStoppedAnimation(fill),
+          ),
+        ),
+      ),
+      const SizedBox(height: 1),
+      FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Text(text, maxLines: 1, style: worldOf(context).text(10.5, color: ink, weight: FontWeight.w600, height: 1.15)),
+      ),
+    ]);
+  }
+}

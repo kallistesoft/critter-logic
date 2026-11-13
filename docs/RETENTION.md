@@ -43,7 +43,7 @@ null if not available).
 
 ## 2. Achievements (`Achievements`)
 
-18 achievements, 52 tiers. Each tier pays coins: **bronze 20, silver 50, gold 100** (Remote Config). Claimable tiers
+20 achievements, 55 tiers. Each tier pays coins: **bronze 20, silver 50, gold 100** (Remote Config). Claimable tiers
 show a badge (`retention.achievements.badgeCount`). Tiers can be claimed in any order once reached.
 
 | id | Measures | Bronze / Silver / Gold |
@@ -62,6 +62,8 @@ show a badge (`retention.achievements.badgeCount`). Tiers can be claimed in any 
 | `critters` | album critters owned | 10 / 20 / 30 |
 | `sets` | album sets completed | 1 / 3 / 5 |
 | `golden` | golden critters owned | 1 / 3 / 5 |
+| `critter_level3` | critters at ⭐3 or more | 1 (bronze only) |
+| `critter_level5` | critters at ⭐5 | 1 / 10 (bronze, silver) |
 | `capsules` | capsules opened | 10 / 50 / 150 |
 | `shares` | shares | 1 / 10 / 50 |
 | `calendar` | login calendar days claimed | 7 / 30 / 100 |
@@ -134,7 +136,7 @@ const RetentionSettings(), analytics:)` at start-up (main.dart) and put it in `S
 | A daily solved, first attempt | `game_screen.dart` `_onSolved()`, right after `grantDailyRewards` when `recordDaily` returned true | `retention.recordEvent(DailySolved(result), now)` |
 | A level won | `game_screen.dart` `_onSolved()` level branch, after `addLevelWon` / `setLevel` | `retention.recordEvent(LevelWon(kind, hints: s.hints), now)` |
 | Share completed | `result_screen.dart` `_share()` (and any other share button), after the share sheet | `retention.recordEvent(const Shared(), now)` |
-| Capsule opened | `capsule_screen.dart` after the critter / duplicate coins are paid | `retention.recordEvent(const CapsuleOpened(), now)` |
+| Capsule opened | `capsule_screen.dart` after `grantCritter` paid the critter | `retention.recordEvent(const CapsuleOpened(), now)` |
 | Trophy screen "Claim" | achievements screen | `retention.claimAchievement(id, tier)` |
 | Event prize "Claim" | event screen | `retention.claimEventPrize(now, threshold)` |
 
@@ -233,6 +235,15 @@ A cozy egg draw (deliberately no casino look: no slots, chips or "bet" wording; 
 | `shop_deal_percent` | Number | `30` (0–90; 0 = no deal) |
 | `lucky_nest` | String | empty (defaults); `golden=15,capsule=120,coins=200,hint=300,price=50,paid_per_day=0 (0 = no limit),min_coins=40,max_coins=120` (odds in per mille) |
 | `lucky_nest` | String | empty (defaults); `golden=15,capsule=120,coins=200,hint=300,price=60,paid_per_day=3,min_coins=50,max_coins=150` (odds in per mille) |
+| `critter_levels` | String | `common=1,2,4,7,10;rare=1,2,3,5,7;golden=1,2,3,4,5` (total copies for ⭐1..⭐5; 5 increasing numbers starting at 1, ≤100; a bad entry keeps that rarity's default) |
+
+## Critter levels (`lib/meta/collection.dart`)
+Every critter copy counts (`StatsStore.critterCopies`; the old `album` list migrates to 1 copy each). Copies give
+⭐1–5 per `critter_levels`. All critters are granted by `grantCritter` (capsules, event prizes, rewards): a new
+critter pays nothing (plus 200 for a finished set, as before), a level-up pays ⭐2 +10, ⭐3 +20, ⭐4 +30, ⭐5 +50
+(`Economy.levelUp`), a copy between levels pays nothing, a copy past ⭐5 pays `Economy.duplicateCritter` (25).
+Capsules prefer missing critters of the rolled rarity, then ones below ⭐5, then any. Analytics: `critter_level_up`
+(`id`, `level`), `album_full` (once).
 
 ## Album set unlocks (`lib/meta/set_rewards.dart`)
 Completing a set still pays `Economy.setComplete` (200 coins) and also unlocks a hat (owned forever, so it

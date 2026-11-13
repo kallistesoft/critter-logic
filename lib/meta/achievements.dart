@@ -1,6 +1,7 @@
 import '../puzzles/puzzle.dart';
 import '../services/stats_store.dart';
 import 'album.dart';
+import 'collection.dart';
 import 'progress_store.dart';
 
 enum Tier { bronze, silver, gold }
@@ -15,6 +16,8 @@ enum Metric {
   crittersOwned,
   setsCompleted,
   goldenOwned,
+  crittersLevel3,
+  crittersLevel5,
   noHintSolves,
   fastNests,
   fastPairs,
@@ -38,7 +41,7 @@ class AchievementDef {
   List<Tier> get tiers => Tier.values.take(targets.length).toList();
 }
 
-/// 18 achievements, 52 tiers. Fast = a daily under a minute with penalties; perfect = no mistake and no hint.
+/// 20 achievements, 55 tiers. Fast = a daily under a minute with penalties; perfect = no mistake and no hint.
 const achievementDefs = <AchievementDef>[
   AchievementDef('first_daily', Metric.dailiesSolved, [1]),
   AchievementDef('dailies', Metric.dailiesSolved, [7, 30, 100]),
@@ -54,6 +57,8 @@ const achievementDefs = <AchievementDef>[
   AchievementDef('critters', Metric.crittersOwned, [10, 20, 30]),
   AchievementDef('sets', Metric.setsCompleted, [1, 3, 5]),
   AchievementDef('golden', Metric.goldenOwned, [1, 3, 5]),
+  AchievementDef('critter_level3', Metric.crittersLevel3, [1]),
+  AchievementDef('critter_level5', Metric.crittersLevel5, [1, 10]),
   AchievementDef('capsules', Metric.capsulesOpened, [10, 50, 150]),
   AchievementDef('shares', Metric.shares, [1, 10, 50]),
   AchievementDef('calendar', Metric.calendarDays, [7, 30, 100]),
@@ -101,16 +106,19 @@ class AchievementProgress {
 
 /// Achievements evaluated from [StatsStore] and the [ProgressStore] counters.
 class Achievements {
-  Achievements(this._stats, this._progress, {this.coins = const AchievementCoins()});
+  Achievements(this._stats, this._progress, {this.coins = const AchievementCoins(), this.levels = const CritterLevels()});
 
   final StatsStore _stats;
   final ProgressStore _progress;
   final AchievementCoins coins;
+  final CritterLevels levels;
 
   /// Every metric's current value.
   Map<Metric, int> metrics() {
-    final owned = _stats.owned;
+    final copies = _stats.critterCopies;
+    final owned = copies.keys.toSet();
     int levels(GameKind kind) => _stats.level(kind) - 1;
+    int atLevel(int level) => album.where((c) => this.levels.level(c.rarity, copies[c.id] ?? 0) >= level).length;
     return {
       Metric.dailiesSolved: _stats.dailiesSolved,
       Metric.bestStreak: _stats.bestStreak,
@@ -121,6 +129,8 @@ class Achievements {
       Metric.setsCompleted:
           albumSets.where((s) => album.where((c) => c.set == s).every((c) => owned.contains(c.id))).length,
       Metric.goldenOwned: album.where((c) => c.rarity == Rarity.golden && owned.contains(c.id)).length,
+      Metric.crittersLevel3: atLevel(3),
+      Metric.crittersLevel5: atLevel(5),
       Metric.noHintSolves: _progress.count(Counter.noHintSolves),
       Metric.fastNests: _progress.count(Counter.fastNests),
       Metric.fastPairs: _progress.count(Counter.fastPairs),

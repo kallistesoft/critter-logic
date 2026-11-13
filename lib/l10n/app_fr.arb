@@ -102,7 +102,6 @@
   "capsuleAlmost": "Encore un petit coup !",
   "goldenCapsule": "Capsule dorée !",
   "capsuleNew": "Nouveau dans ton album ! ✨",
-  "capsuleDuplicate": "Déjà dans ton album : +{coins} pièces",
   "capsuleSetComplete": "Série {set} complète ! +{coins} pièces",
   "openAnother": "Ouvrir la suivante ({count})",
   "seeAlbum": "Voir l’album",
@@ -302,5 +301,15 @@
   "previewDaily": "Aujourd’hui",
   "coinsPreview": "Boutique indisponible dans la version de développement : ceci est un aperçu.",
   "settingWorld": "Monde",
-  "settingWorldMore": "Plus de mondes à la boutique"
+  "settingWorldMore": "Plus de mondes à la boutique",
+  "achievementLevel3": "Étoile montante",
+  "achievementLevel3Desc": "Fais monter une bestiole à ⭐3",
+  "achievementLevel5": "Superstar",
+  "achievementLevel5Desc": "{n, plural, =1{Fais monter une bestiole à ⭐5} other{Fais monter {n} bestioles à ⭐5}}",
+  "capsuleLevelUp": "Niveau supérieur ! ⭐{level}",
+  "capsuleMaxLevel": "Niveau max ! +{coins} pièces",
+  "capsuleCopy": "Un de plus ! {have}/{need} pour ⭐{level}",
+  "critterLevelProgress": "{have}/{need} → ⭐{level}",
+  "critterLevelMax": "Max ⭐5",
+  "critterLevelLabel": "Niveau {level}"
 }

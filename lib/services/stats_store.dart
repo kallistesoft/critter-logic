@@ -42,7 +42,11 @@ class StatsStore {
   /// The preferences behind this store (the retention [ProgressStore] keeps its keys there too).
   SharedPreferences get prefs => _prefs;
 
-  static Future<StatsStore> open() async => StatsStore(await SharedPreferences.getInstance());
+  static Future<StatsStore> open() async {
+    final stats = StatsStore(await SharedPreferences.getInstance());
+    await stats.migrateCritterCopies();
+    return stats;
+  }
 
   // ---- Daily puzzles and streak ----
 
@@ -152,8 +156,54 @@ class StatsStore {
   bool adCapsuleTaken(int day) => _prefs.getBool('adCapsule.$day') ?? false;
   Future<void> setAdCapsuleTaken(int day) => _prefs.setBool('adCapsule.$day', true);
 
-  Set<String> get owned => (_prefs.getStringList('album') ?? const []).toSet();
-  Future<void> addCritter(String id) => _prefs.setStringList('album', {...owned, id}.toList());
+  /// Copies of each critter collected, by id (JSON under 'critterCopies'); a critter with 1+ copies is owned, and
+  /// its copies give its level (see `CritterLevels`). Before levels the album was the string list 'album':
+  /// [migrateCritterCopies] turns it into 1 copy each.
+  Map<String, int> get critterCopies {
+    final raw = _prefs.getString('critterCopies');
+    if (raw == null) return {for (final id in _prefs.getStringList('album') ?? const <String>[]) id: 1};
+    try {
+      return {
+        for (final e in (jsonDecode(raw) as Map<String, dynamic>).entries)
+          if (e.value is int && (e.value as int) > 0) e.key: e.value as int,
+      };
+    } catch (_) {
+      return {for (final id in _prefs.getStringList('album') ?? const <String>[]) id: 1};
+    }
+  }
+
+  /// Copies of critter [id] (0 when not owned).
+  int copies(String id) => critterCopies[id] ?? 0;
+
+  /// Critters in the album (at least one copy).
+  Set<String> get owned => critterCopies.keys.toSet();
+
+  /// Adds one copy of [id].
+  Future<void> addCritter(String id) => setCopies(id, copies(id) + 1);
+
+  /// Sets the copies of [id] (tests, debug seeding). The old 'album' list is kept in step, so an older build
+  /// still sees the critters.
+  Future<void> setCopies(String id, int n) async {
+    final map = critterCopies;
+    n > 0 ? map[id] = n : map.remove(id);
+    await _prefs.setString('critterCopies', jsonEncode(map));
+    await _prefs.setStringList('album', map.keys.toList());
+  }
+
+  /// One-time move from the old 'album' list to copies: every listed critter gets 1 copy. Safe to call at every
+  /// start (a critter already counted keeps its copies).
+  Future<void> migrateCritterCopies() async {
+    final list = _prefs.getStringList('album') ?? const <String>[];
+    final hasMap = _prefs.getString('critterCopies') != null;
+    if (!hasMap && list.isEmpty) return;
+    final map = critterCopies;
+    final missing = list.where((id) => !map.containsKey(id)).toList();
+    if (hasMap && missing.isEmpty) return;
+    for (final id in missing) {
+      map[id] = 1;
+    }
+    await _prefs.setString('critterCopies', jsonEncode(map));
+  }
 
   // ---- Settings and app state ----
 

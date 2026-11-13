@@ -385,11 +385,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get capsuleNew => '¡Nuevo en tu álbum! ✨';
 
   @override
-  String capsuleDuplicate(int coins) {
-    return 'Ya está en tu álbum: +$coins monedas';
-  }
-
-  @override
   String capsuleSetComplete(String set, int coins) {
     return '¡Colección $set completa! +$coins monedas';
   }
@@ -1121,4 +1116,52 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get settingWorldMore => 'Más mundos en la tienda';
+
+  @override
+  String get achievementLevel3 => 'Estrella en ascenso';
+
+  @override
+  String get achievementLevel3Desc => 'Sube un animalito a ⭐3';
+
+  @override
+  String get achievementLevel5 => 'Superestrella';
+
+  @override
+  String achievementLevel5Desc(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Sube $n animalitos a ⭐5',
+      one: 'Sube un animalito a ⭐5',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String capsuleLevelUp(int level) {
+    return '¡Sube de nivel! ⭐$level';
+  }
+
+  @override
+  String capsuleMaxLevel(int coins) {
+    return '¡Nivel máximo! +$coins monedas';
+  }
+
+  @override
+  String capsuleCopy(int have, int need, int level) {
+    return '¡Uno más! $have/$need para ⭐$level';
+  }
+
+  @override
+  String critterLevelProgress(int have, int need, int level) {
+    return '$have/$need → ⭐$level';
+  }
+
+  @override
+  String get critterLevelMax => 'Máx ⭐5';
+
+  @override
+  String critterLevelLabel(int level) {
+    return 'Nivel $level';
+  }
 }

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../l10n/app_localizations.dart';
 import 'meadow_world.dart';
 import 'world.dart';
+import 'level_mark.dart';
 
 /// Wild Lodge palette: dusk sky, dark weathered wood, charcoal-green panels, parchment text, forest green and brass.
 /// Text-ish accents ([woodDark], [goldEdge], [leafEdge], [coralEdge]) are light enough to read on the dark cards.
@@ -313,6 +314,11 @@ class LodgeWorld extends GameWorld {
   @override
   Widget critter(BuildContext context, String id, double size, {CritterRole role = CritterRole.collectible}) =>
       WildlifeBadge(id, size: size, role: role);
+
+  /// Brass stars set in the badge rim.
+  @override
+  Widget levelMark(BuildContext context, int level, double size) => LevelMark(
+      level: level, size: size, style: LevelMarkStyle.rim, color: const Color(0xFFD9B45A), edge: const Color(0xFF5E4614));
 
   // ---- Icons ----
 

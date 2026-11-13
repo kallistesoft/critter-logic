@@ -7,6 +7,7 @@ import 'package:critter_logic/meta/level_ad_pacer.dart';
 import 'package:critter_logic/puzzles/puzzle.dart';
 import 'package:critter_logic/services/stats_store.dart';
 import 'package:critter_logic/ui/capsule_screen.dart';
+import 'package:critter_logic/ui/critter_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -111,7 +112,7 @@ void main() {
       expect(find.byKey(const Key('capsule')), findsOneWidget);
     });
 
-    testWidgets('a duplicate pays coins and a golden capsule gives a golden critter', (tester) async {
+    testWidgets('a copy levels a critter up and a golden capsule gives a golden critter', (tester) async {
       await stats.addCapsule(golden: true);
       for (final c in album.where((c) => c.rarity == Rarity.golden)) {
         await stats.addCritter(c.id);
@@ -130,8 +131,47 @@ void main() {
       }
       await tester.pumpAndSettle();
       expect(stats.goldenCapsules, 0);
+      expect(stats.coins, Economy.starting + Economy.levelUpCoins(2));
+      expect(find.text('Level up! ⭐2'), findsOneWidget);
+      expect(find.text('+${Economy.levelUpCoins(2)} coins'), findsOneWidget);
+      expect(find.byKey(const Key('levelStars')), findsOneWidget);
+    });
+
+    testWidgets('a copy past ⭐5 pays coins: "Max level!"', (tester) async {
+      await stats.addCapsule(golden: true);
+      for (final c in album.where((c) => c.rarity == Rarity.golden)) {
+        await stats.setCopies(c.id, 5);
+      }
+      tester.view.physicalSize = const Size(412, 915);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await app.pump(tester);
+      final nav = tester.state<NavigatorState>(find.byType(Navigator));
+      nav.push(MaterialPageRoute(builder: (_) => CapsuleScreen(random: Random(3))));
+      await tester.pumpAndSettle();
+      for (var i = 0; i < 3; i++) {
+        await tester.tap(find.byKey(const Key('capsule')));
+        await tester.pump(const Duration(milliseconds: 500));
+      }
+      await tester.pumpAndSettle();
       expect(stats.coins, Economy.starting + Economy.duplicateCritter);
-      expect(find.text('Already in your album: +${Economy.duplicateCritter} coins'), findsOneWidget);
+      expect(find.text('Max level! +${Economy.duplicateCritter} coins'), findsOneWidget);
+      expect(find.byKey(const Key('levelStars')), findsNothing);
+    });
+
+    testWidgets('album shows critter levels and progress', (tester) async {
+      await stats.setCopies('chick', 3);
+      await stats.setCopies('cow', 5);
+      await app.pump(tester);
+      await tester.ensureVisible(find.byKey(const Key('album')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('album')));
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(find.text('3/4 → ⭐3'), findsOneWidget);
+      expect(find.text('Max ⭐5'), findsOneWidget);
+      expect(find.bySemanticsLabel('Level 2'), findsOneWidget);
+      expect(find.bySemanticsLabel('Level 5'), findsOneWidget);
     });
 
     testWidgets('album shows owned critters and silhouettes', (tester) async {
@@ -198,6 +238,10 @@ void main() {
           addTearDown(() => activeWorld = worlds.first);
           app.world = world.id;
           await stats.addCapsule();
+          // Leveled critters in the album: one common missing per set (no set completes), the others at ⭐3,
+          // rares at ⭐5, goldens at ⭐3; the golden capsule levels a golden up to ⭐4.
+          await seedLevels(stats);
+          await stats.addCapsule(golden: true);
           await app.pump(tester, locale: locale, size: const Size(360, 640));
           Future<void> visit(Key key, {bool settle = true}) async {
             final list = find.byType(Scrollable).first;
@@ -248,8 +292,16 @@ void main() {
             await tester.pump(const Duration(milliseconds: 500));
           }
           await tester.pumpAndSettle();
+          expect(find.byKey(const Key('levelStars')), findsOneWidget, reason: 'a level-up reveal');
+          expect(tester.takeException(), isNull);
           await back();
           await visit(const Key('album'), settle: false);
+          await tester.pump(const Duration(milliseconds: 100));
+          expect(find.byType(CritterLevelProgress), findsWidgets);
+          await tester.scrollUntilVisible(find.byKey(const Key('set-polar')), 300,
+              scrollable: find.byType(Scrollable).first);
+          await tester.pump(const Duration(seconds: 1));
+          expect(tester.takeException(), isNull);
           await back();
           await visit(const Key('trophies'));
           await back();
@@ -271,4 +323,15 @@ void main() {
       }
     }
   });
+}
+
+/// Leveled critters for the screen tests: per set, the first common missing, the other commons at ⭐3 (4 copies),
+/// the rare at ⭐5 and the golden at ⭐3.
+Future<void> seedLevels(StatsStore stats) async {
+  for (final set in albumSets) {
+    final critters = album.where((c) => c.set == set).toList();
+    for (final c in critters.skip(1)) {
+      await stats.setCopies(c.id, switch (c.rarity) { Rarity.common => 4, Rarity.rare => 7, Rarity.golden => 3 });
+    }
+  }
 }

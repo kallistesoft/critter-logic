@@ -382,14 +382,6 @@
   "@goldenCapsule": {},
   "capsuleNew": "New in your album! ✨",
   "@capsuleNew": {},
-  "capsuleDuplicate": "Already in your album: +{coins} coins",
-  "@capsuleDuplicate": {
-    "placeholders": {
-      "coins": {
-        "type": "int"
-      }
-    }
-  },
   "capsuleSetComplete": "{set} set complete! +{coins} coins",
   "@capsuleSetComplete": {
     "placeholders": {
@@ -1178,5 +1170,80 @@
   },
   "@settingWorldMore": {
     "description": "World picker button opening the shop Worlds tab"
+  },
+  "achievementLevel3": "Rising star",
+  "@achievementLevel3": {},
+  "achievementLevel3Desc": "Raise a critter to ⭐3",
+  "@achievementLevel3Desc": {},
+  "achievementLevel5": "Superstar",
+  "@achievementLevel5": {},
+  "achievementLevel5Desc": "{n, plural, =1{Raise a critter to ⭐5} other{Raise {n} critters to ⭐5}}",
+  "@achievementLevel5Desc": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "capsuleLevelUp": "Level up! ⭐{level}",
+  "@capsuleLevelUp": {
+    "description": "Capsule reveal: an owned critter went up a level",
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "capsuleMaxLevel": "Max level! +{coins} coins",
+  "@capsuleMaxLevel": {
+    "description": "Capsule reveal: a copy of a critter already at the top level, paid in coins",
+    "placeholders": {
+      "coins": {
+        "type": "int"
+      }
+    }
+  },
+  "capsuleCopy": "One more! {have}/{need} to ⭐{level}",
+  "@capsuleCopy": {
+    "description": "Capsule reveal: a copy that does not level up yet; have/need copies for the next level",
+    "placeholders": {
+      "have": {
+        "type": "int"
+      },
+      "need": {
+        "type": "int"
+      },
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "critterLevelProgress": "{have}/{need} → ⭐{level}",
+  "@critterLevelProgress": {
+    "description": "Album: copies owned / copies needed for the next level",
+    "placeholders": {
+      "have": {
+        "type": "int"
+      },
+      "need": {
+        "type": "int"
+      },
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "critterLevelMax": "Max ⭐5",
+  "@critterLevelMax": {
+    "description": "Album: the critter is at the top level"
+  },
+  "critterLevelLabel": "Level {level}",
+  "@critterLevelLabel": {
+    "description": "Accessibility label of the level stars",
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
   }
 }

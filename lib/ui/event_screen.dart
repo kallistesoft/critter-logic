@@ -253,8 +253,12 @@ class _EventScreenState extends State<EventScreen> {
       await showSoftDialog<void>(
         context,
         title: critterName(l10n, r.critter!),
-        body: result.duplicate ? null : l10n.capsuleNew,
-        content: PopIn(child: CritterImage(r.critter!, size: 120)),
+        body: result.critterGrant == null
+            ? null
+            : critterGrantText(l10n, result.critterGrant!, services.retention.settings.critterLevels),
+        content: PopIn(
+            child: CritterImage(r.critter!,
+                size: 120, level: result.duplicate ? result.critterGrant?.levelAfter : null)),
         actions: [ChunkyButton(label: l10n.nice, expand: true, onPressed: () => Navigator.pop(context))],
       );
     } else if (r.capsules > 0 || r.goldenCapsules > 0) {
@@ -378,7 +382,7 @@ class _EventScreenState extends State<EventScreen> {
                     children: [
                       for (final c in critters)
                         owned.contains(c.id)
-                            ? CritterImage(c.id, size: 80)
+                            ? CritterImage(c.id, size: 80, showLevel: true)
                             : worldOf(context).journal
                             // A badge flattened to a grey disc says nothing: show it faded instead.
                             ? Opacity(opacity: 0.3, child: CritterImage(c.id, size: 80))
