@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 
 import '../l10n/app_localizations.dart';
 import '../meta/album.dart';
+import '../meta/collection.dart';
 import '../meta/economy.dart';
 import '../meta/game_flow.dart';
 import '../meta/retention.dart';
@@ -19,6 +20,7 @@ import 'retention_ui.dart';
 import 'palette.dart';
 import 'services.dart';
 import 'widgets.dart';
+import 'worlds/level_mark.dart';
 
 /// Opens capsules: tap to shake, tap to crack, tap to reveal the critter inside.
 class CapsuleScreen extends StatefulWidget {
@@ -36,7 +38,7 @@ class CapsuleScreen extends StatefulWidget {
 class _CapsuleScreenState extends State<CapsuleScreen> with TickerProviderStateMixin {
   static const _tapsToOpen = 3;
   int _taps = 0;
-  CapsuleResult? _result;
+  CritterGrant? _result;
   bool _golden = false;
   late final _shake = AnimationController(vsync: this, duration: const Duration(milliseconds: 420));
   late final _burst = AnimationController(vsync: this, duration: const Duration(milliseconds: 1400));
@@ -70,25 +72,24 @@ class _CapsuleScreenState extends State<CapsuleScreen> with TickerProviderStateM
       _shake.forward(from: 0);
       return;
     }
-    final result = openCapsule(stats.owned, _random,
+    final retention = services.retention;
+    final levels = retention.settings.critterLevels;
+    final opened = openCapsule(stats.critterCopies, _random,
         forceGolden: _golden,
+        levels: levels,
         odds: CapsuleOdds(
-          rare: Services.of(context).settings.value.capsuleRareOdds,
-          golden: Services.of(context).settings.value.capsuleGoldenOdds,
+          rare: services.settings.value.capsuleRareOdds,
+          golden: services.settings.value.capsuleGoldenOdds,
         ));
     await stats.takeCapsule(golden: _golden);
-    if (result.duplicate) {
-      await stats.addCoins(Economy.duplicateCritter);
-    } else {
-      await stats.addCritter(result.critter.id);
-    }
-    if (result.completedSet != null) await stats.addCoins(Economy.setComplete);
-    final update = await services.retention.recordEvent(const CapsuleOpened(), services.today());
+    final result =
+        await grantCritter(stats, retention.progress, opened.critter.id, levels: levels, analytics: services.analytics);
+    final update = await retention.recordEvent(const CapsuleOpened(), services.today());
     services.analytics.capsuleOpen(rarity: result.critter.rarity.name, duplicate: result.duplicate);
     services.sound.play(Sfx.reveal);
     HapticFeedback.heavyImpact();
     if (!mounted) return;
-    final paid = (result.duplicate ? Economy.duplicateCritter : 0) + (result.completedSet != null ? Economy.setComplete : 0);
+    final paid = result.coins;
     setState(() {
       _result = result;
       _coinsHeld = paid;
@@ -244,7 +245,7 @@ class _CapsuleScreenState extends State<CapsuleScreen> with TickerProviderStateM
 
   bool _isGoldenNext() => Services.of(context).stats.goldenCapsules > 0;
 
-  Widget _reveal(AppLocalizations l10n, CapsuleResult r) {
+  Widget _reveal(AppLocalizations l10n, CritterGrant r) {
     final c = r.critter;
     final (label, color) = switch (c.rarity) {
       Rarity.golden => (l10n.rarityGolden, gold),
@@ -309,7 +310,9 @@ class _CapsuleScreenState extends State<CapsuleScreen> with TickerProviderStateM
                     transform: Matrix4.diagonal3Values(1 - stretch + squash, 1 + stretch - squash, 1),
                     child: Transform.scale(
                       scale: Curves.easeOutBack.transform(((t - 0.1) / 0.25).clamp(0, 1)),
-                      child: goldenEgg ? Shimmer(child: CritterImage(c.id, size: 140)) : CritterImage(c.id, size: 140),
+                      child: goldenEgg && r.levelAfter < maxCritterLevel
+                          ? Shimmer(child: CritterImage(c.id, size: 140, level: r.isNew ? 0 : r.levelAfter))
+                          : CritterImage(c.id, size: 140, level: r.isNew ? 0 : r.levelAfter),
                     ),
                   ),
                 ),
@@ -339,11 +342,18 @@ class _CapsuleScreenState extends State<CapsuleScreen> with TickerProviderStateM
             key: _coinSource,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             child: Column(children: [
+              if (r.leveledUp) ...[
+                _LevelStars(level: r.levelAfter),
+                const SizedBox(height: 4),
+              ],
               Text(
-                r.duplicate ? l10n.capsuleDuplicate(Economy.duplicateCritter) : l10n.capsuleNew,
+                critterGrantText(l10n, r, Services.of(context).retention.settings.critterLevels),
+                key: const Key('revealText'),
                 textAlign: TextAlign.center,
-                style: chunky(17, color: r.duplicate ? inkSoft : coralEdge),
+                style: chunky(17, color: r.isNew || r.leveledUp ? coralEdge : inkSoft),
               ),
+              if (r.leveledUp)
+                Text(l10n.rewardCoins(r.coins), style: chunky(15, color: goldEdge)),
               if (r.completedSet != null) ...[
                 const SizedBox(height: 6),
                 Text(l10n.capsuleSetComplete(setName(l10n, r.completedSet!), Economy.setComplete),
@@ -386,6 +396,33 @@ class _CapsuleScreenState extends State<CapsuleScreen> with TickerProviderStateM
         icon: const Icon(Icons.play_circle_fill_rounded, color: Colors.white),
         onPressed: _watchForCapsule,
       );
+}
+
+/// What a critter gave, in words: new, level up, max level (+coins) or one copy closer to the next level.
+String critterGrantText(AppLocalizations l10n, CritterGrant g, CritterLevels levels) {
+  if (g.isNew) return l10n.capsuleNew;
+  if (g.leveledUp) return l10n.capsuleLevelUp(g.levelAfter);
+  if (g.maxed) return l10n.capsuleMaxLevel(g.coins);
+  final need = levels.nextAt(g.critter.rarity, g.levelAfter) ?? g.copies;
+  return l10n.capsuleCopy(g.copies, need, g.levelAfter + 1);
+}
+
+/// The new level's stars popping in one by one on a level-up.
+class _LevelStars extends StatelessWidget {
+  const _LevelStars({required this.level});
+
+  final int level;
+
+  @override
+  Widget build(BuildContext context) => Row(key: const Key('levelStars'), mainAxisSize: MainAxisSize.min, children: [
+        for (var i = 0; i < maxCritterLevel; i++)
+          i < level
+              ? PopIn(
+                  delay: Duration(milliseconds: 900 + 120 * i),
+                  child: LevelStarIcon(filled: true, size: 26, color: gold, edge: goldEdge),
+                )
+              : LevelStarIcon(filled: false, size: 26, empty: inkSoft.withValues(alpha: 0.25)),
+      ]);
 }
 
 /// A speech-bubble hint under the capsule.

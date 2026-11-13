@@ -24,6 +24,8 @@ import 'widgets.dart';
   'critters' => (l10n.achievementCritters, l10n.achievementCrittersDesc(n)),
   'sets' => (l10n.achievementSets, l10n.achievementSetsDesc(n)),
   'golden' => (l10n.achievementGolden, l10n.achievementGoldenDesc(n)),
+  'critter_level3' => (l10n.achievementLevel3, l10n.achievementLevel3Desc),
+  'critter_level5' => (l10n.achievementLevel5, l10n.achievementLevel5Desc(n)),
   'capsules' => (l10n.achievementCapsules, l10n.achievementCapsulesDesc(n)),
   'shares' => (l10n.achievementShares, l10n.achievementSharesDesc(n)),
   'calendar' => (l10n.achievementCalendar, l10n.achievementCalendarDesc(n)),

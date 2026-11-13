@@ -144,7 +144,7 @@ void main() {
     expect(logged('event_prize_claim').map((e) => e.$2['reward']), ['coins', 'capsule', 'critter']);
   });
 
-  test('a granted critter that completes a set pays the set bonus, a duplicate pays coins', () async {
+  test('a granted critter that completes a set pays the set bonus, a copy levels it up', () async {
     for (final c in album.where((c) => c.set == 'farm' && c.id != 'goat')) {
       await stats.addCritter(c.id);
     }
@@ -154,6 +154,8 @@ void main() {
     expect(stats.coins, coins + Economy.setComplete);
     final d = await grantReward(stats, progress, const Reward(critter: 'goat'));
     expect(d.duplicate, isTrue);
-    expect(stats.coins, coins + Economy.setComplete + Economy.duplicateCritter);
+    expect(d.critterGrant!.levelAfter, 2);
+    expect(stats.coins, coins + Economy.setComplete + Economy.levelUpCoins(2));
+    expect(stats.copies('goat'), 2);
   });
 }

@@ -712,12 +712,6 @@ abstract class AppLocalizations {
   /// **'New in your album! ✨'**
   String get capsuleNew;
 
-  /// No description provided for @capsuleDuplicate.
-  ///
-  /// In en, this message translates to:
-  /// **'Already in your album: +{coins} coins'**
-  String capsuleDuplicate(int coins);
-
   /// No description provided for @capsuleSetComplete.
   ///
   /// In en, this message translates to:
@@ -1917,6 +1911,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'More worlds in the shop'**
   String get settingWorldMore;
+
+  /// No description provided for @achievementLevel3.
+  ///
+  /// In en, this message translates to:
+  /// **'Rising star'**
+  String get achievementLevel3;
+
+  /// No description provided for @achievementLevel3Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Raise a critter to ⭐3'**
+  String get achievementLevel3Desc;
+
+  /// No description provided for @achievementLevel5.
+  ///
+  /// In en, this message translates to:
+  /// **'Superstar'**
+  String get achievementLevel5;
+
+  /// No description provided for @achievementLevel5Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{Raise a critter to ⭐5} other{Raise {n} critters to ⭐5}}'**
+  String achievementLevel5Desc(int n);
+
+  /// Capsule reveal: an owned critter went up a level
+  ///
+  /// In en, this message translates to:
+  /// **'Level up! ⭐{level}'**
+  String capsuleLevelUp(int level);
+
+  /// Capsule reveal: a copy of a critter already at the top level, paid in coins
+  ///
+  /// In en, this message translates to:
+  /// **'Max level! +{coins} coins'**
+  String capsuleMaxLevel(int coins);
+
+  /// Capsule reveal: a copy that does not level up yet; have/need copies for the next level
+  ///
+  /// In en, this message translates to:
+  /// **'One more! {have}/{need} to ⭐{level}'**
+  String capsuleCopy(int have, int need, int level);
+
+  /// Album: copies owned / copies needed for the next level
+  ///
+  /// In en, this message translates to:
+  /// **'{have}/{need} → ⭐{level}'**
+  String critterLevelProgress(int have, int need, int level);
+
+  /// Album: the critter is at the top level
+  ///
+  /// In en, this message translates to:
+  /// **'Max ⭐5'**
+  String get critterLevelMax;
+
+  /// Accessibility label of the level stars
+  ///
+  /// In en, this message translates to:
+  /// **'Level {level}'**
+  String critterLevelLabel(int level);
 }
 
 class _AppLocalizationsDelegate

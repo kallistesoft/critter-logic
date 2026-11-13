@@ -105,10 +105,25 @@ class JournalStamp extends StatelessWidget {
 
 /// One sighting in the journal: the badge once collected, else a pencil sketch of the outline.
 class JournalEntry extends StatelessWidget {
-  const JournalEntry({super.key, required this.id, required this.owned, required this.name, this.golden = false, this.rare = false});
+  const JournalEntry({
+    super.key,
+    required this.id,
+    required this.owned,
+    required this.name,
+    this.golden = false,
+    this.rare = false,
+    this.copies = 0,
+    this.level = 0,
+    this.need,
+  });
 
   final String id;
   final bool owned;
+
+  /// Copies collected, the level they give, and the copies for the next level (null at ⭐5).
+  final int copies;
+  final int level;
+  final int? need;
   final String name;
   final bool golden;
   final bool rare;
@@ -117,7 +132,7 @@ class JournalEntry extends StatelessWidget {
   Widget build(BuildContext context) {
     final size = 62.0;
     final Widget image = owned
-        ? CritterImage(id, size: size)
+        ? CritterImage(id, size: size, level: level)
         : SizedBox.square(
             dimension: size,
             child: CustomPaint(
@@ -152,6 +167,18 @@ class JournalEntry extends StatelessWidget {
             Icon(Icons.star_rounded,
                 size: 12, color: owned ? (golden ? journalBrass : journalBlue) : journalPencil.withValues(alpha: 0.45)),
         ]),
+      if (owned && level > 0)
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 6),
+          child: CritterLevelProgress(
+            copies: copies,
+            level: level,
+            need: need,
+            ink: journalPencil,
+            track: const Color(0x226B5E4E),
+            fill: need == null ? journalBrass : journalGreen,
+          ),
+        ),
     ]);
   }
 }

@@ -55,12 +55,12 @@ void main() {
     // Only 'pig' is a missing farm common; force commons with zero rare/golden odds.
     final rnd = Random(1);
     final results = [
-      for (var i = 0; i < 50; i++) openCapsule(owned, rnd, odds: const CapsuleOdds(rare: 0, golden: 0)),
+      for (var i = 0; i < 50; i++) openCapsule({for (final id in owned) id: 1}, rnd, odds: const CapsuleOdds(rare: 0, golden: 0)),
     ];
     expect(results.every((r) => r.critter.rarity == Rarity.common && !owned.contains(r.critter.id)), isTrue);
     final pig = results.firstWhere((r) => r.critter.id == 'pig');
     expect(pig.completedSet, 'farm');
-    final golden = openCapsule(album.map((c) => c.id).toSet(), rnd, forceGolden: true);
+    final golden = openCapsule({for (final c in album) c.id: 1}, rnd, forceGolden: true);
     expect(golden.critter.rarity, Rarity.golden);
     expect(golden.duplicate, isTrue);
   });

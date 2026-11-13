@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
 import '../../l10n/app_localizations.dart';
+import 'level_mark.dart';
 import 'lodge_world.dart';
 import 'meadow_world.dart';
 import 'neon_world.dart';
@@ -303,6 +304,10 @@ abstract class GameWorld {
 
   /// A critter in this World's style.
   Widget critter(BuildContext context, String id, double size, {CritterRole role = CritterRole.collectible});
+
+  /// A critter's level (⭐1–5) drawn over its picture: fills a [size] square laid over [critter]. Chunky gold stars
+  /// along the bottom by default.
+  Widget levelMark(BuildContext context, int level, double size) => LevelMark(level: level, size: size);
 
   // ---- Icons ----
 

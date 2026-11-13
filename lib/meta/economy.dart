@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'album.dart';
+import 'collection.dart';
 
 /// Coin prices and rewards. Kept in one place so they can move to Remote Config.
 class Economy {
@@ -8,7 +9,12 @@ class Economy {
   static const levelWinNoHint = 15;
   static const dailyWin = 20;
   static const hintCost = 30;
+  /// A copy of a critter already at ⭐5.
   static const duplicateCritter = 25;
+
+  /// Coins for an owned critter reaching ⭐2..⭐5 (see [CritterLevels]).
+  static const levelUp = {2: 10, 3: 20, 4: 30, 5: 50};
+  static int levelUpCoins(int level) => levelUp[level] ?? 0;
   static const setComplete = 200;
 
   /// Coins a new player starts with: enough for a few hints.
@@ -49,8 +55,8 @@ class CapsuleOdds {
   }
 }
 
-/// What a capsule gave: a [critter], [duplicate] if it was owned already (paid out as coins instead),
-/// and [completedSet] when it finished a set.
+/// What a capsule holds: a [critter], [duplicate] if it was owned already, and [completedSet] when it finishes a
+/// set. Paying it is [grantCritter]'s job.
 class CapsuleResult {
   const CapsuleResult(this.critter, {required this.duplicate, this.completedSet});
 
@@ -59,18 +65,23 @@ class CapsuleResult {
   final String? completedSet;
 }
 
-/// Opens a capsule: rolls the rarity, then prefers a critter of that rarity the player doesn't have yet.
-CapsuleResult openCapsule(Set<String> owned, Random random,
-    {CapsuleOdds odds = const CapsuleOdds(), bool forceGolden = false}) {
+/// Opens a capsule: rolls the rarity, then prefers a critter of that rarity the player doesn't have yet; once all
+/// are owned, one not at ⭐5 yet; only then any. [copies] is the player's copies by critter id.
+CapsuleResult openCapsule(Map<String, int> copies, Random random,
+    {CapsuleOdds odds = const CapsuleOdds(),
+    CritterLevels levels = const CritterLevels(),
+    bool forceGolden = false}) {
   final rarity = forceGolden ? Rarity.golden : odds.roll(random);
   final pool = album.where((c) => c.rarity == rarity).toList();
-  final missing = pool.where((c) => !owned.contains(c.id)).toList();
-  final critter = (missing.isNotEmpty ? missing : pool)[random.nextInt((missing.isNotEmpty ? missing : pool).length)];
-  final duplicate = owned.contains(critter.id);
+  int have(Critter c) => copies[c.id] ?? 0;
+  final missing = pool.where((c) => have(c) == 0).toList();
+  final growing = pool.where((c) => levels.level(rarity, have(c)) < maxCritterLevel).toList();
+  final from = missing.isNotEmpty ? missing : (growing.isNotEmpty ? growing : pool);
+  final critter = from[random.nextInt(from.length)];
+  final duplicate = have(critter) > 0;
   String? completed;
-  if (!duplicate) {
-    final after = {...owned, critter.id};
-    if (album.where((c) => c.set == critter.set).every((c) => after.contains(c.id))) completed = critter.set;
+  if (!duplicate && album.where((c) => c.set == critter.set).every((c) => c.id == critter.id || have(c) > 0)) {
+    completed = critter.set;
   }
   return CapsuleResult(critter, duplicate: duplicate, completedSet: completed);
 }

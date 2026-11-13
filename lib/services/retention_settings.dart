@@ -1,4 +1,5 @@
 import '../meta/achievements.dart';
+import '../meta/collection.dart';
 import '../meta/login_calendar.dart';
 import '../meta/lucky_nest.dart';
 import '../meta/rewards.dart';
@@ -15,6 +16,7 @@ class RetentionSettings {
     this.events = const EventSettings(),
     this.shop = const ShopSettings(),
     this.lucky = const LuckySettings(),
+    this.critterLevels = const CritterLevels(),
   });
 
   final List<Reward> calendarRewards;
@@ -23,6 +25,9 @@ class RetentionSettings {
   final EventSettings events;
   final ShopSettings shop;
   final LuckySettings lucky;
+
+  /// Copies per critter level, by rarity (`critter_levels`).
+  final CritterLevels critterLevels;
 
   /// The default `calendar_rewards` string: 7 comma-separated days, each a coin amount, `capsule` or `golden`.
   static const defaultCalendarString = '20,60,capsule,30,capsule,60,capsule';
@@ -38,6 +43,7 @@ class RetentionSettings {
         'shop_prices': '',
         'shop_deal_percent': 30,
         'lucky_nest': '',
+        'critter_levels': CritterLevels.defaultString,
       };
 
   /// Parses `calendar_rewards`; null unless it has exactly 7 valid days (coins 1–500, `capsule`, `golden`).
@@ -82,6 +88,7 @@ class RetentionSettings {
         dealPercent: clamp('shop_deal_percent', 30, 0, 90),
       ),
       lucky: LuckySettings.parse(getString('lucky_nest')),
+      critterLevels: CritterLevels.parse(getString('critter_levels')),
     );
   }
 }

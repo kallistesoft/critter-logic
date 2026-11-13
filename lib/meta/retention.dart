@@ -40,7 +40,7 @@ class Shared extends RetentionEvent {
   const Shared();
 }
 
-/// A capsule was opened (after the critter or the duplicate coins were paid).
+/// A capsule was opened (after its critter was paid with `grantCritter`).
 class CapsuleOpened extends RetentionEvent {
   const CapsuleOpened();
 }
@@ -87,7 +87,7 @@ class Retention {
 
   LoginCalendar get calendar =>
       LoginCalendar(progress, rewards: settings.calendarRewards, adDouble: settings.calendarAdDouble);
-  Achievements get achievements => Achievements(stats, progress, coins: settings.achievementCoins);
+  Achievements get achievements => Achievements(stats, progress, coins: settings.achievementCoins, levels: settings.critterLevels);
   WeeklyEvent get event => WeeklyEvent(progress, settings: settings.events);
   LuckyNest get luckyNest => LuckyNest(stats, progress, settings: settings.lucky, analytics: analytics, random: _random);
   final _pendingUnlocks = <SetUnlock>[];
@@ -118,7 +118,7 @@ class Retention {
   Future<GrantResult?> claimCalendar(DateTime now, {bool doubled = false}) async {
     final claim = await calendar.claim(now, doubled: doubled);
     if (claim == null) return null;
-    final result = await grantReward(stats, progress, claim.reward);
+    final result = await grantReward(stats, progress, claim.reward, levels: settings.critterLevels, analytics: analytics);
     await analytics.log('calendar_claim', {
       'day': claim.step + 1,
       'reward': claim.reward.kind,
@@ -141,7 +141,7 @@ class Retention {
     final s = ev.current(now);
     final reward = await ev.claim(now, threshold, stats.owned, _random);
     if (s == null || reward == null) return null;
-    final result = await grantReward(stats, progress, reward);
+    final result = await grantReward(stats, progress, reward, levels: settings.critterLevels, analytics: analytics);
     // The event critter may finish a set: its unlocks come with it (show them via [pendingSetUnlocks]).
     _pendingUnlocks.addAll(await grantSetUnlocks(stats, progress));
     if (threshold == s.thresholds.last) await progress.increment(Counter.eventsCompleted);
