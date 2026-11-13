@@ -11,5 +11,5 @@ flutter_launcher_icons:
   web:
     generate: true
     image_path: "assets/icon/icon.png"
-    background_color: "#FFF6E9"
-    theme_color: "#FF9F7A"
+    background_color: "#7CC85A"
+    theme_color: "#5DB03F"
