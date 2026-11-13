@@ -75,5 +75,47 @@
     "publishAt": "2026-11-20T22:00:00Z",
     "via": "business-suite",
     "account": "kallistesoft"
+  },
+  "2026-11-14-en-tiktok": {
+    "publishAt": "2026-11-14T22:00:00Z",
+    "via": "tiktok-studio",
+    "account": "kallistesoft",
+    "id": "7707687256936467713"
+  },
+  "2026-11-15-en-tiktok": {
+    "publishAt": "2026-11-15T22:00:00Z",
+    "via": "tiktok-studio",
+    "account": "kallistesoft",
+    "id": "7707687629755632897"
+  },
+  "2026-11-16-en-tiktok": {
+    "publishAt": "2026-11-16T22:00:00Z",
+    "via": "tiktok-studio",
+    "account": "kallistesoft",
+    "id": "7707687870126902534"
+  },
+  "2026-11-17-en-tiktok": {
+    "publishAt": "2026-11-17T22:00:00Z",
+    "via": "tiktok-studio",
+    "account": "kallistesoft",
+    "id": "7707688396080188673"
+  },
+  "2026-11-18-en-tiktok": {
+    "publishAt": "2026-11-18T22:00:00Z",
+    "via": "tiktok-studio",
+    "account": "kallistesoft",
+    "id": "7707688907286072628"
+  },
+  "2026-11-19-en-tiktok": {
+    "publishAt": "2026-11-19T22:00:00Z",
+    "via": "tiktok-studio",
+    "account": "kallistesoft",
+    "id": "7707688513243843841"
+  },
+  "2026-11-20-en-tiktok": {
+    "publishAt": "2026-11-20T22:00:00Z",
+    "via": "tiktok-studio",
+    "account": "kallistesoft",
+    "id": "7707689265655778612"
   }
 }
