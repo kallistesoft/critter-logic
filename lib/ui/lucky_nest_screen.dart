@@ -216,6 +216,42 @@ class _LuckyNestScreenState extends State<LuckyNestScreen> with TickerProviderSt
 
   int get _today => localDay(Services.of(context).today());
 
+  /// Paid eggs ask first (coins are spent), unless the player chose "don't ask again".
+  Future<bool> _confirmPaid(int price) async {
+    final services = Services.of(context);
+    final progress = services.retention.progress;
+    if (progress.luckySkipConfirm) return true;
+    final l10n = AppLocalizations.of(context);
+    final answer = await showSoftDialog<String>(
+      context,
+      emoji: '🥚',
+      title: l10n.luckyConfirmTitle(price),
+      body: l10n.luckyConfirmBody(services.stats.coins),
+      actions: [
+        ChunkyButton(
+          key: const Key('luckyConfirm'),
+          label: l10n.luckyConfirmOpen(price),
+          expand: true,
+          color: gold,
+          textColor: ink,
+          icon: const CoinIcon(size: 24),
+          onPressed: () => Navigator.pop(context, 'yes'),
+        ),
+        const SizedBox(height: 8),
+        ChunkyButton(
+          key: const Key('luckyConfirmAlways'),
+          label: l10n.luckyConfirmAlways,
+          expand: true,
+          small: true,
+          color: woodButton,
+          onPressed: () => Navigator.pop(context, 'always'),
+        ),
+      ],
+    );
+    if (answer == 'always') await progress.setLuckySkipConfirm(true);
+    return answer != null;
+  }
+
   Future<void> _pick(int egg) async {
     if (_busy) return;
     final services = Services.of(context);
@@ -235,6 +271,7 @@ class _LuckyNestScreenState extends State<LuckyNestScreen> with TickerProviderSt
       );
       return;
     }
+    if (!state.freeAvailable && !await _confirmPaid(state.price)) return;
     _busy = true;
     final draw = await nest.draw(_today);
     if (!mounted) return;
@@ -397,7 +434,7 @@ class _LuckyNestScreenState extends State<LuckyNestScreen> with TickerProviderSt
                               ? Center(
                                   child: ChunkyButton(
                                     key: const Key('luckyDraw'),
-                                    label: state.freeAvailable ? l10n.luckyFreeEgg : '${state.price}',
+                                    label: state.freeAvailable ? l10n.luckyFreeEgg : l10n.luckyPaidEgg(state.price),
                                     color: state.freeAvailable ? leaf : gold,
                                     textColor: state.freeAvailable ? Colors.white : ink,
                                     icon: state.freeAvailable
@@ -600,7 +637,7 @@ class _LuckyNestScreenState extends State<LuckyNestScreen> with TickerProviderSt
               if (canMore)
                 ChunkyButton(
                   key: const Key('luckyAgain'),
-                  label: state.freeAvailable ? l10n.luckyFreeEgg : '${state.price}',
+                  label: state.freeAvailable ? l10n.luckyFreeEgg : l10n.luckyPaidEgg(state.price),
                   small: true,
                   color: leaf,
                   icon: state.freeAvailable ? null : const CoinIcon(size: 22),

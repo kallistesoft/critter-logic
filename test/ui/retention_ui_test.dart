@@ -190,11 +190,22 @@ void main() {
       expect(stats.coins, 60);
       await tester.tap(find.byKey(const Key('luckyAgain')));
       await tester.pumpAndSettle();
-      expect(find.text('50'), findsOneWidget);
+      expect(find.text('Egg · 50'), findsOneWidget);
+      // A paid egg asks first; backing out spends nothing.
       await tester.tap(find.byKey(const Key('luckyDraw')));
+      await tester.pumpAndSettle();
+      expect(find.text('Open an egg for 50 coins?'), findsOneWidget);
+      expect(find.text('You have 60 coins.'), findsOneWidget);
+      await tester.tapAt(const Offset(10, 10));
+      await tester.pumpAndSettle();
+      expect(stats.coins, 60);
+      await tester.tap(find.byKey(const Key('luckyDraw')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('luckyConfirm')));
       await tester.pumpAndSettle();
       expect(stats.coins, 10);
       expect(progress.freeHints, 2);
+      expect(progress.luckySkipConfirm, isFalse, reason: 'it asks again next time');
 
       await tester.tap(find.byKey(const Key('luckyOdds')));
       await tester.pumpAndSettle();
