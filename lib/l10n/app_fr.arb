@@ -308,7 +308,7 @@
   "achievementLevel5Desc": "{n, plural, =1{Fais monter une bestiole à ⭐5} other{Fais monter {n} bestioles à ⭐5}}",
   "capsuleLevelUp": "Niveau supérieur ! ⭐{level}",
   "capsuleMaxLevel": "Niveau max ! +{coins} pièces",
-  "capsuleCopy": "Un de plus ! {have}/{need} pour ⭐{level}",
+  "capsuleCopy": "Un de plus ! {have}/{need} pour ⭐{level} · +{coins}",
   "critterLevelProgress": "{have}/{need} → ⭐{level}",
   "critterLevelMax": "Max ⭐5",
   "critterLevelLabel": "Niveau {level}"

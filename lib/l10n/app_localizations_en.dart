@@ -1142,8 +1142,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String capsuleCopy(int have, int need, int level) {
-    return 'One more! $have/$need to ⭐$level';
+  String capsuleCopy(int have, int need, int level, int coins) {
+    return 'One more! $have/$need to ⭐$level · +$coins';
   }
 
   @override

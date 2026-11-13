@@ -1203,7 +1203,7 @@
       }
     }
   },
-  "capsuleCopy": "One more! {have}/{need} to ⭐{level}",
+  "capsuleCopy": "One more! {have}/{need} to ⭐{level} · +{coins}",
   "@capsuleCopy": {
     "description": "Capsule reveal: a copy that does not level up yet; have/need copies for the next level",
     "placeholders": {
@@ -1214,6 +1214,9 @@
         "type": "int"
       },
       "level": {
+        "type": "int"
+      },
+      "coins": {
         "type": "int"
       }
     }
