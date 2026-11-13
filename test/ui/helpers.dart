@@ -1,4 +1,5 @@
 import 'package:critter_logic/main.dart';
+import 'package:critter_logic/meta/onboarding.dart';
 import 'package:critter_logic/meta/progress_store.dart';
 import 'package:critter_logic/meta/retention.dart';
 import 'package:critter_logic/puzzles/nests/nests.dart';
@@ -117,7 +118,9 @@ class TestApp {
 
   /// [calendar] lets the once-a-day calendar popup open; other tests start with it already seen today.
   Future<void> pump(WidgetTester tester,
-      {Locale? locale, Size size = const Size(412, 915), bool motion = false, bool calendar = false}) async {
+      {Locale? locale, Size size = const Size(412, 915), bool motion = false, bool calendar = false, bool newPlayer = false}) async {
+    // Most tests want the full home; the first-session gating has its own tests (newPlayer: true).
+    if (!newPlayer) await stats.prefs.setBool(Onboarding.skipKey, true);
     if (!calendar) await stats.prefs.setInt('progress.cal.shownDay', localDay(now));
     if (!welcome) await stats.prefs.setBool('progress.world.chosen', true);
     if (world != null) {
