@@ -1164,4 +1164,30 @@ class AppLocalizationsEs extends AppLocalizations {
   String critterLevelLabel(int level) {
     return 'Nivel $level';
   }
+
+  @override
+  String levelReplayTitle(int level) {
+    return '¿Repetir el nivel $level?';
+  }
+
+  @override
+  String get levelReplayBody =>
+      'Mira un video corto para jugarlo otra vez. Supera tus estrellas para ganar monedas.';
+
+  @override
+  String get levelReplayButton => 'Ver y repetir';
+
+  @override
+  String get levelReplayNoCoins =>
+      '¡Bien! Supera tus estrellas para ganar monedas.';
+
+  @override
+  String get shopNoAdsTitle => 'Sin anuncios';
+
+  @override
+  String get shopNoAdsBody =>
+      'Adiós a los banners y a los anuncios entre retos. Los videos con premio siguen siendo opcionales.';
+
+  @override
+  String get shopNoAdsOwned => 'Anuncios eliminados. ¡Gracias!';
 }

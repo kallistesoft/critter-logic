@@ -17,6 +17,9 @@ abstract class PremiumService extends ChangeNotifier {
 
   Future<void> buy();
   Future<void> restore();
+
+  /// Dev builds without a store show the offer with a sample price; buying does nothing.
+  bool get preview => false;
 }
 
 /// Web and tests: nothing to buy.
@@ -46,10 +49,16 @@ class StorePremiumService extends PremiumService {
 
   @override
   bool get isPremium => _stats.premium;
+  /// Sample price for the dev-build preview (the CAD price set in Play Console).
+  static const samplePrice = 'CA\$7.99';
+
+  /// Dev builds have their own app id, so Play never returns the product: show it as a preview.
   @override
-  bool get available => _product != null && !isPremium;
+  bool get preview => !kReleaseMode && _product == null && !isPremium;
   @override
-  String? get price => _product?.price;
+  bool get available => (_product != null || preview) && !isPremium;
+  @override
+  String? get price => _product?.price ?? (preview ? samplePrice : null);
 
   /// Listens for purchases (including ones finished while the app was closed) and loads the product.
   Future<void> init() async {

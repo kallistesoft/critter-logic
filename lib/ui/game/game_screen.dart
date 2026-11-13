@@ -50,7 +50,11 @@ String boardCritter(StatsStore stats, int number) {
 
 /// One puzzle being played, daily or level: board, timer, undo, restart, hint.
 class GameScreen extends StatefulWidget {
-  const GameScreen({super.key, required this.kind, required this.mode, required this.number, this.pacer});
+  const GameScreen({super.key, required this.kind, required this.mode, required this.number, this.pacer, this.replay = false});
+
+  /// A finished level played again (unlocked with a rewarded ad): it only pays coins when it beats the best stars,
+  /// and doesn't move the level track.
+  final bool replay;
 
   final GameKind kind;
   final PlayMode mode;
@@ -85,7 +89,7 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver, Ti
   late final _celebrate = AnimationController(vsync: this, duration: const Duration(milliseconds: 1700));
 
   bool get _daily => widget.mode == PlayMode.daily;
-  String get _slot => saveSlot(widget.kind, widget.mode);
+  String get _slot => widget.replay ? '${saveSlot(widget.kind, widget.mode)}.replay' : saveSlot(widget.kind, widget.mode);
 
   int get _elapsed =>
       _elapsedBase + (_runningSince == null ? 0 : _services.today().difference(_runningSince!).inMilliseconds.clamp(0, 7 * 86400000));
@@ -306,6 +310,18 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver, Ti
         rewards: rewards,
         retention: update,
       )));
+    } else if (widget.replay) {
+      _stars = starsFor(hints: s.hints, mistakes: s.mistakes);
+      final best = stats.levelStars(widget.kind, widget.number);
+      _levelCoins = _stars > best ? levelReward(hints: s.hints) : 0;
+      _coinsHeld = _levelCoins;
+      await stats.recordLevelStars(widget.kind, widget.number, _stars);
+      if (_levelCoins > 0) await stats.addCoins(_levelCoins);
+      services.analytics.log('level_replay', {'game': widget.kind.name, 'level': widget.number, 'stars': _stars, 'best': best});
+      await celebration;
+      if (!mounted) return;
+      setState(() => _levelWon = true);
+      if (_levelCoins > 0) await _flyRewardCoins();
     } else {
       _levelCoins = levelReward(hints: s.hints);
       _coinsHeld = _levelCoins;
@@ -548,6 +564,10 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver, Ti
                             const SizedBox(height: 10),
                             StarRow(stars: _stars, size: 54),
                             const SizedBox(height: 12),
+                            if (widget.replay && _levelCoins == 0)
+                              Text(l10n.levelReplayNoCoins,
+                                  textAlign: TextAlign.center, style: chunky(15, color: inkSoft, weight: FontWeight.w500))
+                            else
                             PopIn(
                               delay: const Duration(milliseconds: 1300),
                               child: Container(
@@ -571,14 +591,14 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver, Ti
                                   textAlign: TextAlign.center, style: chunky(15, color: inkSoft, weight: FontWeight.w500)),
                             ],
                             const SizedBox(height: 18),
-                            ChunkyButton(
+                            if (!widget.replay) ChunkyButton(
                               key: const Key('nextLevel'),
                               label: l10n.nextLevel,
                               expand: true,
                               icon: const Icon(Icons.arrow_forward_rounded, color: Colors.white),
                               onPressed: () => _afterLevel(next: true),
                             ),
-                            const SizedBox(height: 10),
+                            if (!widget.replay) const SizedBox(height: 10),
                             ChunkyButton(
                               key: const Key('levelHome'),
                               label: l10n.levelMap,

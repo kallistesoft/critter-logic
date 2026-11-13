@@ -311,5 +311,12 @@
   "capsuleCopy": "¡Uno más! {have}/{need} para ⭐{level} · +{coins}",
   "critterLevelProgress": "{have}/{need} → ⭐{level}",
   "critterLevelMax": "Máx ⭐5",
-  "critterLevelLabel": "Nivel {level}"
+  "critterLevelLabel": "Nivel {level}",
+  "levelReplayTitle": "¿Repetir el nivel {level}?",
+  "levelReplayBody": "Mira un video corto para jugarlo otra vez. Supera tus estrellas para ganar monedas.",
+  "levelReplayButton": "Ver y repetir",
+  "levelReplayNoCoins": "¡Bien! Supera tus estrellas para ganar monedas.",
+  "shopNoAdsTitle": "Sin anuncios",
+  "shopNoAdsBody": "Adiós a los banners y a los anuncios entre retos. Los videos con premio siguen siendo opcionales.",
+  "shopNoAdsOwned": "Anuncios eliminados. ¡Gracias!"
 }
