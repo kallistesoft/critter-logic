@@ -26,18 +26,19 @@ python3 tools/daily_shorts.py upload                   # schedule them on the Ka
 The Shorts never show ranking numbers: the promo build runs with `boards=false` because its stand-in leaderboard has
 made-up player counts.
 
-## One-time YouTube setup (owner)
+## YouTube setup (done 2026-11-13)
 
-The channel is KallisteSoft (kallistesoft@gmail.com).
+The channel is KallisteSoft (kallistesoft@gmail.com). Google Cloud project **kallistesoft-youtube** (org
+kallistesoft.ca, contact@kallistesoft.ca, no billing), shared by every game's Shorts:
 
-1. In Google Cloud (any project, for example `critter-logic-ks`): **APIs & Services → Library → YouTube Data API v3 →
-   Enable**.
-2. **OAuth consent screen**: External, app name "KallisteSoft Shorts", then **Publish app** (in Testing mode, the login
-   expires every 7 days). Google warns "unverified app" at login: that's fine for your own account.
-3. **Credentials → Create credentials → OAuth client ID → Desktop app**. Download the JSON to
-   `~/Keys/kallistesoft/youtube-client-secret.json`.
-4. The first `upload` opens the browser: sign in as kallistesoft@gmail.com and pick the KallisteSoft channel. The token
-   is saved to `~/Keys/kallistesoft/youtube-shorts-token.json` (never commit it).
+- YouTube Data API v3 enabled.
+- OAuth consent screen "KallisteSoft Shorts", External, **published** (logins don't expire after 7 days). Home page
+  https://kallistesoft.ca/en/, privacy https://kallistesoft.ca/en/privacy/, authorized domain kallistesoft.ca.
+- Desktop OAuth client "daily-shorts": its JSON is `~/Keys/kallistesoft/youtube-client-secret.json` (never commit it).
+
+`python3 tools/daily_shorts.py login` opens the browser once: sign in as kallistesoft@gmail.com and pick the KallisteSoft
+channel (Google warns "unverified app": continue, it's your own). The token is saved to
+`~/Keys/kallistesoft/youtube-shorts-token.json`. `upload` reuses it.
 
 ### The audit (important)
 

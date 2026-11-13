@@ -1,6 +1,7 @@
 """Daily YouTube Shorts: yesterday's daily puzzle, played on the emulator and cut into a 9:16 "Can you solve it?" clip.
 
     python3 tools/daily_shorts.py render [YYYY-MM-DD] [--days 7] [--lang en]   # record + edit
+    python3 tools/daily_shorts.py login                                          # once: sign in to the channel
     python3 tools/daily_shorts.py upload [--dry-run]                             # schedule on YouTube
 
 Each day gets one game (Nests, Pairs, Trail in turn) and the daily of the day before, so a Short never shows the
@@ -501,12 +502,16 @@ def main():
     r.add_argument('--live', action='store_true', default=None,
                    help='say "Free on Google Play" even if the store page is not up yet (launch day)')
     r.add_argument('--rerecord', action='store_true', help='record again even if the day was recorded before')
+    sub.add_parser('login', help='sign in to the YouTube channel once (saves the token)')
     u = sub.add_parser('upload')
     u.add_argument('--dry-run', action='store_true')
     a = ap.parse_args()
     if a.cmd == 'render':
         first = dt.date.fromisoformat(a.date) if a.date else dt.date.today() + dt.timedelta(days=1)
         render([first + dt.timedelta(days=i) for i in range(a.days)], a.lang, a.rerecord, a.live)
+    elif a.cmd == 'login':
+        youtube()
+        print('signed in, token saved to', TOKEN)
     else:
         upload(a.dry_run)
 
