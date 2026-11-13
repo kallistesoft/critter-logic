@@ -87,6 +87,10 @@ class ProgressStore {
   int luckyPaid(int day) => _int('lucky.paid.$day');
   Future<void> addLuckyPaid(int day) => _setInt('lucky.paid.$day', luckyPaid(day) + 1);
 
+  /// The player asked not to confirm each paid egg.
+  bool get luckySkipConfirm => _prefs.getBool('${prefix}lucky.skipConfirm') ?? false;
+  Future<void> setLuckySkipConfirm(bool value) => _prefs.setBool('${prefix}lucky.skipConfirm', value);
+
   /// Hints won (Lucky Nest); the hint button uses these before charging coins.
   int get freeHints => _int('freeHints');
   Future<void> addFreeHints(int n) => _setInt('freeHints', freeHints + n);

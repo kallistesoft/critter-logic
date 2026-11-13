@@ -2013,6 +2013,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Ads removed. Thank you!'**
   String get shopNoAdsOwned;
+
+  /// Lucky Nest: confirming a paid egg
+  ///
+  /// In en, this message translates to:
+  /// **'Open an egg for {price} coins?'**
+  String luckyConfirmTitle(int price);
+
+  /// Lucky Nest: confirming a paid egg
+  ///
+  /// In en, this message translates to:
+  /// **'You have {coins} coins.'**
+  String luckyConfirmBody(int coins);
+
+  /// Lucky Nest: confirming a paid egg
+  ///
+  /// In en, this message translates to:
+  /// **'Open for {price}'**
+  String luckyConfirmOpen(int price);
+
+  /// Lucky Nest: confirming a paid egg
+  ///
+  /// In en, this message translates to:
+  /// **'Open, don\'t ask again'**
+  String get luckyConfirmAlways;
+
+  /// Lucky Nest: confirming a paid egg
+  ///
+  /// In en, this message translates to:
+  /// **'Egg · {price}'**
+  String luckyPaidEgg(int price);
 }
 
 class _AppLocalizationsDelegate

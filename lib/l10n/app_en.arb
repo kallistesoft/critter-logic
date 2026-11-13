@@ -1281,5 +1281,45 @@
   "shopNoAdsOwned": "Ads removed. Thank you!",
   "@shopNoAdsOwned": {
     "description": "Shop Coins tab: the No ads purchase"
+  },
+  "luckyConfirmTitle": "Open an egg for {price} coins?",
+  "@luckyConfirmTitle": {
+    "description": "Lucky Nest: confirming a paid egg",
+    "placeholders": {
+      "price": {
+        "type": "int"
+      }
+    }
+  },
+  "luckyConfirmBody": "You have {coins} coins.",
+  "@luckyConfirmBody": {
+    "description": "Lucky Nest: confirming a paid egg",
+    "placeholders": {
+      "coins": {
+        "type": "int"
+      }
+    }
+  },
+  "luckyConfirmOpen": "Open for {price}",
+  "@luckyConfirmOpen": {
+    "description": "Lucky Nest: confirming a paid egg",
+    "placeholders": {
+      "price": {
+        "type": "int"
+      }
+    }
+  },
+  "luckyConfirmAlways": "Open, don't ask again",
+  "@luckyConfirmAlways": {
+    "description": "Lucky Nest: confirming a paid egg"
+  },
+  "luckyPaidEgg": "Egg · {price}",
+  "@luckyPaidEgg": {
+    "description": "Lucky Nest: confirming a paid egg",
+    "placeholders": {
+      "price": {
+        "type": "int"
+      }
+    }
   }
 }

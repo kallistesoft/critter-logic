@@ -318,5 +318,10 @@
   "levelReplayNoCoins": "Bravo ! Bats ton record d’étoiles pour gagner des pièces.",
   "shopNoAdsTitle": "Sans pub",
   "shopNoAdsBody": "Fini les bannières et les pubs entre les casse-tête. Les vidéos à récompense restent au choix.",
-  "shopNoAdsOwned": "Pubs retirées. Merci !"
+  "shopNoAdsOwned": "Pubs retirées. Merci !",
+  "luckyConfirmTitle": "Ouvrir un œuf pour {price} pièces ?",
+  "luckyConfirmBody": "Tu as {coins} pièces.",
+  "luckyConfirmOpen": "Ouvrir pour {price}",
+  "luckyConfirmAlways": "Ouvrir, ne plus demander",
+  "luckyPaidEgg": "Œuf · {price}"
 }

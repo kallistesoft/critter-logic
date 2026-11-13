@@ -1183,4 +1183,27 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get shopNoAdsOwned => 'Ads removed. Thank you!';
+
+  @override
+  String luckyConfirmTitle(int price) {
+    return 'Open an egg for $price coins?';
+  }
+
+  @override
+  String luckyConfirmBody(int coins) {
+    return 'You have $coins coins.';
+  }
+
+  @override
+  String luckyConfirmOpen(int price) {
+    return 'Open for $price';
+  }
+
+  @override
+  String get luckyConfirmAlways => 'Open, don\'t ask again';
+
+  @override
+  String luckyPaidEgg(int price) {
+    return 'Egg · $price';
+  }
 }

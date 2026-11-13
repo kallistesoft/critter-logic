@@ -318,5 +318,10 @@
   "levelReplayNoCoins": "¡Bien! Supera tus estrellas para ganar monedas.",
   "shopNoAdsTitle": "Sin anuncios",
   "shopNoAdsBody": "Adiós a los banners y a los anuncios entre retos. Los videos con premio siguen siendo opcionales.",
-  "shopNoAdsOwned": "Anuncios eliminados. ¡Gracias!"
+  "shopNoAdsOwned": "Anuncios eliminados. ¡Gracias!",
+  "luckyConfirmTitle": "¿Abrir un huevo por {price} monedas?",
+  "luckyConfirmBody": "Tienes {coins} monedas.",
+  "luckyConfirmOpen": "Abrir por {price}",
+  "luckyConfirmAlways": "Abrir, no volver a preguntar",
+  "luckyPaidEgg": "Huevo · {price}"
 }
