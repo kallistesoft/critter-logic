@@ -161,6 +161,29 @@ void main() {
       expect(find.text('Continuer'), findsOneWidget);
     });
 
+    testWidgets('the shop Coins tab sells No ads behind the grown-up check', (tester) async {
+      final premium = FakePremium();
+      await stats.prefs.setBool('progress.onboarding.skip', true);
+      await pumpHome(tester, premium);
+      final stall = find.byKey(const Key('shopStall'));
+      await tester.ensureVisible(stall);
+      await tester.pumpAndSettle();
+      await tester.tap(stall);
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('tab-coins')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('shopNoAds')), findsOneWidget);
+      await tester.tap(find.byKey(const Key('buyNoAds')));
+      await tester.pumpAndSettle();
+      final question = tester.widget<Text>(find.textContaining('×')).data!;
+      final nums = RegExp(r'\d+').allMatches(question).map((m) => int.parse(m[0]!)).toList();
+      await tester.enterText(find.byKey(const Key('parentAnswer')), '${nums[0] * nums[1]}');
+      await tester.tap(find.byKey(const Key('parentOk')));
+      await tester.pumpAndSettle();
+      expect(premium.buys, 1);
+      expect(find.text('Ads removed. Thank you!'), findsOneWidget);
+    });
+
     testWidgets('the right answer buys and hides the offer', (tester) async {
       final premium = FakePremium();
       await pumpHome(tester, premium);

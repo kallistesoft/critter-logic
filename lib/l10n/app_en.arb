@@ -1248,5 +1248,38 @@
         "type": "int"
       }
     }
+  },
+  "levelReplayTitle": "Replay level {level}?",
+  "@levelReplayTitle": {
+    "description": "Replaying a finished level from the level map (rewarded ad)",
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "levelReplayBody": "Watch a short video to play it again. Beat your stars to earn coins.",
+  "@levelReplayBody": {
+    "description": "Replaying a finished level from the level map (rewarded ad)"
+  },
+  "levelReplayButton": "Watch & replay",
+  "@levelReplayButton": {
+    "description": "Replaying a finished level from the level map (rewarded ad)"
+  },
+  "levelReplayNoCoins": "Nice! Beat your best stars to earn coins.",
+  "@levelReplayNoCoins": {
+    "description": "Replaying a finished level from the level map (rewarded ad)"
+  },
+  "shopNoAdsTitle": "No ads",
+  "@shopNoAdsTitle": {
+    "description": "Shop Coins tab: the No ads purchase"
+  },
+  "shopNoAdsBody": "Banners and ads between puzzles gone for good. Reward videos stay optional.",
+  "@shopNoAdsBody": {
+    "description": "Shop Coins tab: the No ads purchase"
+  },
+  "shopNoAdsOwned": "Ads removed. Thank you!",
+  "@shopNoAdsOwned": {
+    "description": "Shop Coins tab: the No ads purchase"
   }
 }

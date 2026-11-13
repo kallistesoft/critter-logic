@@ -14,9 +14,7 @@ class RemoveAdsButtons extends StatelessWidget {
   final PremiumService premium;
   final Random? random;
 
-  Future<void> _buy(BuildContext context) async {
-    if (await askParent(context, random ?? Random())) await premium.buy();
-  }
+  Future<void> _buy(BuildContext context) => buyNoAds(context, premium, random: random);
 
   @override
   Widget build(BuildContext context) => ListenableBuilder(
@@ -39,6 +37,15 @@ class RemoveAdsButtons extends StatelessWidget {
           ]);
         },
       );
+}
+
+/// Buys "No ads" behind the grown-up check (a preview message in dev builds).
+Future<void> buyNoAds(BuildContext context, PremiumService premium, {Random? random}) async {
+  if (premium.preview) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context).coinsPreview)));
+    return;
+  }
+  if (await askParent(context, random ?? Random())) await premium.buy();
 }
 
 /// Parental gate: a multiplication a young child can't answer. True when answered correctly.

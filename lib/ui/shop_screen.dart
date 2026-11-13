@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import '../services/premium_service.dart';
 import 'package:flutter/services.dart';
 
 import '../l10n/app_localizations.dart';
@@ -116,12 +117,15 @@ class _ShopScreenState extends State<ShopScreen> {
     if (await askParent(context, widget.random ?? Random())) await store.buy(pack);
   }
 
-  bool _coinsTabShown(Services s) => s.coinStore.packs.isNotEmpty;
+  bool _coinsTabShown(Services s) => s.coinStore.packs.isNotEmpty || s.premium.available || s.premium.isPremium;
 
   @override
   Widget build(BuildContext context) {
     final services = Services.of(context);
-    return ListenableBuilder(listenable: services.coinStore, builder: (context, _) => _build(context, services));
+    return ListenableBuilder(
+      listenable: Listenable.merge([services.coinStore, services.premium]),
+      builder: (context, _) => _build(context, services),
+    );
   }
 
   Widget _build(BuildContext context, Services services) {
@@ -215,6 +219,10 @@ class _ShopScreenState extends State<ShopScreen> {
                     style: outlinedText(15, stroke: woodEdge, width: 1.4),
                   ),
                   const SizedBox(height: 12),
+                  if (services.premium.available || services.premium.isPremium) ...[
+                    _NoAdsRow(premium: services.premium, random: widget.random),
+                    const SizedBox(height: 28),
+                  ],
                   for (final (pack, price) in services.coinStore.packs) ...[
                     _PackRow(pack: pack, price: price, onBuy: () => _buyPack(pack)),
                     // Room for the next card's ribbon, which sticks out above it.
@@ -542,6 +550,56 @@ class _HatCard extends StatelessWidget {
         Positioned(left: -4, top: -10, child: Ribbon(text: l10n.shopDeal)),
       ],
     );
+  }
+}
+
+/// "No ads" for good: banners and between-puzzle ads go away; reward videos stay optional.
+class _NoAdsRow extends StatelessWidget {
+  const _NoAdsRow({required this.premium, this.random});
+
+  final PremiumService premium;
+  final Random? random;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final owned = premium.isPremium;
+    final card = SoftCard(
+      key: const Key('shopNoAds'),
+      color: owned ? goodSoft : paper,
+      border: owned ? leaf : coral,
+      padding: const EdgeInsets.fromLTRB(12, 20, 12, 12),
+      child: Row(children: [
+        SizedBox(
+          width: 70,
+          height: 54,
+          child: Center(
+            child: Icon(owned ? Icons.verified_rounded : Icons.block_rounded, size: 46, color: owned ? leaf : coral),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: AlignmentDirectional.centerStart,
+              child: Text(l10n.shopNoAdsTitle, maxLines: 1, style: chunky(20)),
+            ),
+            Text(owned ? l10n.shopNoAdsOwned : l10n.shopNoAdsBody,
+                style: chunky(13, color: inkSoft, weight: FontWeight.w500)),
+          ]),
+        ),
+        if (!owned)
+          ChunkyButton(
+            key: const Key('buyNoAds'),
+            label: premium.price ?? '',
+            small: true,
+            color: coral,
+            onPressed: () => buyNoAds(context, premium, random: random),
+          ),
+      ]),
+    );
+    return card;
   }
 }
 
