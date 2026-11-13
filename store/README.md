@@ -35,3 +35,39 @@ wording in a title or short description. Lengths are Unicode code points (NFC), 
   player, Stylized, Cute)
 - Contains ads: yes. In-app purchases: yes ("No ads" one-time, coin packs).
 - Privacy policy: https://kallistesoft.ca/en/privacy/critter-logic/ (FR: https://kallistesoft.ca/confidentialite/critter-logic/)
+
+## Graphics and promo videos
+
+| File | What |
+|---|---|
+| `icon-512.png` | Play icon, 512 × 512, from `assets/icon/icon.png` |
+| `feature-graphic-en.png`, `-fr.png`, `-es.png` | Feature graphic, 1024 × 500 (fr for fr-CA and fr-FR; es for es-419, es-ES and es-US) |
+| `screenshots/<locale>/phone/` | 8 phone screenshots, 1080 × 1920 (en-US, fr-CA, es-419; fr-FR reuses fr-CA, es-ES and es-US reuse es-419) |
+| `screenshots/<locale>/tablet7/`, `tablet10/` | 4 each, 1200 × 1920 and 1600 × 2560 |
+| `video/promo-<en\|fr\|es>-<16x9\|9x16>.mp4` | 30 s promo videos, H.264 + AAC, 1920 × 1080 / 1080 × 1920, 30 fps (for YouTube; the Play listing takes a YouTube URL) |
+
+Everything is real app footage: the promo build (`tools/promo_main.dart`) is the app on a staged save (12-day streak,
+1,240 coins, 22/30 critters, levels with stars, daily #13, a local stand-in for the online ranking) with no ads at all,
+run on the Android emulator with a clean status bar. Nothing here shows test ads or debug UI.
+
+Regenerate (Android emulator `emulator-5554` running, never a phone; Python with Pillow + numpy; ffmpeg):
+
+```sh
+flutter build apk --profile -t tools/promo_main.dart
+adb -s emulator-5554 install -r build/app/outputs/flutter-apk/app-profile.apk
+
+python3 tools/capture_store_shots.py en fr es   # raw screens  -> build/promo/shots/
+python3 tools/make_store_graphics.py            # screenshots, feature graphics, icon -> store/
+
+python3 tools/record_promo_clips.py en          # gameplay clips + event times -> build/promo/clips/
+python3 tools/record_promo_clips.py fr
+python3 tools/record_promo_clips.py es
+python3 tools/make_promo_video.py en fr es      # -> store/video/ (about 2 min per video)
+```
+
+- `tools/promo_device.py` holds the emulator driving (adb taps/drags, screen coordinates, `screenrecord`); the scripts
+  turn the system animations on and put the emulator's settings back when they finish.
+- `tools/make_promo_music.py` synthesizes the soundtrack (original, 120 BPM, no samples); `make_promo_video.py` cuts
+  to its beats, layers the game's own sound effects (`assets/sfx`) and levels the mix to about −14 LUFS.
+- Captions and texts are in `make_store_graphics.py` (`CAPTIONS`, `FEATURE`) and `make_promo_video.py` (`TEXT`).
+- `make_promo_video.py --frames 30,450 --draft` writes stills to check the look without rendering a whole video.
