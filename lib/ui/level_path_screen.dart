@@ -36,6 +36,41 @@ class _LevelPathScreenState extends State<LevelPathScreen> {
     if (mounted) setState(() {});
   }
 
+  /// A finished level: watch a rewarded video to play it again (coins only for beating its stars).
+  Future<void> _replay(int level) async {
+    final services = Services.of(context);
+    final l10n = AppLocalizations.of(context);
+    final nav = Navigator.of(context);
+    final best = services.stats.levelStars(widget.kind, level);
+    final go = await showSoftDialog<bool>(
+      context,
+      title: l10n.levelReplayTitle(level),
+      content: Column(mainAxisSize: MainAxisSize.min, children: [
+        StarRow(stars: best, size: 40),
+        const SizedBox(height: 10),
+        Text(l10n.levelReplayBody, textAlign: TextAlign.center, style: chunky(16, color: inkSoft, weight: FontWeight.w500)),
+      ]),
+      actions: [
+        ChunkyButton(
+          key: const Key('replayLevel'),
+          label: l10n.levelReplayButton,
+          expand: true,
+          color: sky,
+          icon: const Icon(Icons.play_circle_fill_rounded, color: Colors.white),
+          onPressed: () => Navigator.of(context).pop(true),
+        ),
+      ],
+    );
+    if (go != true || !mounted) return;
+    if (!await services.ads.showRewarded()) {
+      _say(l10n.noAdAvailable);
+      return;
+    }
+    services.analytics.adReward('replay');
+    await nav.push(softRoute(GameScreen(kind: widget.kind, mode: PlayMode.level, number: level, replay: true)));
+    if (mounted) setState(() {});
+  }
+
   void _say(String text) {
     final m = ScaffoldMessenger.of(context);
     m.hideCurrentSnackBar();
@@ -108,9 +143,10 @@ class _LevelPathScreenState extends State<LevelPathScreen> {
                         for (var l = first; l <= last; l++)
                           if (l < current)
                             _at(pos(l), 64, _DoneNode(
+                              key: Key('doneLevel-$l'),
                               level: l,
                               stars: stats.levelStars(widget.kind, l),
-                              onTap: () => _say(l10n.levelDone(l, stats.levelStars(widget.kind, l))),
+                              onTap: () => _replay(l),
                             ))
                           else if (l > current)
                             _at(pos(l), 56, _LockedNode(level: l, onTap: () => _say(l10n.levelLocked(current))))
@@ -142,7 +178,7 @@ class _LevelPathScreenState extends State<LevelPathScreen> {
 }
 
 class _DoneNode extends StatelessWidget {
-  const _DoneNode({required this.level, required this.stars, required this.onTap});
+  const _DoneNode({super.key, required this.level, required this.stars, required this.onTap});
 
   final int level;
   final int stars;

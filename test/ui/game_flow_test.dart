@@ -202,6 +202,39 @@ void main() {
     expect(find.text('Tap to play!'), findsOneWidget);
   });
 
+  testWidgets('a finished level can be replayed for a rewarded video; coins only for more stars', (tester) async {
+    await stats.recordLevelStars(GameKind.nests, 1, 1);
+    await stats.setLevel(GameKind.nests, 2);
+    await app.pump(tester);
+    await tester.tap(find.byKey(const Key('level-nests')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('doneLevel-1')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('replayLevel')));
+    await tester.pumpAndSettle();
+    expect(app.ads.rewarded, 1);
+    expect(find.text('Level 1'), findsOneWidget);
+    await solveNests(tester);
+    await tester.pumpAndSettle();
+    expect(stats.levelStars(GameKind.nests, 1), 3);
+    expect(stats.coins, Economy.starting + Economy.levelWinNoHint, reason: 'beat 1 star with 3');
+    expect(stats.level(GameKind.nests), 2, reason: 'the track does not move');
+    expect(stats.levelsWon, 0);
+    expect(find.byKey(const Key('nextLevel')), findsNothing);
+
+    // Again with no better stars: no coins.
+    await tester.tap(find.byKey(const Key('levelHome')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('doneLevel-1')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('replayLevel')));
+    await tester.pumpAndSettle();
+    await solveNests(tester);
+    await tester.pumpAndSettle();
+    expect(stats.coins, Economy.starting + Economy.levelWinNoHint);
+    expect(find.text('Nice! Beat your best stars to earn coins.'), findsOneWidget);
+  });
+
   testWidgets('streak repair for a rewarded video', (tester) async {
     await stats.recordDaily(const DailyResult(kind: GameKind.nests, number: today - 2, millis: 60000));
     await app.pump(tester);

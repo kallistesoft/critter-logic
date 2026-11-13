@@ -311,5 +311,12 @@
   "capsuleCopy": "Un de plus ! {have}/{need} pour ⭐{level} · +{coins}",
   "critterLevelProgress": "{have}/{need} → ⭐{level}",
   "critterLevelMax": "Max ⭐5",
-  "critterLevelLabel": "Niveau {level}"
+  "critterLevelLabel": "Niveau {level}",
+  "levelReplayTitle": "Rejouer le niveau {level} ?",
+  "levelReplayBody": "Regarde une courte vidéo pour le rejouer. Bats ton nombre d’étoiles pour gagner des pièces.",
+  "levelReplayButton": "Regarder et rejouer",
+  "levelReplayNoCoins": "Bravo ! Bats ton record d’étoiles pour gagner des pièces.",
+  "shopNoAdsTitle": "Sans pub",
+  "shopNoAdsBody": "Fini les bannières et les pubs entre les casse-tête. Les vidéos à récompense restent au choix.",
+  "shopNoAdsOwned": "Pubs retirées. Merci !"
 }

@@ -1971,6 +1971,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Level {level}'**
   String critterLevelLabel(int level);
+
+  /// Replaying a finished level from the level map (rewarded ad)
+  ///
+  /// In en, this message translates to:
+  /// **'Replay level {level}?'**
+  String levelReplayTitle(int level);
+
+  /// Replaying a finished level from the level map (rewarded ad)
+  ///
+  /// In en, this message translates to:
+  /// **'Watch a short video to play it again. Beat your stars to earn coins.'**
+  String get levelReplayBody;
+
+  /// Replaying a finished level from the level map (rewarded ad)
+  ///
+  /// In en, this message translates to:
+  /// **'Watch & replay'**
+  String get levelReplayButton;
+
+  /// Replaying a finished level from the level map (rewarded ad)
+  ///
+  /// In en, this message translates to:
+  /// **'Nice! Beat your best stars to earn coins.'**
+  String get levelReplayNoCoins;
+
+  /// Shop Coins tab: the No ads purchase
+  ///
+  /// In en, this message translates to:
+  /// **'No ads'**
+  String get shopNoAdsTitle;
+
+  /// Shop Coins tab: the No ads purchase
+  ///
+  /// In en, this message translates to:
+  /// **'Banners and ads between puzzles gone for good. Reward videos stay optional.'**
+  String get shopNoAdsBody;
+
+  /// Shop Coins tab: the No ads purchase
+  ///
+  /// In en, this message translates to:
+  /// **'Ads removed. Thank you!'**
+  String get shopNoAdsOwned;
 }
 
 class _AppLocalizationsDelegate
