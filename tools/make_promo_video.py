@@ -73,6 +73,20 @@ TEXT = {
         'free': 'Gratuit sur Google Play',
         'end_sub': 'De nouveaux défis chaque jour',
     },
+    'es': {
+        'title': 'Critter *Logic*', 'tagline': 'Retos diarios',
+        'daily': '*3 retos nuevos*|cada día',
+        'nests': 'Nidos', 'pairs': 'Parejas', 'trail': 'Sendero',
+        'nests_sub': 'un animalito por fila y zona', 'pairs_sub': 'soles y lunas en equilibrio', 'trail_sub': 'un solo camino, en orden',
+        'coins': '¡Resuelve retos|*y gana monedas!*',
+        'rank': 'Compite con|*todo el mundo*',
+        'lucky': 'Abre el|*Nido de la suerte*',
+        'critters': 'Colecciona|*30* animalitos',
+        'levelup': 'Súbelos de nivel *⭐*',
+        'worlds': '*5 mundos*|por explorar',
+        'free': 'Gratis en Google Play',
+        'end_sub': 'Retos nuevos cada día',
+    },
 }
 
 # --------------------------------------------------------------------------------------------------------------------
@@ -580,9 +594,14 @@ def build_edit(lang, fmt, ev):
         at = e['home'] if part == 'home' else e['board']
         rz = [-4, 3, -3, 4, -4, 3, -3, 4][i]
         shots.append(Shot(t0, t0 + 0.5, w, [(0, at), (0.5, at + 0.5)],
-                          [(0, cam(1.25 if part == 'home' else 1.35, 0.5, 0.4, 0.5, 0.58 if wide else 0.6, rz=rz, ry=0)),
-                           (0.5, cam(1.36 if part == 'home' else 1.48, 0.5, 0.4, 0.5, 0.58 if wide else 0.6, rz=rz * 0.5))],
-                          tint=tints[w], caption=T['worlds'] if i == 0 else None, layout='top', enter='flash' if i else 'zoom',
+                          # 16:9: the whole phone on the right, the caption on the left; 9:16: closer, caption on top.
+                          [(0, cam(*((0.88, 0.5, 0.5, 0.66, 0.5) if wide and part == 'home' else
+                                     (1.45, 0.5, 0.45, 0.66, 0.5) if wide else
+                                     (1.25 if part == 'home' else 1.35, 0.5, 0.4, 0.5, 0.6)), rz=rz, ry=0)),
+                           (0.5, cam(*((0.93, 0.5, 0.5, 0.66, 0.5) if wide and part == 'home' else
+                                       (1.58, 0.5, 0.45, 0.66, 0.5) if wide else
+                                       (1.36 if part == 'home' else 1.48, 0.5, 0.4, 0.5, 0.6)), rz=rz * 0.5))],
+                          tint=tints[w], caption=T['worlds'] if i == 0 else None, layout='montage', enter='flash' if i else 'zoom',
                           grade=(1.12, 1.06, 0.0)))
     # 26–30 s: end card.
     shots.append(Shot(26.0, LENGTH, None, title='end', enter='flash'))
@@ -633,6 +652,8 @@ class Renderer:
         if self.fmt == '16x9':
             if shot.layout == 'top':
                 return W * 0.5, H * 0.07, W * 0.8, int(96 * k)
+            if shot.layout == 'montage':
+                return W * 0.29, H * 0.33, W * 0.44, int(120 * k)
             x = W * 0.3 if shot.layout == 'left' else W * 0.7
             return x, H * 0.33, W * 0.44, int(112 * k)
         return W * 0.5, H * 0.075, W * 0.88, int(118 * k)
@@ -706,19 +727,20 @@ class Renderer:
                     ImageDraw.Draw(band).rectangle((0, 0, W, bh), fill=(10, 6, 24, 140))
                     img.alpha_composite(band.filter(ImageFilter.GaussianBlur(40 * self.scale)))
                 exit_at = shot.end - shot.start - 0.2 if shot.end - shot.start > 0.8 else None
-                if shot.layout == 'top' and shot.end - shot.start <= 0.5:
+                if shot.layout in ('top', 'montage') and shot.end - shot.start <= 0.5:
                     exit_at = None
                 words.draw(img, x, y, t, 0.05, exit_at)
                 if sub:
                     sub.draw(img, x, y + words.height + 8 * self.scale, t, 0.3, exit_at, pop=False)
-            if shot.layout == 'top' and shot.caption is None and 22.0 <= t_abs < 26.0:
+            if shot.layout == 'montage' and shot.caption is None:
                 # The montage keeps its first caption on screen.
                 first = next(s for s in self.shots if s.start == 22.0)
                 words, sub = self.caption_for(first)
                 x, y, _, _ = self.caption_box(first)
-                band = Image.new('RGBA', self.size, (0, 0, 0, 0))
-                ImageDraw.Draw(band).rectangle((0, 0, W, y + words.height + 50 * self.scale), fill=(10, 6, 24, 140))
-                img.alpha_composite(band.filter(ImageFilter.GaussianBlur(40 * self.scale)))
+                if self.fmt == '9x16':
+                    band = Image.new('RGBA', self.size, (0, 0, 0, 0))
+                    ImageDraw.Draw(band).rectangle((0, 0, W, y + words.height + 50 * self.scale), fill=(10, 6, 24, 140))
+                    img.alpha_composite(band.filter(ImageFilter.GaussianBlur(40 * self.scale)))
                 words.draw(img, x, y, t_abs - 22.0, 0.05, 25.75 - 22.0)
         img = self.transition(shot, t, img)
         img = img.convert('RGB')
@@ -991,7 +1013,7 @@ def render(lang, fmt, frames=None, draft=False):
 
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument('langs', nargs='*', default=['en', 'fr'])
+    p.add_argument('langs', nargs='*', default=['en', 'fr', 'es'])
     p.add_argument('--format', choices=['16x9', '9x16'])
     p.add_argument('--frames')
     p.add_argument('--draft', action='store_true')

@@ -45,19 +45,45 @@ def sh(script):
     return subprocess.run(ADB + ['shell', script], capture_output=True, text=True).stdout
 
 
+DEMO = ['settings put global sysui_demo_allowed 1',
+        'am broadcast -a com.android.systemui.demo -e command enter',
+        'am broadcast -a com.android.systemui.demo -e command clock -e hhmm 0941',
+        'am broadcast -a com.android.systemui.demo -e command battery -e level 100 -e plugged false',
+        # One SIM, no mobile data icon, full Wi-Fi; no other status icons.
+        'am broadcast -a com.android.systemui.demo -e command network -e sims 1',
+        'am broadcast -a com.android.systemui.demo -e command network -e mobile hide',
+        'am broadcast -a com.android.systemui.demo -e command network -e nosim hide',
+        'am broadcast -a com.android.systemui.demo -e command network -e airplane hide',
+        'am broadcast -a com.android.systemui.demo -e command network -e wifi show -e level 4 -e fully true',
+        'am broadcast -a com.android.systemui.demo -e command status -e volume hide -e bluetooth hide '
+        '-e location hide -e alarm hide -e zen hide -e sync hide -e tty hide -e eri hide -e mute hide '
+        '-e speakerphone hide -e managed_profile hide',
+        'am broadcast -a com.android.systemui.demo -e command notifications -e visible false']
+
+
+def demo_mode():
+    """System UI demo mode: 9:41, full battery, Wi-Fi only, no notifications. Re-entered from scratch, so a display
+    change doesn't leave stale icons behind."""
+    sh('am broadcast -a com.android.systemui.demo -e command exit')
+    time.sleep(0.5)
+    for cmd in DEMO:
+        sh(cmd)
+
+
+def display(size=None, density=None):
+    """A tablet-sized display override (None: back to the phone), then a fresh demo mode."""
+    sh(f'wm size {size}; wm density {density}' if size else 'wm size reset; wm density reset')
+    time.sleep(2.5)
+    demo_mode()
+    time.sleep(0.5)
+
+
 def setup():
     """Clean status bar (System UI demo mode) and animations on; returns the previous animation scales."""
     old = [sh(f'settings get global {k}').strip() for k in ANIM_KEYS]
     for k in ANIM_KEYS:
         sh(f'settings put global {k} 1')
-    for cmd in ['settings put global sysui_demo_allowed 1',
-                'am broadcast -a com.android.systemui.demo -e command enter',
-                'am broadcast -a com.android.systemui.demo -e command clock -e hhmm 0941',
-                'am broadcast -a com.android.systemui.demo -e command battery -e level 100 -e plugged false',
-                'am broadcast -a com.android.systemui.demo -e command network -e wifi show -e level 4',
-                'am broadcast -a com.android.systemui.demo -e command network -e mobile hide',
-                'am broadcast -a com.android.systemui.demo -e command notifications -e visible false']:
-        sh(cmd)
+    demo_mode()
     return old
 
 

@@ -5,7 +5,7 @@ Writes, under store/:
 - screenshots/<locale>/tablet7/NN_<name>.png and tablet10/: 4 each, 1200 x 1920 and 1600 x 2560;
 - feature-graphic-en.png / -fr.png: 1024 x 500;
 - icon-512.png: from assets/icon/icon.png.
-Locales: en-US and fr-CA (Play's fr-FR listing reuses fr-CA's images).
+Locales: en-US, fr-CA and es-419 (Play's fr-FR reuses fr-CA's images; es-ES and es-US reuse es-419's).
 
 Each screenshot is a real screen of the app, captured on the emulator by tools/capture_store_shots.py (the promo build
 on a staged save, so no ads, no debug banner and a clean status bar) into build/promo/shots/<lang>/<device>/, framed in
@@ -24,7 +24,7 @@ STORE = os.path.join(ROOT, 'store')
 FONT = os.path.join(ROOT, 'assets', 'fonts', 'Fredoka-Bold.ttf')
 FONT_SEMI = os.path.join(ROOT, 'assets', 'fonts', 'Fredoka-SemiBold.ttf')
 CRITTERS = os.path.join(ROOT, 'assets', 'critters')
-LOCALES = {'en': 'en-US', 'fr': 'fr-CA'}
+LOCALES = {'en': 'en-US', 'fr': 'fr-CA', 'es': 'es-419'}
 
 # Background gradients (top, bottom) and accent per World.
 THEMES = {
@@ -73,10 +73,21 @@ CAPTIONS = {
         'levels': '*Des niveaux à l’infini*|et des étoiles',
         'gifts': '*Cadeaux*, trophées et|événements de la semaine',
     },
+    'es': {
+        'daily': '*3 retos nuevos*|cada día',
+        'play': 'Nidos, Parejas y Sendero:|tableros *ingeniosos*',
+        'rank': '*Sube* en la|clasificación',
+        'album': 'Colecciona y mejora|*30 animalitos*',
+        'lucky': 'Sorpresas del|*Nido de la suerte*',
+        'worlds': 'Elige tu *mundo*',
+        'levels': '*Niveles sin fin*|con estrellas',
+        'gifts': '*Regalos*, trofeos y|eventos semanales',
+    },
 }
 FEATURE = {
     'en': ('Critter Logic', 'Daily Puzzles', '3 new logic puzzles every day'),
     'fr': ('Critter Logic', 'Casse-têtes du jour', '3 nouveaux casse-têtes chaque jour'),
+    'es': ('Critter Logic', 'Retos diarios', '3 acertijos de lógica nuevos cada día'),
 }
 
 

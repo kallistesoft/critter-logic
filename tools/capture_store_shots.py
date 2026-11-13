@@ -18,6 +18,18 @@ def path(lang, kind, name):
     return os.path.join(OUT, 'shots', lang, kind, name + '.png')
 
 
+def clean_status_icons(file):
+    """On a display override, System UI draws stale duplicate network icons left of the battery (demo mode can't
+    clear them): paint that strip over with the row colour just left of it. Tablets only."""
+    from PIL import Image
+    img = Image.open(file).convert('RGB')
+    w, h = img.size
+    x0, x1, y1 = w - 222, w - 104, 100
+    for y in range(y1):
+        img.paste(img.getpixel((x0 - 4, y)), (x0, y, x1, y + 1))
+    img.save(file)
+
+
 def crop_board(src, dst, box, pad=34):
     from PIL import Image
     x0, y0, x1, y1 = box
@@ -99,12 +111,12 @@ def tablet(lang, kind):
     """Home, a board, the album and the Worlds shop on a tablet-sized display. Positions come from the layout's
     proportions on these displays (measured once from screenshots)."""
     size, density = DISPLAYS[kind]
-    sh(f'wm size {size}; wm density {density}')
-    time.sleep(2)
+    display(size, density)
     w, h = map(int, size.split('x'))
     pos = TABLET_POS[kind]
     launch(lang, 'world.meadow', wait=7)
     shot(path(lang, kind, 'daily'))
+    clean_status_icons(path(lang, kind, 'daily'))
     launch(lang, 'world.lodge', wait=7)
     tap(*pos['nests'], 2.0)
     box = pos['nests_box']
@@ -115,15 +127,18 @@ def tablet(lang, kind):
     taps([g(cells[1] + 2)], 0.1)
     time.sleep(1.5)
     shot(path(lang, kind, 'play'))
+    clean_status_icons(path(lang, kind, 'play'))
     launch(lang, 'world.meadow', wait=7)
     swipe(w // 2, int(h * 0.7), w // 2, int(h * 0.3), 1500)
     time.sleep(1)
     tap(*pos['album'], 2.5)
     shot(path(lang, kind, 'album'))
+    clean_status_icons(path(lang, kind, 'album'))
     launch(lang, 'world.neon', wait=7)
     tap(*pos['shop'], 2.0)
     tap(*pos['worlds_tab'], 2.0)
     shot(path(lang, kind, 'worlds'))
+    clean_status_icons(path(lang, kind, 'worlds'))
 
 
 # Tap targets on the tablet displays (measured from screenshots of the promo build).
@@ -136,7 +151,7 @@ TABLET_POS = {
 
 
 if __name__ == '__main__':
-    langs = [a for a in sys.argv[1:] if not a.startswith('--')] or ['en', 'fr']
+    langs = [a for a in sys.argv[1:] if not a.startswith('--')] or ['en', 'fr', 'es']
     old = setup()
     try:
         for lang in langs:
@@ -144,6 +159,6 @@ if __name__ == '__main__':
             if '--phone-only' not in sys.argv:
                 for kind in ('tablet7', 'tablet10'):
                     tablet(lang, kind)
-                sh('wm size reset; wm density reset')
+                display()
     finally:
         teardown(old)
