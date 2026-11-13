@@ -7,27 +7,18 @@ import '../services/sound_service.dart';
 import 'meadow.dart';
 import 'palette.dart';
 import 'services.dart';
+import 'worlds/world.dart';
 
-/// Chunky, friendly type in the rounded display font.
-TextStyle chunky(double size, {Color color = ink, FontWeight weight = FontWeight.w700, double? height}) => TextStyle(
-      fontFamily: displayFont,
-      color: color,
-      fontSize: size,
-      fontWeight: weight.value >= 700 ? FontWeight.w700 : (weight.value >= 600 ? FontWeight.w600 : FontWeight.w500),
-      height: height,
-      letterSpacing: 0.1,
-    );
+/// Chunky, friendly type in the equipped World's display font.
+TextStyle chunky(double size, {Color? color, FontWeight weight = FontWeight.w700, double? height}) =>
+    activeWorld.text(size, color: color, weight: weight, height: height);
 
 /// A cartoon outline around text, made of shadows (so it stays a single [Text]).
-List<Shadow> outline(Color color, double width, {double drop = 1.8}) => [
-      for (var k = 0; k < 8; k++)
-        Shadow(color: color, offset: Offset(cos(k * pi / 4) * width, sin(k * pi / 4) * width)),
-      Shadow(color: color, offset: Offset(0, width * drop)),
-    ];
+List<Shadow> outline(Color color, double width, {double drop = 1.8}) => cartoonOutline(color, width, drop: drop);
 
-/// Light text with a dark cartoon outline, for titles over the sky and on candy buttons.
-TextStyle outlinedText(double size, {Color color = Colors.white, Color stroke = woodEdge, double? width}) =>
-    chunky(size, color: color).copyWith(shadows: outline(stroke, width ?? max(1.5, size * 0.07)));
+/// Light text that stands out over the World's background (a dark cartoon outline in the Meadow).
+TextStyle outlinedText(double size, {Color? color, Color? stroke, double? width}) =>
+    activeWorld.outlined(size, color: color, stroke: stroke, width: width);
 
 /// Centers screen content at phone width (scaled up on tablets by [MeadowScaffold]).
 class ScreenFrame extends StatelessWidget {
@@ -125,109 +116,39 @@ class SoftCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final world = worldOf(context);
     final Widget card;
     if (style == PanelStyle.wood) {
-      card = CustomPaint(painter: const WoodPainter(), child: Padding(padding: padding, child: child));
+      card = CustomPaint(painter: WoodPainter(world: world), child: Padding(padding: padding, child: child));
     } else {
-      final fill = color ?? paper;
-      final edge = border ?? Color.lerp(fill, woodDark, 0.32)!;
-      card = Container(
-        padding: padding,
-        decoration: BoxDecoration(
-          color: fill,
-          borderRadius: BorderRadius.circular(radius),
-          border: Border.all(color: border ?? paperEdge, width: border == null ? 2.5 : 3.5),
-          boxShadow: [
-            BoxShadow(color: edge, offset: const Offset(0, 5)),
-            const BoxShadow(color: shadow, blurRadius: 14, offset: Offset(0, 9)),
-          ],
-        ),
-        child: child,
-      );
+      card = Container(padding: padding, decoration: world.card(fill: color, border: border), child: child);
     }
     return onTap == null ? card : Bouncy(onTap: onTap, child: card);
   }
 }
 
-/// Wood planks with seams, grain and nails.
+/// The World's panel (wood planks with seams, grain and nails in the Meadow).
 class WoodPainter extends CustomPainter {
-  const WoodPainter({this.radius = 18, this.nails = true, this.plank = 34});
+  const WoodPainter({this.radius = 18, this.nails = true, this.plank = 34, this.world});
 
   final double radius;
   final bool nails;
   final double plank;
 
-  @override
-  void paint(Canvas canvas, Size size) {
-    final rr = RRect.fromRectAndRadius(Offset.zero & size, Radius.circular(radius));
-    canvas.drawRRect(rr.shift(const Offset(0, 9)), Paint()
-      ..color = shadow
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 7));
-    canvas.drawRRect(rr.shift(const Offset(0, 5)), Paint()..color = woodEdge);
-    canvas.drawRRect(
-      rr,
-      Paint()
-        ..shader = const LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [woodLight, wood],
-        ).createShader(Offset.zero & size),
-    );
-    canvas.save();
-    canvas.clipRRect(rr);
-    final seam = Paint()
-      ..color = woodDark.withValues(alpha: 0.55)
-      ..strokeWidth = 2;
-    final grain = Paint()
-      ..color = woodDark.withValues(alpha: 0.18)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.4;
-    final rows = max(1, (size.height / plank).round());
-    final ph = size.height / rows;
-    final r = Random(size.width.round() * 31 + size.height.round());
-    for (var i = 0; i < rows; i++) {
-      final y = i * ph;
-      if (i > 0) canvas.drawLine(Offset(0, y), Offset(size.width, y), seam);
-      canvas.drawLine(Offset(0, y + 1.5), Offset(size.width, y + 1.5), Paint()
-        ..color = Colors.white.withValues(alpha: 0.18)
-        ..strokeWidth = 1.5);
-      for (var g = 0; g < 2; g++) {
-        final gy = y + ph * (0.3 + 0.4 * r.nextDouble());
-        final x0 = r.nextDouble() * size.width * 0.5;
-        final path = Path()
-          ..moveTo(x0, gy)
-          ..quadraticBezierTo(x0 + size.width * 0.2, gy - 3, x0 + size.width * 0.45, gy + 1);
-        canvas.drawPath(path, grain);
-      }
-    }
-    canvas.restore();
-    canvas.drawRRect(rr.deflate(1.5), Paint()
-      ..color = woodEdge
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 3);
-    canvas.drawRRect(rr.deflate(4.5), Paint()
-      ..color = Colors.white.withValues(alpha: 0.22)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.5);
-    if (nails && size.width > 60 && size.height > 40) {
-      for (final o in [
-        Offset(11, 11),
-        Offset(size.width - 11, 11),
-        Offset(11, size.height - 11),
-        Offset(size.width - 11, size.height - 11),
-      ]) {
-        canvas.drawCircle(o, 3.2, Paint()..color = woodEdge);
-        canvas.drawCircle(o - const Offset(0.8, 0.8), 1.3, Paint()..color = Colors.white.withValues(alpha: 0.5));
-      }
-    }
-  }
+  /// Paints this World's panel instead of the equipped one (previews).
+  final GameWorld? world;
 
   @override
-  bool shouldRepaint(WoodPainter old) => old.radius != radius || old.nails != nails || old.plank != plank;
+  void paint(Canvas canvas, Size size) =>
+      (world ?? activeWorld).paintPanel(canvas, size, radius: radius, nails: nails, plank: plank);
+
+  @override
+  bool shouldRepaint(WoodPainter old) =>
+      old.radius != radius || old.nails != nails || old.plank != plank || old.world?.id != world?.id;
 }
 
-/// The face and edge colors of a candy button for a base color.
-Color edgeOf(Color c) => Color.lerp(c, const Color(0xFF3A2010), 0.32)!;
+/// The darker rim of a button for a base color, in the equipped World.
+Color edgeOf(Color c) => activeWorld.edgeOf(c);
 
 /// Chunky 3D "candy" button: thick darker edge, glossy top, squashes when pressed and springs back.
 class ChunkyButton extends StatelessWidget {
@@ -236,7 +157,7 @@ class ChunkyButton extends StatelessWidget {
     required this.label,
     required this.onPressed,
     this.icon,
-    this.color = leaf,
+    this.color,
     this.edge,
     this.textColor = Colors.white,
     this.expand = false,
@@ -246,7 +167,9 @@ class ChunkyButton extends StatelessWidget {
   final String label;
   final VoidCallback? onPressed;
   final Widget? icon;
-  final Color color;
+
+  /// Face color; the World's main button color ([WorldPalette.leaf]) by default.
+  final Color? color;
   final Color? edge;
   final Color textColor;
   final bool expand;
@@ -254,12 +177,13 @@ class ChunkyButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final world = worldOf(context);
+    final base = color ?? world.palette.leaf;
     final enabled = onPressed != null;
-    final face = enabled ? color : Color.lerp(color, const Color(0xFFBDB3A6), 0.65)!;
-    final rim = enabled ? (edge ?? edgeOf(color)) : edgeOf(face);
-    final light = textColor.computeLuminance() > 0.5;
+    final face = enabled ? base : Color.lerp(base, world.disabledButton, 0.65)!;
+    final rim = enabled ? (edge ?? world.edgeOf(base)) : world.edgeOf(face);
     final fontSize = small ? 16.0 : 20.0;
-    final depth = small ? 4.0 : 6.0;
+    final depth = world.buttonDepth(small);
     final content = Row(
       mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
@@ -272,9 +196,7 @@ class ChunkyButton extends StatelessWidget {
             child: Text(label,
                 textAlign: TextAlign.center,
                 maxLines: 1,
-                style: light
-                    ? outlinedText(fontSize, color: textColor, stroke: rim, width: 1.6)
-                    : chunky(fontSize, color: textColor)),
+                style: world.buttonText(fontSize, textColor: textColor, rim: rim)),
           ),
         ),
       ],
@@ -284,7 +206,7 @@ class ChunkyButton extends StatelessWidget {
       builder: (context, p, child) {
         final pressed = p.clamp(0.0, 1.0);
         return CustomPaint(
-          painter: CandyPainter(face: face, edge: rim, press: pressed, depth: depth, radius: small ? 16 : 20),
+          painter: CandyPainter(face: face, edge: rim, press: pressed, depth: depth, radius: small ? 16 : 20, world: world),
           child: Padding(
             padding: EdgeInsets.only(top: depth * pressed, bottom: depth * (1 - pressed)),
             child: Transform.scale(scaleX: 1 + 0.04 * p, scaleY: 1 - 0.04 * p, child: child),
@@ -299,9 +221,17 @@ class ChunkyButton extends StatelessWidget {
   }
 }
 
-/// Paints a candy button: dark outline, thick bottom edge, gradient face and a glossy highlight.
+/// Paints a button the World's way (a candy button in the Meadow).
 class CandyPainter extends CustomPainter {
-  const CandyPainter({required this.face, required this.edge, this.press = 0, this.depth = 6, this.radius = 20, this.circle = false});
+  const CandyPainter({
+    required this.face,
+    required this.edge,
+    this.press = 0,
+    this.depth = 6,
+    this.radius = 20,
+    this.circle = false,
+    this.world,
+  });
 
   final Color face;
   final Color edge;
@@ -309,39 +239,21 @@ class CandyPainter extends CustomPainter {
   final double depth;
   final double radius;
   final bool circle;
+  final GameWorld? world;
 
   @override
-  void paint(Canvas canvas, Size size) {
-    final r = circle ? size.height / 2 : radius;
-    final outer = RRect.fromRectAndRadius(Offset.zero & size, Radius.circular(r));
-    final top = depth * press;
-    final faceRect = RRect.fromLTRBR(0, top, size.width, size.height - depth + top, Radius.circular(r));
-    canvas.drawRRect(outer.shift(const Offset(0, 3)), Paint()
-      ..color = shadow
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4));
-    canvas.drawRRect(outer, Paint()..color = edge);
-    canvas.drawRRect(
-      faceRect,
-      Paint()
-        ..shader = LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Color.lerp(face, Colors.white, 0.28)!, face],
-        ).createShader(faceRect.outerRect),
-    );
-    // Gloss on the upper half.
-    final g = faceRect.outerRect;
-    final gloss = RRect.fromLTRBR(g.left + r * 0.45, g.top + 3, g.right - r * 0.45, g.top + g.height * 0.45, Radius.circular(r));
-    canvas.drawRRect(gloss, Paint()..color = Colors.white.withValues(alpha: 0.28));
-    canvas.drawRRect(outer.deflate(1), Paint()
-      ..color = Color.lerp(edge, Colors.black, 0.25)!
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2);
-  }
+  void paint(Canvas canvas, Size size) => (world ?? activeWorld)
+      .paintButton(canvas, size, face: face, edge: edge, press: press, depth: depth, radius: radius, circle: circle);
 
   @override
   bool shouldRepaint(CandyPainter old) =>
-      old.face != face || old.edge != edge || old.press != press || old.depth != depth || old.radius != radius;
+      old.face != face ||
+      old.edge != edge ||
+      old.press != press ||
+      old.depth != depth ||
+      old.radius != radius ||
+      old.circle != circle ||
+      old.world?.id != world?.id;
 }
 
 /// Pill badge for the HUD (coins, streak, timer…): a cream pill with an icon on the left.
@@ -351,8 +263,8 @@ class StatPill extends StatelessWidget {
     this.emoji,
     this.icon,
     required this.text,
-    this.color = paper,
-    this.textColor = ink,
+    this.color,
+    this.textColor,
     this.onTap,
     this.big = false,
   });
@@ -360,30 +272,28 @@ class StatPill extends StatelessWidget {
   final String? emoji;
   final Widget? icon;
   final String text;
-  final Color color;
-  final Color textColor;
+
+  /// Pill fill and text; the World's paper and ink by default.
+  final Color? color;
+  final Color? textColor;
   final VoidCallback? onTap;
   final bool big;
 
   @override
   Widget build(BuildContext context) {
+    final world = worldOf(context);
     final h = big ? 44.0 : 38.0;
     final pill = Container(
       height: h,
       padding: EdgeInsets.only(left: 5, right: big ? 16 : 13),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(h),
-        border: Border.all(color: woodEdge.withValues(alpha: 0.75), width: 2.5),
-        boxShadow: const [BoxShadow(color: shadow, offset: Offset(0, 3), blurRadius: 3)],
-      ),
+      decoration: world.pill(color ?? world.palette.paper, h),
       child: Row(mainAxisSize: MainAxisSize.min, children: [
         SizedBox.square(
           dimension: h - 10,
           child: icon ?? FittedBox(child: Text(emoji ?? '', style: const TextStyle(fontSize: 22))),
         ),
         const SizedBox(width: 6),
-        Text(text, style: chunky(big ? 20 : 17, color: textColor)),
+        Text(text, style: world.text(big ? 20 : 17, color: textColor ?? world.palette.ink)),
       ]),
     );
     return onTap == null ? pill : Bouncy(onTap: onTap, child: pill);
@@ -407,7 +317,7 @@ class _CoinPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final s = min(size.width, size.height);
     final c = size.center(Offset.zero);
-    canvas.drawCircle(c + Offset(0, s * 0.05), s * 0.46, Paint()..color = goldEdge);
+    canvas.drawCircle(c + Offset(0, s * 0.05), s * 0.46, Paint()..color = const Color(0xFFD38A12));
     canvas.drawCircle(c, s * 0.46, Paint()..color = const Color(0xFFFFCF40));
     canvas.drawCircle(c, s * 0.33, Paint()..color = const Color(0xFFF5B321));
     final star = starPath(c, s * 0.2, s * 0.09);
@@ -423,50 +333,31 @@ class _CoinPainter extends CustomPainter {
   bool shouldRepaint(_CoinPainter old) => false;
 }
 
-/// The streak flame.
+/// The streak icon: a flame in the Meadow, a campfire that grows with [streak] in the Lodge.
 class FlameIcon extends StatelessWidget {
-  const FlameIcon({super.key, this.size = 28, this.lit = true});
+  const FlameIcon({super.key, this.size = 28, this.lit = true, this.streak = 0});
 
   final double size;
   final bool lit;
+  final int streak;
 
   @override
-  Widget build(BuildContext context) => SizedBox.square(dimension: size, child: CustomPaint(painter: _FlamePainter(lit)));
+  Widget build(BuildContext context) =>
+      SizedBox.square(dimension: size, child: CustomPaint(painter: _FlamePainter(worldOf(context), lit, streak)));
 }
 
 class _FlamePainter extends CustomPainter {
-  const _FlamePainter(this.lit);
+  const _FlamePainter(this.world, this.lit, this.streak);
 
+  final GameWorld world;
   final bool lit;
-
-  Path _flame(Size size, double k) {
-    final w = size.width, h = size.height;
-    final cx = w / 2;
-    return Path()
-      ..moveTo(cx, h * (0.04 + (1 - k) * 0.4))
-      ..cubicTo(cx + w * 0.42 * k, h * 0.35, cx + w * 0.44 * k, h * 0.95, cx, h * 0.96)
-      ..cubicTo(cx - w * 0.44 * k, h * 0.95, cx - w * 0.42 * k, h * 0.5, cx - w * 0.1 * k, h * 0.42)
-      ..cubicTo(cx - w * 0.05, h * 0.3, cx, h * 0.2, cx, h * (0.04 + (1 - k) * 0.4))
-      ..close();
-  }
+  final int streak;
 
   @override
-  void paint(Canvas canvas, Size size) {
-    final outer = lit ? const Color(0xFFFF6B2C) : const Color(0xFFFFB892);
-    final inner = lit ? const Color(0xFFFFC93C) : const Color(0xFFFFE6C8);
-    canvas.drawPath(_flame(size, 1), Paint()..color = outer);
-    canvas.save();
-    canvas.translate(0, size.height * 0.12);
-    canvas.drawPath(_flame(size, 0.6), Paint()..color = inner);
-    canvas.restore();
-    canvas.drawPath(_flame(size, 1), Paint()
-      ..color = lit ? const Color(0xFFC2410C) : const Color(0xFFD9895F)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = max(1, size.width * 0.06));
-  }
+  void paint(Canvas canvas, Size size) => world.paintStreak(canvas, size, lit: lit, streak: streak);
 
   @override
-  bool shouldRepaint(_FlamePainter old) => old.lit != lit;
+  bool shouldRepaint(_FlamePainter old) => old.lit != lit || old.streak != streak || old.world.id != world.id;
 }
 
 /// Coins pill whose number rolls up or down to [value].
@@ -494,23 +385,27 @@ class CoinCounter extends StatelessWidget {
 
 /// Round candy icon button (back, settings…).
 class RoundIconButton extends StatelessWidget {
-  const RoundIconButton({super.key, required this.icon, required this.onPressed, this.tooltip, this.size = 48, this.color = sky});
+  const RoundIconButton({super.key, required this.icon, required this.onPressed, this.tooltip, this.size = 48, this.color});
 
   final IconData icon;
   final VoidCallback? onPressed;
   final String? tooltip;
   final double size;
-  final Color color;
+
+  /// Face color; the World's secondary button color ([WorldPalette.sky]) by default.
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
-    final depth = size * 0.1;
+    final world = worldOf(context);
+    final face = color ?? world.palette.sky;
+    final depth = world.buttonDepth(false) == 0 ? 0.0 : size * 0.1;
     final button = Bouncy(
       onTap: onPressed,
       builder: (context, p, child) {
         final pressed = p.clamp(0.0, 1.0);
         return CustomPaint(
-          painter: CandyPainter(face: color, edge: edgeOf(color), press: pressed, depth: depth, circle: true),
+          painter: CandyPainter(face: face, edge: world.edgeOf(face), press: pressed, depth: depth, circle: true, world: world),
           child: SizedBox(
             width: size,
             height: size + depth,
@@ -519,7 +414,7 @@ class RoundIconButton extends StatelessWidget {
         );
       },
       child: Center(
-        child: Icon(icon, color: Colors.white, size: size * 0.56, shadows: [Shadow(color: edgeOf(color), offset: const Offset(0, 2))]),
+        child: Icon(icon, color: world.iconColor(face), size: size * 0.56, shadows: world.iconShadows(face)),
       ),
     );
     return tooltip == null ? button : Tooltip(message: tooltip!, child: button);
@@ -540,7 +435,7 @@ class CountBadge extends StatelessWidget {
           color: bad,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(color: Colors.white, width: 2.5),
-          boxShadow: const [BoxShadow(color: shadow, offset: Offset(0, 2))],
+          boxShadow: [BoxShadow(color: shadow, offset: const Offset(0, 2))],
         ),
         child: Text('$count', textAlign: TextAlign.center, style: chunky(14, color: Colors.white)),
       );
@@ -597,7 +492,7 @@ class SlideIn extends StatelessWidget {
   }
 }
 
-/// The "Critter Logic" wooden sign hanging from two ropes.
+/// The big home title ("Critter Logic"): a wooden sign hanging from two ropes in the Meadow.
 class WoodSign extends StatelessWidget {
   const WoodSign({super.key, required this.title, this.subtitle, this.fontSize = 40});
 
@@ -606,53 +501,11 @@ class WoodSign extends StatelessWidget {
   final double fontSize;
 
   @override
-  Widget build(BuildContext context) {
-    return CustomPaint(
-      painter: const _SignPainter(),
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(30, 34, 30, subtitle == null ? 18 : 14),
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Text(title, textAlign: TextAlign.center, style: outlinedText(fontSize, color: const Color(0xFFFFF4D6), stroke: woodEdge, width: 2.6)),
-          if (subtitle != null) ...[
-            const SizedBox(height: 2),
-            Text(subtitle!, textAlign: TextAlign.center, style: chunky(15, color: const Color(0xFFFFE9C2), weight: FontWeight.w600)),
-          ],
-        ]),
-      ),
-    );
-  }
+  Widget build(BuildContext context) =>
+      worldOf(context).sign(context, title: title, subtitle: subtitle, fontSize: fontSize);
 }
 
-class _SignPainter extends CustomPainter {
-  const _SignPainter();
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    const top = 22.0;
-    final board = Rect.fromLTWH(0, top, size.width, size.height - top - 4);
-    // Ropes up to the top edge.
-    final rope = Paint()
-      ..color = const Color(0xFFB88A55)
-      ..strokeWidth = 4
-      ..strokeCap = StrokeCap.round;
-    for (final x in [size.width * 0.18, size.width * 0.82]) {
-      canvas.drawLine(Offset(x, 0), Offset(x, top + 10), rope);
-      canvas.drawLine(Offset(x, 0), Offset(x, top + 10), Paint()
-        ..color = const Color(0xFF8A6238)
-        ..strokeWidth = 1.2);
-      canvas.drawCircle(Offset(x, 2), 4, Paint()..color = woodEdge);
-    }
-    canvas.save();
-    canvas.translate(board.left, board.top);
-    const WoodPainter(radius: 22, plank: 30).paint(canvas, board.size);
-    canvas.restore();
-  }
-
-  @override
-  bool shouldRepaint(_SignPainter old) => false;
-}
-
-/// A wooden plaque with a title, for screen headers.
+/// A header plaque with a title (a wooden one in the Meadow).
 class WoodLabel extends StatelessWidget {
   const WoodLabel({super.key, required this.text, this.subtitle, this.fontSize = 22});
 
@@ -661,22 +514,8 @@ class WoodLabel extends StatelessWidget {
   final double fontSize;
 
   @override
-  Widget build(BuildContext context) => CustomPaint(
-        painter: const WoodPainter(radius: 16, nails: false, plank: 60),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 6, 16, 8),
-          child: Column(mainAxisSize: MainAxisSize.min, children: [
-            FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.center, child: Text(text,
-                maxLines: 1,
-                textAlign: TextAlign.center,
-                style: outlinedText(fontSize, color: const Color(0xFFFFF4D6), stroke: woodEdge, width: 2))),
-            if (subtitle != null)
-              FittedBox(fit: BoxFit.scaleDown, alignment: AlignmentDirectional.centerStart, child: Text(subtitle!,
-                  maxLines: 1,
-                  style: chunky(14, color: const Color(0xFFFFE6BC), weight: FontWeight.w600))),
-          ]),
-        ),
-      );
+  Widget build(BuildContext context) =>
+      worldOf(context).label(context, text: text, subtitle: subtitle, fontSize: fontSize);
 }
 
 /// Standard top bar: back button, wooden title, and trailing badges.
@@ -752,7 +591,7 @@ class _StarPainter extends CustomPainter {
       canvas.drawPath(path, Paint()..color = const Color(0x55000000));
       return;
     }
-    canvas.drawPath(path.shift(Offset(0, s * 0.05)), join..color = goldEdge);
+    canvas.drawPath(path.shift(Offset(0, s * 0.05)), join..color = const Color(0xFFD38A12));
     canvas.drawPath(path, join..color = const Color(0xFFE59A12));
     canvas.drawPath(
       path,
@@ -912,7 +751,7 @@ Future<T?> showSoftDialog<T>(
       context: context,
       barrierDismissible: true,
       barrierLabel: title,
-      barrierColor: const Color(0x664A3426),
+      barrierColor: activeWorld.palette.barrier,
       transitionDuration: const Duration(milliseconds: 320),
       transitionBuilder: (context, a, _, child) => FadeTransition(
         opacity: a,

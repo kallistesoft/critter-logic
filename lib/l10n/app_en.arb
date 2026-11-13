@@ -877,11 +877,17 @@
   "settingReminders": "Daily reminder",
   "@settingReminders": {},
   "settingLanguage": "Language",
-  "@settingLanguage": {"description": "Settings row: picks the app language"},
+  "@settingLanguage": {
+    "description": "Settings row: picks the app language"
+  },
   "languageSystem": "System default",
-  "@languageSystem": {"description": "Language picker: follow the phone's language"},
+  "@languageSystem": {
+    "description": "Language picker: follow the phone's language"
+  },
   "reminderChannel": "Daily puzzle",
-  "@reminderChannel": {"description": "Android notification channel name for the daily reminder, shown in the phone's settings"},
+  "@reminderChannel": {
+    "description": "Android notification channel name for the daily reminder, shown in the phone's settings"
+  },
   "credits": "Art and sounds: Kenney (kenney.nl), CC0",
   "@credits": {},
   "critterChick": "Chick",
@@ -1063,12 +1069,114 @@
       }
     }
   },
-  "fontCredit": "Font: Fredoka (SIL Open Font License)",
+  "fontCredit": "Fonts: Fredoka, Zilla Slab, Bevan, Exo 2, Inter (SIL Open Font License)",
   "@fontCredit": {
     "description": "Settings credits line for the bundled font"
+  },
+  "shopWorlds": "Worlds",
+  "@shopWorlds": {
+    "description": "Shop tab with the app themes (Worlds)"
+  },
+  "worldMeadow": "Meadow",
+  "@worldMeadow": {
+    "description": "World name: the default sunny meadow look"
+  },
+  "worldLodge": "Wild Lodge",
+  "@worldLodge": {
+    "description": "World name: rugged outdoors look (dusk, pine forest, campfire)"
+  },
+  "worldNeon": "Night Neon",
+  "@worldNeon": {
+    "description": "World name: dark synthwave look with glowing outlines"
+  },
+  "worldWinter": "Winter Cabin",
+  "@worldWinter": {
+    "description": "World name: snowy cabin at night with northern lights"
+  },
+  "worldPro": "Clean Pro",
+  "@worldPro": {
+    "description": "World name: minimal slate and gold look"
+  },
+  "worldMeadowBlurb": "Sunny hills, wooden signs and cute critters.",
+  "@worldMeadowBlurb": {
+    "description": "One-line description of the Meadow world"
+  },
+  "worldLodgeBlurb": "Dusk in the pines, campfire glow and wildlife badges.",
+  "@worldLodgeBlurb": {
+    "description": "One-line description of the Wild Lodge world"
+  },
+  "worldNeonBlurb": "Glowing grids and synthwave nights.",
+  "@worldNeonBlurb": {
+    "description": "One-line description of the Night Neon world"
+  },
+  "worldWinterBlurb": "Snowy pines, warm windows and northern lights.",
+  "@worldWinterBlurb": {
+    "description": "One-line description of the Winter Cabin world"
+  },
+  "worldProBlurb": "Minimal slate and gold. Just your times.",
+  "@worldProBlurb": {
+    "description": "One-line description of the Clean Pro world"
+  },
+  "worldFree": "Free",
+  "@worldFree": {
+    "description": "Price label of a free World"
+  },
+  "worldPreview": "Preview",
+  "@worldPreview": {
+    "description": "Button: see a World full screen before buying it"
+  },
+  "worldPreviewNote": "Preview: tap to close",
+  "@worldPreviewNote": {
+    "description": "Small label on the full-screen World preview"
+  },
+  "worldEquipped": "Your world is now {world}",
+  "@worldEquipped": {
+    "description": "Toast after switching World",
+    "placeholders": {
+      "world": {
+        "type": "String"
+      }
+    }
+  },
+  "welcomeWorldTitle": "Pick your world",
+  "@welcomeWorldTitle": {
+    "description": "First-launch screen title: choose the app's look"
+  },
+  "welcomeWorldBody": "Same puzzles, your style. You can switch anytime in the shop.",
+  "@welcomeWorldBody": {
+    "description": "First-launch screen subtitle"
+  },
+  "welcomeWorldGo": "Play in {world}",
+  "@welcomeWorldGo": {
+    "description": "First-launch screen button",
+    "placeholders": {
+      "world": {
+        "type": "String"
+      }
+    }
+  },
+  "welcomeWorldSkip": "Skip",
+  "@welcomeWorldSkip": {
+    "description": "First-launch World picker: skip (keeps Meadow)"
+  },
+  "fieldJournal": "Field journal",
+  "@fieldJournal": {
+    "description": "Album title in the Wild Lodge world"
+  },
+  "previewDaily": "Today",
+  "@previewDaily": {
+    "description": "Sample label inside a small World preview"
   },
   "coinsPreview": "Store not available in the dev build: this is a preview.",
   "@coinsPreview": {
     "description": "Snackbar when tapping a coin pack in a dev build (no store)"
+  },
+  "settingWorld": "World",
+  "settingWorldMore": "More worlds in the shop",
+  "@settingWorld": {
+    "description": "Settings row: the equipped World (visual theme)"
+  },
+  "@settingWorldMore": {
+    "description": "World picker button opening the shop Worlds tab"
   }
 }

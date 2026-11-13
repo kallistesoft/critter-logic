@@ -81,7 +81,7 @@ class _Required extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(32),
           child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-            const Icon(Icons.system_update_rounded, color: accent, size: 72),
+            Icon(Icons.system_update_rounded, color: accent, size: 72),
             const SizedBox(height: 24),
             Text(l10n.updateRequiredTitle,
                 style: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.w900)),

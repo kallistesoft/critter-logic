@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'worlds/world.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -74,14 +75,13 @@ Future<void> showRetentionUpdate(BuildContext context, RetentionUpdate u, {bool 
   if (u.setUnlocks.isNotEmpty) await showSetUnlocks(context, u.setUnlocks);
 }
 
-/// The hat (and full-album coins) a set unlock gives that the player can see today; board themes come later.
+/// The hats and frames a set unlock gives (the bonus coins are shown apart).
 List<String> visibleUnlocks(SetUnlock u) => [
   for (final c in u.cosmetics)
     if (shownCosmetic(c)) c,
 ];
 
-/// "Set complete!" with what the set unlocked and an Equip button for a hat. Sets whose unlock is a board theme
-/// show nothing extra (their 200 coins are already announced by the capsule reveal).
+/// "Set complete!" with what the set unlocked (a hat or bonus coins) and an Equip button for a hat.
 Future<void> showSetUnlocks(BuildContext context, List<SetUnlock> unlocks) async {
   for (final u in unlocks) {
     final items = visibleUnlocks(u);
@@ -116,7 +116,7 @@ Future<void> _showSetUnlock(BuildContext context, SetUnlock u, List<String> item
           child: Stack(
             alignment: Alignment.center,
             children: [
-              const Positioned.fill(
+              Positioned.fill(
                 child: ClipRect(child: _SpinningRays(color: gold)),
               ),
               Row(
@@ -229,7 +229,7 @@ Future<void> showCalendarPopup(BuildContext context, {GlobalKey? coinTarget}) =>
   context: context,
   barrierDismissible: true,
   barrierLabel: AppLocalizations.of(context).calendarTitle,
-  barrierColor: const Color(0x664A3426),
+  barrierColor: activeWorld.palette.barrier,
   transitionDuration: const Duration(milliseconds: 360),
   transitionBuilder: (context, a, _, child) => FadeTransition(
     opacity: a,
@@ -333,11 +333,11 @@ class _CalendarPanelState extends State<CalendarPanel> {
                 children: [
                   Text(
                     l10n.calendarTitle,
-                    style: outlinedText(30, color: const Color(0xFFFFF4D6), stroke: woodEdge, width: 2.4),
+                    style: outlinedText(30, color: onWood, stroke: woodEdge, width: 2.4),
                   ),
                   Text(
                     l10n.calendarSubtitle,
-                    style: chunky(15, color: const Color(0xFFFFE6BC), weight: FontWeight.w600),
+                    style: chunky(15, color: onWoodSoft, weight: FontWeight.w600),
                   ),
                   const SizedBox(height: 12),
                   Row(
@@ -393,7 +393,7 @@ class _CalendarPanelState extends State<CalendarPanel> {
                     Text(
                       l10n.calendarTomorrow,
                       textAlign: TextAlign.center,
-                      style: chunky(16, color: const Color(0xFFFFF4D6), weight: FontWeight.w600),
+                      style: chunky(16, color: onWood, weight: FontWeight.w600),
                     ),
                     const SizedBox(height: 10),
                     ChunkyButton(
@@ -585,15 +585,15 @@ class _PawPainter extends CustomPainter {
 
 /// A little golden cup.
 class TrophyIcon extends StatelessWidget {
-  const TrophyIcon({super.key, this.size = 28, this.color = gold});
+  const TrophyIcon({super.key, this.size = 28, this.color});
 
   final double size;
-  final Color color;
+  final Color? color;
 
   @override
   Widget build(BuildContext context) => SizedBox.square(
     dimension: size,
-    child: CustomPaint(painter: _CupPainter(color)),
+    child: CustomPaint(painter: _CupPainter(color ?? gold)),
   );
 }
 

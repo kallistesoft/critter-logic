@@ -1037,9 +1037,88 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get fontCredit => 'Police : Fredoka (licence SIL Open Font)';
+  String get fontCredit =>
+      'Polices : Fredoka, Zilla Slab, Bevan, Exo 2, Inter (licence SIL Open Font)';
+
+  @override
+  String get shopWorlds => 'Mondes';
+
+  @override
+  String get worldMeadow => 'Prairie';
+
+  @override
+  String get worldLodge => 'Chalet sauvage';
+
+  @override
+  String get worldNeon => 'Néon de nuit';
+
+  @override
+  String get worldWinter => 'Cabane d’hiver';
+
+  @override
+  String get worldPro => 'Pro épuré';
+
+  @override
+  String get worldMeadowBlurb =>
+      'Collines ensoleillées, panneaux de bois et bestioles mignonnes.';
+
+  @override
+  String get worldLodgeBlurb =>
+      'Crépuscule dans les pins, feu de camp et médaillons d’animaux.';
+
+  @override
+  String get worldNeonBlurb => 'Grilles lumineuses et nuits synthwave.';
+
+  @override
+  String get worldWinterBlurb =>
+      'Pins enneigés, fenêtres chaudes et aurores boréales.';
+
+  @override
+  String get worldProBlurb =>
+      'Ardoise et or, sans fioritures. Juste tes temps.';
+
+  @override
+  String get worldFree => 'Gratuit';
+
+  @override
+  String get worldPreview => 'Aperçu';
+
+  @override
+  String get worldPreviewNote => 'Aperçu : touche pour fermer';
+
+  @override
+  String worldEquipped(String world) {
+    return 'Ton monde : $world';
+  }
+
+  @override
+  String get welcomeWorldTitle => 'Choisis ton monde';
+
+  @override
+  String get welcomeWorldBody =>
+      'Les mêmes casse-têtes, à ton style. Tu pourras changer à tout moment dans la boutique.';
+
+  @override
+  String welcomeWorldGo(String world) {
+    return 'Jouer dans $world';
+  }
+
+  @override
+  String get welcomeWorldSkip => 'Passer';
+
+  @override
+  String get fieldJournal => 'Carnet de terrain';
+
+  @override
+  String get previewDaily => 'Aujourd’hui';
 
   @override
   String get coinsPreview =>
       'Boutique indisponible dans la version de développement : ceci est un aperçu.';
+
+  @override
+  String get settingWorld => 'Monde';
+
+  @override
+  String get settingWorldMore => 'Plus de mondes à la boutique';
 }

@@ -28,7 +28,7 @@ class RemoveAdsButtons extends StatelessWidget {
             TextButton.icon(
               key: const Key('removeAds'),
               onPressed: () => _buy(context),
-              icon: const Icon(Icons.block_rounded, color: Colors.white, shadows: [Shadow(color: coralEdge, offset: Offset(0, 2))]),
+              icon: Icon(Icons.block_rounded, color: Colors.white, shadows: [Shadow(color: coralEdge, offset: Offset(0, 2))]),
               label: Text(l10n.noAdsPrice(premium.price ?? ''), style: outlinedText(15, stroke: coralEdge, width: 1.4)),
             ),
             TextButton(

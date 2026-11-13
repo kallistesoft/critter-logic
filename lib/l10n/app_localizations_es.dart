@@ -1038,9 +1038,87 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get fontCredit => 'Fuente: Fredoka (licencia SIL Open Font)';
+  String get fontCredit =>
+      'Fuentes: Fredoka, Zilla Slab, Bevan, Exo 2, Inter (licencia SIL Open Font)';
+
+  @override
+  String get shopWorlds => 'Mundos';
+
+  @override
+  String get worldMeadow => 'Pradera';
+
+  @override
+  String get worldLodge => 'Refugio salvaje';
+
+  @override
+  String get worldNeon => 'Neón nocturno';
+
+  @override
+  String get worldWinter => 'Cabaña de invierno';
+
+  @override
+  String get worldPro => 'Pro limpio';
+
+  @override
+  String get worldMeadowBlurb =>
+      'Colinas soleadas, carteles de madera y animalitos adorables.';
+
+  @override
+  String get worldLodgeBlurb =>
+      'Atardecer entre pinos, fogata y medallones de fauna salvaje.';
+
+  @override
+  String get worldNeonBlurb => 'Cuadrículas brillantes y noches synthwave.';
+
+  @override
+  String get worldWinterBlurb =>
+      'Pinos nevados, ventanas cálidas y auroras boreales.';
+
+  @override
+  String get worldProBlurb => 'Pizarra y oro, sin adornos. Solo tus tiempos.';
+
+  @override
+  String get worldFree => 'Gratis';
+
+  @override
+  String get worldPreview => 'Vista previa';
+
+  @override
+  String get worldPreviewNote => 'Vista previa: toca para cerrar';
+
+  @override
+  String worldEquipped(String world) {
+    return 'Tu mundo: $world';
+  }
+
+  @override
+  String get welcomeWorldTitle => 'Elige tu mundo';
+
+  @override
+  String get welcomeWorldBody =>
+      'Los mismos rompecabezas, a tu estilo. Puedes cambiarlo cuando quieras en la tienda.';
+
+  @override
+  String welcomeWorldGo(String world) {
+    return 'Jugar en $world';
+  }
+
+  @override
+  String get welcomeWorldSkip => 'Saltar';
+
+  @override
+  String get fieldJournal => 'Diario de campo';
+
+  @override
+  String get previewDaily => 'Hoy';
 
   @override
   String get coinsPreview =>
       'Tienda no disponible en la versión de desarrollo: esto es una vista previa.';
+
+  @override
+  String get settingWorld => 'Mundo';
+
+  @override
+  String get settingWorldMore => 'Más mundos en la tienda';
 }

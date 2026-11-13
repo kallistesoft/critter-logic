@@ -219,7 +219,7 @@ class _MedalStack extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           best == null
-              ? const TrophyIcon(size: 44, color: Color(0xFFD8CDBB))
+              ? TrophyIcon(size: 44, color: tileGiven)
               : TrophyIcon(size: 44, color: medalColors[best]!),
           const SizedBox(height: 4),
           Row(
@@ -253,7 +253,7 @@ class Medal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = reached ? medalColors[tier]! : const Color(0xFFE8DFD0);
+    final c = reached ? medalColors[tier]! : tileEmpty;
     return Container(
       width: size,
       height: size,
@@ -277,7 +277,7 @@ class _ProgressBar extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     height: 20,
     decoration: BoxDecoration(
-      color: const Color(0xFFEFE3CC),
+      color: tileEmpty,
       borderRadius: BorderRadius.circular(10),
       border: Border.all(color: paperEdge, width: 1.5),
     ),
@@ -287,7 +287,7 @@ class _ProgressBar extends StatelessWidget {
           widthFactor: fraction.clamp(0.0, 1.0),
           child: Container(
             decoration: BoxDecoration(
-              gradient: const LinearGradient(colors: [Color(0xFF8EDB5E), leaf]),
+              gradient: LinearGradient(colors: [Color.lerp(leaf, Colors.white, 0.25)!, leaf]),
               borderRadius: BorderRadius.circular(10),
             ),
           ),

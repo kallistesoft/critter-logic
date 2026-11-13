@@ -2,14 +2,18 @@ import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
 import '../meta/reminders.dart';
+import '../meta/shop.dart';
 import '../puzzles/puzzle.dart';
 import 'game/game_screen.dart';
 import 'meadow.dart';
 import 'navigation.dart';
 import 'palette.dart';
+import 'retention_ui.dart';
 import 'services.dart';
+import 'shop_screen.dart';
 import 'tutorial_screen.dart';
 import 'widgets.dart';
+import 'worlds/world.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -90,6 +94,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           await planReminders(stats, services.reminders, l10n, services.today());
                         }
                         setState(() {});
+                      },
+                    ),
+                    const _Divider(),
+                    _Link(
+                      key: const Key('worldRow'),
+                      icon: Icons.public_rounded,
+                      tint: const Color(0xFF7C6BD6),
+                      label: l10n.settingWorld,
+                      value: worldById(services.retention.shop.equippedWorld).name(l10n),
+                      onTap: () async {
+                        await _pickWorld(context);
+                        if (mounted) setState(() {});
                       },
                     ),
                     const _Divider(),
@@ -182,6 +198,54 @@ const languageNames = {'en': 'English', 'fr': 'Français', 'es': 'Español'};
 
 /// Picks the app language: the phone's, or one of [languageNames]. Applies at once and re-plans the reminders
 /// so they speak the new language too.
+/// Switch between the Worlds the player owns; the shop sells the others.
+Future<void> _pickWorld(BuildContext context) async {
+  final l10n = AppLocalizations.of(context);
+  final services = Services.of(context);
+  final shop = services.retention.shop;
+  final current = shop.equippedWorld;
+  final owned = [
+    for (final w in worlds)
+      if (shopItemById[w.id] == null || shop.owns(shopItemById[w.id]!)) w,
+  ];
+  final picked = await showSoftDialog<String>(
+    context,
+    title: l10n.settingWorld,
+    actions: [
+      for (final w in owned)
+        ChunkyButton(
+          key: Key('pickWorld-${w.id.substring(6)}'),
+          label: w.name(l10n),
+          expand: true,
+          color: w.id == current ? leaf : paper,
+          edge: w.id == current ? null : paperEdge,
+          textColor: w.id == current ? Colors.white : ink,
+          onPressed: () => Navigator.of(context).pop(w.id),
+        ),
+      if (owned.length < worlds.length)
+        ChunkyButton(
+          key: const Key('moreWorlds'),
+          label: l10n.settingWorldMore,
+          expand: true,
+          color: gold,
+          textColor: ink,
+          onPressed: () => Navigator.of(context).pop('shop'),
+        ),
+    ],
+  );
+  if (picked == null || !context.mounted) return;
+  if (picked == 'shop') {
+    await openShop(context, tab: ShopTab.worlds);
+    return;
+  }
+  if (picked == current) return;
+  await shop.equip(picked);
+  if (!context.mounted) return;
+  final world = worldById(shop.equippedWorld);
+  WorldHost.maybeOf(context)?.switchTo(world);
+  showToast(context, [l10n.worldEquipped(world.name(l10n))], icon: const Icon(Icons.public_rounded, size: 24));
+}
+
 Future<void> _pickLanguage(BuildContext context) async {
   final l10n = AppLocalizations.of(context);
   final services = Services.of(context);
@@ -296,9 +360,9 @@ class CandySwitch extends StatelessWidget {
         height: 34,
         padding: const EdgeInsets.all(3),
         decoration: BoxDecoration(
-          color: value ? leaf : const Color(0xFFD9CFC0),
+          color: value ? leaf : tileGiven,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: value ? leafEdge : const Color(0xFFAFA393), width: 2.5),
+          border: Border.all(color: value ? leafEdge : inkSoft.withValues(alpha: 0.6), width: 2.5),
         ),
         child: AnimatedAlign(
           duration: const Duration(milliseconds: 260),
@@ -310,7 +374,7 @@ class CandySwitch extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.white,
               shape: BoxShape.circle,
-              boxShadow: [BoxShadow(color: value ? leafEdge : const Color(0xFFAFA393), offset: const Offset(0, 2))],
+              boxShadow: [BoxShadow(color: value ? leafEdge : inkSoft.withValues(alpha: 0.6), offset: const Offset(0, 2))],
             ),
           ),
         ),
@@ -343,7 +407,7 @@ class _Link extends StatelessWidget {
                 constraints: const BoxConstraints(maxWidth: 150),
                 child: Text(value!, textAlign: TextAlign.end, style: chunky(15, color: inkSoft, weight: FontWeight.w600)),
               ),
-            const Icon(Icons.chevron_right_rounded, color: woodDark, size: 28),
+            Icon(Icons.chevron_right_rounded, color: woodDark, size: 28),
           ]),
         ),
       );

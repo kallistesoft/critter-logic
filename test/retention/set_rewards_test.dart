@@ -23,24 +23,39 @@ void main() {
     }
   }
 
-  test('every set unlocks a shop cosmetic', () {
-    expect(setUnlocks.keys.toSet(), albumSets.toSet());
+  test('every set unlocks a shop hat or bonus coins', () {
+    expect({...setUnlocks.keys, ...setBonusCoins.keys}, albumSets.toSet());
+    expect(setUnlocks.keys.toSet().intersection(setBonusCoins.keys.toSet()), isEmpty);
+    expect(setBonusCoins, {'friends': 300, 'jungle': 300, 'polar': 300});
     for (final id in [...setUnlocks.values, ...fullAlbumUnlocks.where((c) => !c.startsWith('frame.'))]) {
       expect(shopItemById, contains(id));
+      expect(id, startsWith('hat.'));
     }
   });
 
   test('a completed set gives its unlock once', () async {
-    await own('polar');
+    await own('farm');
     final first = await grantSetUnlocks(stats, progress);
-    expect(first.map((u) => u.set), ['polar']);
-    expect(progress.cosmetics, contains('theme.snowy'));
+    expect(first.map((u) => u.set), ['farm']);
+    expect(progress.cosmetics, contains('hat.flowers'));
     expect(await grantSetUnlocks(stats, progress), isEmpty);
-    // The unlocked theme is owned in the shop, so it isn't for sale any more.
-    expect(Shop(stats, progress).owns(shopItemById['theme.snowy']!), isTrue);
+    // The unlocked hat is owned in the shop, so it isn't for sale any more.
+    expect(Shop(stats, progress).owns(shopItemById['hat.flowers']!), isTrue);
   });
 
-  test('the full album gives the crown, the starry board, the gold frame and 500 coins', () async {
+  test('sets that used to give a board theme pay 300 coins instead, once', () async {
+    await own('polar');
+    final coins = stats.coins;
+    final first = await grantSetUnlocks(stats, progress);
+    expect(first.single.set, 'polar');
+    expect(first.single.cosmetics, isEmpty);
+    expect(first.single.coins, 300);
+    expect(stats.coins, coins + 300);
+    expect(await grantSetUnlocks(stats, progress), isEmpty);
+    expect(stats.coins, coins + 300);
+  });
+
+  test('the full album gives the crown, the gold frame and 1000 coins', () async {
     for (final set in albumSets) {
       await own(set);
     }
@@ -49,7 +64,9 @@ void main() {
     expect(given.length, albumSets.length + 1);
     expect(given.last.set, 'all');
     expect(progress.cosmetics, containsAll(fullAlbumUnlocks));
-    expect(stats.coins, coins + fullAlbumCoins);
+    expect(fullAlbumUnlocks, ['hat.crown', 'frame.album_gold']);
+    expect(fullAlbumCoins, 1000);
+    expect(stats.coins, coins + fullAlbumCoins + 3 * 300);
   });
 
   test('opening a capsule reports a set just completed', () async {

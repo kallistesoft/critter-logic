@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
+import 'worlds/world.dart';
 
 /// Emoji stand-ins while (or if) a sprite is missing.
 const critterEmoji = {
@@ -36,9 +37,22 @@ const critterEmoji = {
   'narwhal': '🐋',
 };
 
-/// The critter's sprite (`assets/critters/<id>.png`), or its emoji when the sprite isn't there.
+/// A critter drawn the World's way: the Kenney sprite in the Meadow, a wildlife badge in the Lodge, a glowing
+/// outline in Neon, and so on.
 class CritterImage extends StatelessWidget {
-  const CritterImage(this.id, {super.key, required this.size});
+  const CritterImage(this.id, {super.key, required this.size, this.role = CritterRole.collectible});
+
+  final String id;
+  final double size;
+  final CritterRole role;
+
+  @override
+  Widget build(BuildContext context) => worldOf(context).critter(context, id, size, role: role);
+}
+
+/// The critter's sprite (`assets/critters/<id>.png`), or its emoji when the sprite isn't there.
+class CritterSprite extends StatelessWidget {
+  const CritterSprite(this.id, {super.key, required this.size});
 
   final String id;
   final double size;

@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import '../worlds/world.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
@@ -244,8 +245,8 @@ class _TrailBoardState extends State<TrailBoard> {
             child: Opacity(
               opacity: path.isEmpty ? 0.75 : 1,
               child: s.refusals == 0
-                  ? CritterImage(widget.critter, size: c * 0.96)
-                  : Wobble(key: ValueKey('w${s.refusals}'), child: CritterImage(widget.critter, size: c * 0.96)),
+                  ? CritterImage(widget.critter, size: c * 0.96, role: CritterRole.piece)
+                  : Wobble(key: ValueKey('w${s.refusals}'), child: CritterImage(widget.critter, size: c * 0.96, role: CritterRole.piece)),
             ),
           ),
         ),
@@ -304,10 +305,9 @@ class TrailPebble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = reached
-        ? const [Color(0xFFFFEDB8), Color(0xFFF5C95A)]
-        : const [Color(0xFFF4EEE4), Color(0xFFCFC5B4)];
-    final rim = reached ? goldEdge : const Color(0xFF9A8C76);
+    final b = worldOf(context).board;
+    final colors = reached ? [b.pebbleReachedTop, b.pebbleReachedLow] : [b.pebbleTop, b.pebbleLow];
+    final rim = reached ? b.pebbleReachedRim : b.pebbleRim;
     return SizedBox.square(
       dimension: size,
       child: Stack(clipBehavior: Clip.none, children: [
@@ -319,13 +319,13 @@ class TrailPebble extends StatelessWidget {
             boxShadow: [BoxShadow(color: const Color(0x55402A14), offset: Offset(0, size * 0.08))],
           ),
           alignment: Alignment.center,
-          child: Text('$number', style: chunky(size * 0.52, color: reached ? woodEdge : ink, height: 1)),
+          child: Text('$number', style: worldOf(context).text(size * 0.52, color: reached ? b.pebbleReachedText : b.pebbleText, height: 1)),
         ),
         if (finish)
           Positioned(
             right: -size * 0.22,
             top: -size * 0.3,
-            child: Icon(Icons.flag_rounded, size: size * 0.55, color: coral, shadows: const [Shadow(color: coralEdge, offset: Offset(0, 1.5))]),
+            child: Icon(Icons.flag_rounded, size: size * 0.55, color: coral, shadows: [Shadow(color: coralEdge, offset: Offset(0, 1.5))]),
           ),
       ]),
     );
@@ -341,18 +341,21 @@ class _GrassPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final c = size.width / n;
-    final light = Paint()..color = const Color(0xFFC4EAA0);
-    final dark = Paint()..color = const Color(0xFFB2E08B);
+    final b = activeWorld.board;
+    final light = Paint()..color = b.grassLight;
+    final dark = Paint()..color = b.grassDark;
     final tuft = Paint()
-      ..color = const Color(0xFF7CBF55)
+      ..color = b.grassLine
       ..strokeWidth = max(1.2, c * 0.03)
       ..strokeCap = StrokeCap.round;
     final r = Random(n * 31 + 7);
     for (var i = 0; i < n * n; i++) {
       final rect = Rect.fromLTWH((i % n) * c, (i ~/ n) * c, c, c);
       canvas.drawRect(rect.inflate(0.5), ((i % n) + (i ~/ n)).isEven ? light : dark);
-      canvas.drawCircle(rect.topLeft + Offset(c * 0.3, c * 0.3), c * 0.28, Paint()..color = Colors.white.withValues(alpha: 0.16));
-      if (r.nextDouble() < 0.6) {
+      if (b.bedShine.a > 0) {
+        canvas.drawCircle(rect.topLeft + Offset(c * 0.3, c * 0.3), c * 0.28, Paint()..color = Colors.white.withValues(alpha: 0.16));
+      }
+      if (r.nextDouble() < 0.6 && b.speckles) {
         final p = rect.topLeft + Offset(c * (0.15 + r.nextDouble() * 0.7), c * (0.55 + r.nextDouble() * 0.3));
         final h = c * 0.1;
         canvas.drawLine(p, p + Offset(-h * 0.5, -h), tuft);
@@ -361,7 +364,7 @@ class _GrassPainter extends CustomPainter {
       }
     }
     final line = Paint()
-      ..color = Colors.white.withValues(alpha: 0.45)
+      ..color = b.cellLine.withValues(alpha: b.cellLine.a * 0.8)
       ..strokeWidth = 1;
     for (var k = 1; k < n; k++) {
       canvas.drawLine(Offset(k * c, 0), Offset(k * c, size.height), line);
@@ -388,8 +391,9 @@ class _DirtTrailPainter extends CustomPainter {
     if (path.isEmpty) return;
     final c = size.width / n;
     Offset center(int i) => Offset((i % n + 0.5) * c, (i ~/ n + 0.5) * c);
-    final edge = const Color(0xFFB8874F);
-    final fill = Color.lerp(const Color(0xFFE9CB97), const Color(0xFFFFE9A8), sin(glow * pi).clamp(0.0, 1.0))!;
+    final b = activeWorld.board;
+    final edge = b.dirtEdge;
+    final fill = Color.lerp(b.dirtFill, b.dirtGlow, sin(glow * pi).clamp(0.0, 1.0))!;
     if (path.length == 1) {
       canvas.drawCircle(center(path.first), c * 0.25, Paint()..color = edge);
       canvas.drawCircle(center(path.first), c * 0.19, Paint()..color = fill);
@@ -406,10 +410,11 @@ class _DirtTrailPainter extends CustomPainter {
       ..strokeJoin = StrokeJoin.round
       ..strokeCap = StrokeCap.round;
     canvas.drawPath(line.shift(Offset(0, c * 0.04)), stroke(const Color(0x334A3426), c * 0.5));
+    if (b.glow) paintGlow(canvas, line, edge, c * 0.3);
     canvas.drawPath(line, stroke(edge, c * 0.5));
     canvas.drawPath(line, stroke(fill, c * 0.38));
     // Paw prints: alternating left and right along the trail.
-    final print = Paint()..color = const Color(0xFFC79D66);
+    final print = Paint()..color = b.dirtPrint;
     var left = true;
     for (final m in line.computeMetrics()) {
       for (var d = c * 0.3; d < m.length - c * 0.1; d += c * 0.42) {
@@ -474,10 +479,14 @@ class _HedgePainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = width
       ..strokeCap = StrokeCap.round;
+    final b = activeWorld.board;
     canvas.drawPath(hedges.shift(Offset(0, w * 0.3)), stroke(const Color(0x444A3426), w));
-    canvas.drawPath(hedges, stroke(const Color(0xFF2F7A26), w));
-    canvas.drawPath(hedges, stroke(const Color(0xFF55AD3C), w * 0.55));
-    final leafDot = Paint()..color = const Color(0xFF8BD468);
+    if (b.glow) paintGlow(canvas, hedges, b.zoneEdgeInner, w);
+    canvas.drawPath(hedges, stroke(b.zoneEdge, w));
+    canvas.drawPath(hedges, stroke(b.zoneEdgeInner, w * 0.55));
+    final dots = b.zoneDots;
+    if (dots == null) return;
+    final leafDot = Paint()..color = Color.lerp(dots, Colors.white, 0.06)!;
     for (final m in hedges.computeMetrics()) {
       for (var d = w * 0.4; d < m.length; d += w * 0.9) {
         final tan = m.getTangentForOffset(d);

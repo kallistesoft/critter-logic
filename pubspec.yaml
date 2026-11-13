@@ -86,6 +86,7 @@ flutter:
     - assets/sfx/
     - assets/dailies/
     - assets/music/
+    - assets/silhouettes/
 
   fonts:
     - family: Fredoka
@@ -95,6 +96,35 @@ flutter:
         - asset: assets/fonts/Fredoka-SemiBold.ttf
           weight: 600
         - asset: assets/fonts/Fredoka-Bold.ttf
+          weight: 700
+    # Worlds (all SIL OFL 1.1, see assets/CREDITS.md).
+    - family: ZillaSlab
+      fonts:
+        - asset: assets/fonts/ZillaSlab-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/ZillaSlab-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/ZillaSlab-Bold.ttf
+          weight: 700
+    - family: Bevan
+      fonts:
+        - asset: assets/fonts/Bevan-Regular.ttf
+          weight: 700
+    - family: Exo2
+      fonts:
+        - asset: assets/fonts/Exo2-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Exo2-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Exo2-Bold.ttf
+          weight: 700
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Inter-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Inter-Bold.ttf
           weight: 700
 
   # To add assets to your application, add an assets section, like this:

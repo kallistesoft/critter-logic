@@ -30,6 +30,7 @@ import 'settings_screen.dart';
 import 'shop_screen.dart';
 import 'trophies_screen.dart';
 import 'widgets.dart';
+import 'worlds/world.dart';
 
 /// Home: today's dailies, streak, coins, levels, album and capsules, with critters playing on the grass.
 class HomeScreen extends StatefulWidget {
@@ -437,6 +438,7 @@ class _Foreground extends StatelessWidget {
   Widget build(BuildContext context) {
     // Short phones get smaller critters, so the list keeps its room.
     final k = (MediaQuery.sizeOf(context).height / 820).clamp(0.72, 1.0);
+    if (!worldOf(context).decorations) return _PlainForeground(luckyFree: luckyFree, onShop: onShop, onNest: onNest);
     return SizedBox(
       height: 108 * k,
       child: Padding(
@@ -446,7 +448,15 @@ class _Foreground extends StatelessWidget {
             padding: EdgeInsets.only(bottom: 4 * k),
             child: PopIn(
               delay: const Duration(milliseconds: 300),
-              child: ShopStall(key: const Key('shopStall'), size: 92 * k, onTap: onShop),
+              child: worldOf(context).cartoonProps
+                  ? ShopStall(key: const Key('shopStall'), size: 92 * k, onTap: onShop)
+                  : _PlaqueProp(
+                      key: const Key('shopStall'),
+                      icon: Icons.storefront_rounded,
+                      label: AppLocalizations.of(context).shop,
+                      size: 86 * k,
+                      onTap: onShop,
+                    ),
             ),
           ),
           Expanded(
@@ -471,11 +481,118 @@ class _Foreground extends StatelessWidget {
             padding: EdgeInsets.only(bottom: 6 * k),
             child: PopIn(
               delay: const Duration(milliseconds: 750),
-              child: LuckyNestProp(key: const Key('luckyNest'), free: luckyFree, size: 84 * k, onTap: onNest),
+              child: worldOf(context).cartoonProps
+                  ? LuckyNestProp(key: const Key('luckyNest'), free: luckyFree, size: 84 * k, onTap: onNest)
+                  : _PlaqueProp(
+                      key: const Key('luckyNest'),
+                      icon: Icons.egg_rounded,
+                      label: AppLocalizations.of(context).luckyNest,
+                      size: 86 * k,
+                      badge: luckyFree ? AppLocalizations.of(context).luckyFree : null,
+                      onTap: onNest,
+                    ),
             ),
           ),
         ]),
       ),
+    );
+  }
+}
+
+/// A small panel plaque with an icon and a label: the shop and the Lucky Nest in Worlds without cartoon props.
+class _PlaqueProp extends StatelessWidget {
+  const _PlaqueProp({super.key, required this.icon, required this.label, required this.size, required this.onTap, this.badge});
+
+  final IconData icon;
+  final String label;
+  final double size;
+  final VoidCallback onTap;
+  final String? badge;
+
+  @override
+  Widget build(BuildContext context) => Bouncy(
+        onTap: onTap,
+        child: Semantics(
+          button: true,
+          label: label,
+          child: Stack(clipBehavior: Clip.none, children: [
+            SizedBox(
+              width: size,
+              height: size * 0.78,
+              child: CustomPaint(
+                painter: const WoodPainter(radius: 12, nails: true, plank: 28),
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(6, size * 0.08, 6, size * 0.1),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Column(mainAxisSize: MainAxisSize.min, children: [
+                      Icon(icon, color: onWood, size: size * 0.32),
+                      Text(label, maxLines: 1, style: outlinedText(14, color: onWood)),
+                    ]),
+                  ),
+                ),
+              ),
+            ),
+            if (badge != null)
+              Positioned(
+                right: -6,
+                top: -10,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: leaf,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: leafEdge, width: 1.5),
+                  ),
+                  child: Text(badge!, style: chunky(12, color: Colors.white)),
+                ),
+              ),
+          ]),
+        ),
+      );
+}
+
+/// The bottom bar of Worlds without decorations: two flat buttons, no critters.
+class _PlainForeground extends StatelessWidget {
+  const _PlainForeground({required this.luckyFree, required this.onShop, required this.onNest});
+
+  final bool luckyFree;
+  final VoidCallback onShop;
+  final VoidCallback onNest;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 6, 16, 10),
+      child: Row(children: [
+        Expanded(
+          child: ChunkyButton(
+            key: const Key('shopStall'),
+            label: l10n.shop,
+            small: true,
+            expand: true,
+            color: woodButton,
+            icon: Icon(Icons.storefront_rounded, color: worldOf(context).iconColor(woodButton), size: 20),
+            onPressed: onShop,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Stack(clipBehavior: Clip.none, children: [
+            ChunkyButton(
+              key: const Key('luckyNest'),
+              label: l10n.luckyNest,
+              small: true,
+              expand: true,
+              color: woodButton,
+              icon: Icon(Icons.egg_rounded, color: worldOf(context).iconColor(woodButton), size: 20),
+              onPressed: onNest,
+            ),
+            if (luckyFree) const Positioned(right: -4, top: -6, child: _Dot()),
+          ]),
+        ),
+      ]),
     );
   }
 }
@@ -531,7 +648,7 @@ class ShopStall extends StatelessWidget {
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: size * 0.14),
                 child: FittedBox(
-                  child: Text(l10n.shop, style: outlinedText(15, color: const Color(0xFFFFF4D6), stroke: woodEdge, width: 1.4)),
+                  child: Text(l10n.shop, style: outlinedText(15, color: onWood, stroke: woodEdge, width: 1.4)),
                 ),
               ),
             ),
@@ -584,7 +701,7 @@ class _StallPainter extends CustomPainter {
       ..close();
     canvas.drawPath(awning.shift(const Offset(0, 3)), Paint()..color = const Color(0x33000000));
     const stripes = 6;
-    final cream = Paint()..color = const Color(0xFFFFF8E7);
+    final cream = Paint()..color = paper;
     final red = Paint()..color = bad;
     canvas.save();
     canvas.clipPath(awning);
@@ -596,7 +713,7 @@ class _StallPainter extends CustomPainter {
       canvas.drawArc(Rect.fromLTWH(w * i / stripes, bottom - h * 0.06, w / stripes, h * 0.12), 0, pi, true, i.isEven ? red : cream);
     }
     canvas.drawPath(awning, Paint()
-      ..color = const Color(0xFFA8323A)
+      ..color = Color.lerp(bad, Colors.black, 0.3)!
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2);
   }
@@ -629,13 +746,13 @@ class _DailyCard extends StatelessWidget {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: switch (kind) {
-                  GameKind.nests => const [Color(0xFFDDF5C6), Color(0xFFB9E596)],
-                  GameKind.pairs => const [Color(0xFFD6ECFF), Color(0xFFB4D8F7)],
-                  GameKind.trail => const [Color(0xFFFFEBC9), Color(0xFFF6D49C)],
+                  GameKind.nests => activeWorld.board.cardNests,
+                  GameKind.pairs => activeWorld.board.cardPairs,
+                  GameKind.trail => activeWorld.board.cardTrail,
                 },
               ),
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: paperEdge, width: 2),
+              border: Border.all(color: activeWorld.board.cardEdge, width: 2),
             ),
             padding: const EdgeInsets.all(6),
             child: FittedBox(
@@ -681,7 +798,7 @@ class _DailyCard extends StatelessWidget {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.check_circle_rounded, color: leafEdge, size: 20),
+                        Icon(Icons.check_circle_rounded, color: leafEdge, size: 20),
                         const SizedBox(width: 4),
                         Text(formatTime(r.millis), style: chunky(17, color: leafEdge)),
                       ],
@@ -718,7 +835,7 @@ class _LevelCard extends StatelessWidget {
               FittedBox(
                 fit: BoxFit.scaleDown,
                 alignment: Alignment.centerLeft,
-                child: Text(gameName(l10n, kind), style: outlinedText(19, color: const Color(0xFFFFF4D6))),
+                child: Text(gameName(l10n, kind), style: outlinedText(19, color: onWood)),
               ),
               const SizedBox(height: 2),
               Row(
@@ -729,7 +846,7 @@ class _LevelCard extends StatelessWidget {
                       alignment: Alignment.centerLeft,
                       child: Text(
                         l10n.levelTitle(stats.level(kind)),
-                        style: chunky(15, color: const Color(0xFFFFE6BC), weight: FontWeight.w600),
+                        style: chunky(15, color: onWoodSoft, weight: FontWeight.w600),
                       ),
                     ),
                   ),
@@ -758,7 +875,7 @@ class _MapPin extends StatelessWidget {
       shape: BoxShape.circle,
       border: Border.all(color: leafEdge, width: 2.5),
     ),
-    child: const Icon(Icons.flag_rounded, color: Colors.white, size: 18),
+    child: Icon(Icons.flag_rounded, color: activeWorld.iconColor(leaf), size: 18),
   );
 }
 
@@ -776,7 +893,7 @@ class _NestsArt extends StatelessWidget {
       decoration: BoxDecoration(
         color: woodDark,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: const [BoxShadow(color: woodEdge, offset: Offset(0, 3))],
+        boxShadow: [BoxShadow(color: woodEdge, offset: Offset(0, 3))],
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(9),
@@ -816,9 +933,9 @@ class _PairsArt extends StatelessWidget {
             height: 50,
             padding: const EdgeInsets.all(7),
             decoration: BoxDecoration(
-              color: const Color(0xFFEFE6D6),
+              color: activeWorld.board.stoneTop,
               borderRadius: BorderRadius.circular(14),
-              boxShadow: const [BoxShadow(color: Color(0xFFB4A58C), offset: Offset(0, 4))],
+              boxShadow: [BoxShadow(color: activeWorld.board.stoneEdge, offset: const Offset(0, 4))],
             ),
             child: SymbolIcon(v),
           ),
@@ -867,8 +984,8 @@ class _TrailArtPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = width
       ..strokeCap = StrokeCap.round;
-    canvas.drawPath(path, stroke(const Color(0xFFB8874F), 15));
-    canvas.drawPath(path, stroke(const Color(0xFFE9CB97), 11));
+    canvas.drawPath(path, stroke(activeWorld.board.dirtEdge, 15));
+    canvas.drawPath(path, stroke(activeWorld.board.dirtFill, 11));
   }
 
   @override

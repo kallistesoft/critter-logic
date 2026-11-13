@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import '../worlds/world.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -394,7 +395,7 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver, Ti
             child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
               Flexible(
                 child: s == null
-                    ? const Center(child: CircularProgressIndicator(color: leaf))
+                    ? Center(child: CircularProgressIndicator(color: leaf))
                     : BoardStage(
                         critters: buddyCritters(_services.stats, 2, seed: widget.number),
                         cheer: _finishing,
@@ -463,7 +464,7 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver, Ti
     return Row(mainAxisAlignment: MainAxisAlignment.center, children: [
       StatPill(
         key: const Key('timer'),
-        icon: const Icon(Icons.timer_rounded, color: skyEdge),
+        icon: Icon(Icons.timer_rounded, color: skyEdge),
         text: formatTime(_elapsed),
       ),
       if (penalty > 0) ...[
@@ -472,7 +473,7 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver, Ti
           key: ValueKey(penalty),
           child: StatPill(
             key: const Key('penalty'),
-            icon: const Icon(Icons.warning_rounded, color: coralEdge),
+            icon: Icon(Icons.warning_rounded, color: coralEdge),
             text: l10n.penaltySeconds(penalty ~/ 1000),
             color: accentSoft,
             textColor: coralEdge,
@@ -656,15 +657,18 @@ class _ToolButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final enabled = onTap != null;
-    final face = enabled ? color : Color.lerp(color, const Color(0xFFC9C3B8), 0.7)!;
-    final rim = edgeOf(face);
+    final face = enabled ? color : Color.lerp(color, activeWorld.disabledButton, 0.7)!;
+    final world = worldOf(context);
+    final rim = world.edgeOf(face);
+    final depth = world.buttonDepth(false);
+    final labelStyle = world.buttonText(14, textColor: Colors.white, rim: rim);
     return Bouncy(
       onTap: onTap,
       builder: (context, p, child) {
         final pressed = p.clamp(0.0, 1.0);
         return CustomPaint(
-          painter: CandyPainter(face: face, edge: rim, press: pressed, depth: 6, radius: 18),
-          child: Padding(padding: EdgeInsets.only(top: 6 * pressed, bottom: 6 * (1 - pressed)), child: child),
+          painter: CandyPainter(face: face, edge: rim, press: pressed, depth: depth, radius: 18, world: world),
+          child: Padding(padding: EdgeInsets.only(top: depth * pressed, bottom: depth * (1 - pressed)), child: child),
         );
       },
       child: SizedBox(
@@ -672,8 +676,8 @@ class _ToolButton extends StatelessWidget {
         child: Stack(clipBehavior: Clip.none, children: [
           Center(
             child: Column(mainAxisSize: MainAxisSize.min, children: [
-              Icon(icon, color: Colors.white, size: 26, shadows: [Shadow(color: rim, offset: const Offset(0, 2))]),
-              FittedBox(fit: BoxFit.scaleDown, alignment: AlignmentDirectional.centerStart, child: Text(label, maxLines: 1, style: outlinedText(14, stroke: rim, width: 1.3))),
+              Icon(icon, color: labelStyle.color, size: 26, shadows: world.iconShadows(face)),
+              FittedBox(fit: BoxFit.scaleDown, alignment: AlignmentDirectional.centerStart, child: Text(label, maxLines: 1, style: labelStyle)),
             ]),
           ),
           if (free > 0)

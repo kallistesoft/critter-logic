@@ -1033,9 +1033,86 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get fontCredit => 'Font: Fredoka (SIL Open Font License)';
+  String get fontCredit =>
+      'Fonts: Fredoka, Zilla Slab, Bevan, Exo 2, Inter (SIL Open Font License)';
+
+  @override
+  String get shopWorlds => 'Worlds';
+
+  @override
+  String get worldMeadow => 'Meadow';
+
+  @override
+  String get worldLodge => 'Wild Lodge';
+
+  @override
+  String get worldNeon => 'Night Neon';
+
+  @override
+  String get worldWinter => 'Winter Cabin';
+
+  @override
+  String get worldPro => 'Clean Pro';
+
+  @override
+  String get worldMeadowBlurb => 'Sunny hills, wooden signs and cute critters.';
+
+  @override
+  String get worldLodgeBlurb =>
+      'Dusk in the pines, campfire glow and wildlife badges.';
+
+  @override
+  String get worldNeonBlurb => 'Glowing grids and synthwave nights.';
+
+  @override
+  String get worldWinterBlurb =>
+      'Snowy pines, warm windows and northern lights.';
+
+  @override
+  String get worldProBlurb => 'Minimal slate and gold. Just your times.';
+
+  @override
+  String get worldFree => 'Free';
+
+  @override
+  String get worldPreview => 'Preview';
+
+  @override
+  String get worldPreviewNote => 'Preview: tap to close';
+
+  @override
+  String worldEquipped(String world) {
+    return 'Your world is now $world';
+  }
+
+  @override
+  String get welcomeWorldTitle => 'Pick your world';
+
+  @override
+  String get welcomeWorldBody =>
+      'Same puzzles, your style. You can switch anytime in the shop.';
+
+  @override
+  String welcomeWorldGo(String world) {
+    return 'Play in $world';
+  }
+
+  @override
+  String get welcomeWorldSkip => 'Skip';
+
+  @override
+  String get fieldJournal => 'Field journal';
+
+  @override
+  String get previewDaily => 'Today';
 
   @override
   String get coinsPreview =>
       'Store not available in the dev build: this is a preview.';
+
+  @override
+  String get settingWorld => 'World';
+
+  @override
+  String get settingWorldMore => 'More worlds in the shop';
 }

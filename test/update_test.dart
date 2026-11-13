@@ -25,7 +25,7 @@ void main() {
     late int updates;
 
     setUp(() async {
-      SharedPreferences.setMockInitialValues({});
+      SharedPreferences.setMockInitialValues({'flutter.progress.world.chosen': true});
       stats = await StatsStore.open();
       // The once-a-day calendar popup was already seen today.
       await stats.prefs.setInt('progress.cal.shownDay', localDay(DateTime(2026, 10, 25)));

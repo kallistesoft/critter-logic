@@ -7,6 +7,7 @@ import 'l10n/app_localizations.dart';
 import 'meta/progress_store.dart';
 import 'meta/reminders.dart';
 import 'meta/retention.dart';
+import 'meta/shop.dart';
 import 'puzzles/bundled_source.dart';
 import 'puzzles/source.dart';
 import 'services/ad_ids.dart';
@@ -27,9 +28,10 @@ import 'services/stats_store.dart';
 import 'services/update_service.dart';
 import 'ui/home_screen.dart';
 import 'ui/meadow.dart';
-import 'ui/palette.dart';
 import 'ui/services.dart';
 import 'ui/update_gate.dart';
+import 'ui/worlds/welcome_world_screen.dart';
+import 'ui/worlds/world.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -78,9 +80,9 @@ Future<void> main() async {
       // Remove Ads, or the Remote Config kill switch, stops interstitials and banners; rewarded ads stay.
       ads = PremiumAwareAdService(capped, () => store.isPremium || !settings.value.adsEnabled);
       banner = (_) => ValueListenableBuilder(
-            valueListenable: settings,
-            builder: (_, s, _) => s.adsEnabled ? admob.banner() : const SizedBox.shrink(),
-          );
+        valueListenable: settings,
+        builder: (_, s, _) => s.adsEnabled ? admob.banner() : const SizedBox.shrink(),
+      );
       privacyOptionsRequired = admob.privacyOptionsRequired;
       showPrivacyOptions = admob.showPrivacyOptions;
       admob.init();
@@ -98,43 +100,49 @@ Future<void> main() async {
   // Calendar, trophies, weekly event, shop and Lucky Nest. Rebuilt with the new tuning when Remote Config loads.
   final progress = await ProgressStore.open();
   Retention makeRetention() => Retention(
-        stats: stats,
-        progress: progress,
-        settings: updates?.retention.value ?? const RetentionSettings(),
-        analytics: analytics,
-      );
+    stats: stats,
+    progress: progress,
+    settings: updates?.retention.value ?? const RetentionSettings(),
+    analytics: analytics,
+  );
   final retention = ValueNotifier(makeRetention());
   updates?.retention.addListener(() => retention.value = makeRetention());
 
-  final music = kIsWeb ? NoMusic(enabled: stats.musicOn) : AudioMusicService(enabled: stats.musicOn, persist: stats.setMusicOn);
+  final music = kIsWeb
+      ? NoMusic(enabled: stats.musicOn)
+      : AudioMusicService(enabled: stats.musicOn, persist: stats.setMusicOn);
   // The language picked in Settings, else the phone's.
   final chosen = stats.language;
-  final l10n = lookupAppLocalizations(chosen != null
-      ? Locale(chosen)
-      : basicLocaleListResolution(PlatformDispatcher.instance.locales, AppLocalizations.supportedLocales));
+  final l10n = lookupAppLocalizations(
+    chosen != null
+        ? Locale(chosen)
+        : basicLocaleListResolution(PlatformDispatcher.instance.locales, AppLocalizations.supportedLocales),
+  );
   planReminders(stats, reminders, l10n, DateTime.now());
   music.start();
 
-  runApp(CritterLogicApp(
-    stats: stats,
-    ads: ads,
-    analytics: analytics,
-    premium: premium,
-    review: review,
-    leaderboard: leaderboard,
-    banner: banner,
-    privacyOptionsRequired: privacyOptionsRequired,
-    showPrivacyOptions: showPrivacyOptions,
-    updateStatus: updates?.status,
-    onUpdate: updates?.update,
-    sound: AudioSoundService(muted: stats.muted, persist: stats.setMuted),
-    puzzles: BundledPuzzleSource(),
-    settings: settings,
-    music: music,
-    reminders: reminders,
-    retention: retention,
-    coinStore: coinStore,
-  ));
+  runApp(
+    CritterLogicApp(
+      stats: stats,
+      ads: ads,
+      analytics: analytics,
+      premium: premium,
+      review: review,
+      leaderboard: leaderboard,
+      banner: banner,
+      privacyOptionsRequired: privacyOptionsRequired,
+      showPrivacyOptions: showPrivacyOptions,
+      updateStatus: updates?.status,
+      onUpdate: updates?.update,
+      sound: AudioSoundService(muted: stats.muted, persist: stats.setMuted),
+      puzzles: BundledPuzzleSource(),
+      settings: settings,
+      music: music,
+      reminders: reminders,
+      retention: retention,
+      coinStore: coinStore,
+    ),
+  );
 }
 
 class CritterLogicApp extends StatelessWidget {
@@ -196,6 +204,7 @@ class CritterLogicApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final progress = retention?.value.progress ?? ProgressStore(stats.prefs);
     return Services(
       stats: stats,
       ads: ads,
@@ -214,34 +223,38 @@ class CritterLogicApp extends StatelessWidget {
       privacyOptionsRequired: privacyOptionsRequired,
       showPrivacyOptions: showPrivacyOptions,
       today: today,
-      child: ValueListenableBuilder(
-        valueListenable: stats.languageChanges,
-        builder: (context, language, _) => MaterialApp(
-          title: 'Critter Logic',
-          debugShowCheckedModeBanner: false,
-          locale: locale ?? (language == null ? null : Locale(language)),
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          theme: ThemeData(
-            useMaterial3: true,
-            brightness: Brightness.light,
-            colorSchemeSeed: leaf,
-            fontFamily: displayFont,
-            scaffoldBackgroundColor: Colors.transparent,
-            snackBarTheme: SnackBarThemeData(
-              behavior: SnackBarBehavior.floating,
-              backgroundColor: woodEdge,
-              contentTextStyle: const TextStyle(fontFamily: displayFont, fontSize: 16, color: Colors.white),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: WorldHost(
+        initial: worldById(Shop(stats, progress).equippedWorld),
+        builder: (context, world) => ValueListenableBuilder(
+          valueListenable: stats.languageChanges,
+          builder: (context, language, _) => MaterialApp(
+            title: 'Critter Logic',
+            debugShowCheckedModeBanner: false,
+            locale: locale ?? (language == null ? null : Locale(language)),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            theme: ThemeData(
+              useMaterial3: true,
+              brightness: world.brightness,
+              colorSchemeSeed: world.palette.leaf,
+              fontFamily: world.font,
+              scaffoldBackgroundColor: Colors.transparent,
+              snackBarTheme: SnackBarThemeData(
+                behavior: SnackBarBehavior.floating,
+                backgroundColor: world.palette.woodEdge,
+                contentTextStyle: TextStyle(fontFamily: world.font, fontSize: 16, color: Colors.white),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              ),
             ),
+            navigatorKey: _navigator,
+            builder: (context, child) => WorldBackdrop(
+              child: updateStatus == null
+                  ? child!
+                  : UpdateGate(status: updateStatus!, onUpdate: onUpdate!, navigatorKey: _navigator, child: child!),
+            ),
+            // The World picker greets new players once (and players updating to the version with Worlds).
+            home: progress.worldChosen ? const HomeScreen() : const WelcomeWorldScreen(),
           ),
-          navigatorKey: _navigator,
-          builder: (context, child) => MeadowWorld(
-            child: updateStatus == null
-                ? child!
-                : UpdateGate(status: updateStatus!, onUpdate: onUpdate!, navigatorKey: _navigator, child: child!),
-          ),
-          home: const HomeScreen(),
         ),
       ),
     );

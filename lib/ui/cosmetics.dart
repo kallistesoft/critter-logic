@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'worlds/world.dart';
 import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
@@ -13,6 +14,8 @@ import 'services.dart';
 class Hatted extends StatelessWidget {
   const Hatted({super.key, required this.hat, required this.size, required this.child});
 
+  /// Hats only go on Worlds whose critters have heads to wear them (not the Lodge's badges).
+
   final String? hat;
   final double size;
   final Widget child;
@@ -20,7 +23,7 @@ class Hatted extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final h = hat;
-    if (h == null || !hatIds.contains(h)) return child;
+    if (h == null || !hatIds.contains(h) || !worldOf(context).hats) return child;
     final w = size * 0.6;
     final hh = w * 0.8;
     return SizedBox(
@@ -45,10 +48,11 @@ class Hatted extends StatelessWidget {
 
 /// A critter image with the equipped hat (a shortcut for the home, board and win screens).
 class HattedCritter extends StatelessWidget {
-  const HattedCritter(this.id, {super.key, required this.size, this.hat});
+  const HattedCritter(this.id, {super.key, required this.size, this.hat, this.role = CritterRole.collectible});
 
   final String id;
   final double size;
+  final CritterRole role;
 
   /// Overrides the equipped hat (shop previews).
   final String? hat;
@@ -57,7 +61,7 @@ class HattedCritter extends StatelessWidget {
   Widget build(BuildContext context) => Hatted(
     hat: hat ?? Services.of(context).retention.shop.equippedHat,
     size: size,
-    child: CritterImage(id, size: size),
+    child: CritterImage(id, size: size, role: role),
   );
 }
 
@@ -286,10 +290,11 @@ String cosmeticName(AppLocalizations l10n, String id) => switch (id) {
   'hat.beanie' => l10n.hatBeanie,
   'hat.crown' => l10n.hatCrown,
   'frame.album_gold' => l10n.frameAlbumGold,
+  _ when id.startsWith('world.') => worldById(id).name(l10n),
   _ => id,
 };
 
-/// Cosmetics the player can see for now: hats and the gold album frame (board themes come later as Worlds).
+/// Cosmetics announced as unlocks: hats and the gold album frame (Worlds are bought in the shop).
 bool shownCosmetic(String id) => id.startsWith('hat.') || id == 'frame.album_gold';
 
 /// The set whose completion gives [cosmetic] for free ('all' for the full album), if any.
