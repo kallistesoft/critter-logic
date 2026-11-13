@@ -5,7 +5,8 @@
 //       --esal dart_entrypoint_args reset=true,lang=fr,world=world.lodge
 //
 // Not shipped. Settings come as `key=value` launch arguments: lang=en|fr|es, world=world.lodge, reset=true,
-// calendar=true (let the daily-gift popup open), hat=hat.crown, seed=3 (repeatable Lucky Nest draws). With reset=true
+// calendar=true (let the daily-gift popup open), hat=hat.crown, seed=3 (repeatable Lucky Nest draws), daily=40 (stage
+// another daily than #13), boards=false (no ranking at all, for tools/daily_shorts.py). With reset=true
 // (or on the first launch) the save is wiped and re-seeded: a 12-day streak, 1,240 coins, 22 of 30 critters (some at
 // ⭐3–5), levels with stars, trophies, a weekly event under way, two capsules to open and the free Lucky Nest egg. The
 // date is moved to daily #13 (keeping the time of day) and the boards are a local stand-in with a few thousand
@@ -32,21 +33,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// The staged day: daily #13, so days 1–12 make a 12-day streak with today's puzzles still to play.
-const promoDaily = 13;
+/// The staged day: daily #13 by default (daily=N picks another), with the 12 days before it a streak and today's
+/// puzzles still to play.
+var promoDaily = 13;
 
 Future<void> main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   final config = <String, dynamic>{
     for (final a in args)
-      if (a.contains('=')) a.substring(0, a.indexOf('=')): switch (a.substring(a.indexOf('=') + 1)) {
-        'true' => true,
-        'false' => false,
-        final v => v,
-      },
+      if (a.contains('='))
+        a.substring(0, a.indexOf('=')): switch (a.substring(a.indexOf('=') + 1)) {
+          'true' => true,
+          'false' => false,
+          final v => v,
+        },
   };
 
+  promoDaily = int.tryParse('${config['daily'] ?? ''}') ?? promoDaily;
   final now = DateTime.now();
   final day = dateOfDaily(promoDaily);
   final offset = DateTime(day.year, day.month, day.day).difference(DateTime(now.year, now.month, now.day));
@@ -65,19 +69,23 @@ Future<void> main(List<String> args) async {
   final stats = await StatsStore.open();
   final progress = await ProgressStore.open();
   final luckySeed = int.tryParse('${config['seed'] ?? ''}');
-  final retention = ValueNotifier(Retention(stats: stats, progress: progress, random: luckySeed == null ? null : Random(luckySeed)));
-  runApp(CritterLogicApp(
-    stats: stats,
-    ads: const NoAdService(),
-    premium: _OwnedNoAds(),
-    coinStore: _SamplePacks(lang ?? 'en'),
-    leaderboard: _StagedBoards(),
-    sound: AudioSoundService(muted: stats.muted, persist: stats.setMuted),
-    music: NoMusic(enabled: false),
-    puzzles: BundledPuzzleSource(),
-    retention: retention,
-    today: today,
-  ));
+  final retention = ValueNotifier(
+    Retention(stats: stats, progress: progress, random: luckySeed == null ? null : Random(luckySeed)),
+  );
+  runApp(
+    CritterLogicApp(
+      stats: stats,
+      ads: const NoAdService(),
+      premium: _OwnedNoAds(),
+      coinStore: _SamplePacks(lang ?? 'en'),
+      leaderboard: config['boards'] == false ? _NoBoards() : _StagedBoards(),
+      sound: AudioSoundService(muted: stats.muted, persist: stats.setMuted),
+      music: NoMusic(enabled: false),
+      puzzles: BundledPuzzleSource(),
+      retention: retention,
+      today: today,
+    ),
+  );
 }
 
 /// Writes the staged save.
@@ -96,8 +104,8 @@ Future<void> seed(SharedPreferences prefs, Map<String, dynamic> config, DateTime
   await stats.setReviewed(true);
   await prefs.setInt('firstLaunch', now.subtract(const Duration(days: 13)).millisecondsSinceEpoch);
 
-  // Days 1–12: every daily solved, so a 12-day streak, chests claimed.
-  for (var d = 1; d < promoDaily; d++) {
+  // The 12 days before: every daily solved, so a 12-day streak, chests claimed.
+  for (var d = max(1, promoDaily - 12); d < promoDaily; d++) {
     for (final k in GameKind.values) {
       await stats.recordDaily(DailyResult(kind: k, number: d, millis: 45000 + rng.nextInt(90000)));
     }
@@ -123,10 +131,28 @@ Future<void> seed(SharedPreferences prefs, Map<String, dynamic> config, DateTime
 
   // 22 of 30 critters; some leveled up (copies → ⭐).
   const copies = {
-    'chick': 7, 'chicken': 4, 'duck': 2, 'pig': 10, 'goat': 3, 'cow': 1,
-    'dog': 11, 'rabbit': 4, 'frog': 7, 'horse': 2, 'owl': 5, 'panda': 3,
-    'zebra': 2, 'hippo': 1, 'giraffe': 1, 'parrot': 2, 'monkey': 2,
-    'moose': 4, 'bear': 7, 'walrus': 1, 'penguin': 3, 'whale': 1,
+    'chick': 7,
+    'chicken': 4,
+    'duck': 2,
+    'pig': 10,
+    'goat': 3,
+    'cow': 1,
+    'dog': 11,
+    'rabbit': 4,
+    'frog': 7,
+    'horse': 2,
+    'owl': 5,
+    'panda': 3,
+    'zebra': 2,
+    'hippo': 1,
+    'giraffe': 1,
+    'parrot': 2,
+    'monkey': 2,
+    'moose': 4,
+    'bear': 7,
+    'walrus': 1,
+    'penguin': 3,
+    'whale': 1,
   };
   for (final e in copies.entries) {
     await stats.setCopies(e.key, e.value);
@@ -144,9 +170,21 @@ Future<void> seed(SharedPreferences prefs, Map<String, dynamic> config, DateTime
   await progress.increment(Counter.shares, 3);
   // Every reached tier claimed (tier index 0 = bronze) but two, so the trophy badge shows 2.
   const claimed = {
-    'first_daily': 1, 'dailies': 2, 'streak': 2, 'both_dailies': 1, 'perfect_daily': 1, 'fast_nests': 1,
-    'nests_levels': 1, 'pairs_levels': 1, 'levels': 1, 'no_hint': 2, 'critters': 2, 'golden': 1,
-    'critter_level3': 1, 'capsules': 1, 'shares': 1,
+    'first_daily': 1,
+    'dailies': 2,
+    'streak': 2,
+    'both_dailies': 1,
+    'perfect_daily': 1,
+    'fast_nests': 1,
+    'nests_levels': 1,
+    'pairs_levels': 1,
+    'levels': 1,
+    'no_hint': 2,
+    'critters': 2,
+    'golden': 1,
+    'critter_level3': 1,
+    'capsules': 1,
+    'shares': 1,
   };
   for (final e in claimed.entries) {
     for (var t = 0; t < e.value; t++) {
@@ -196,12 +234,25 @@ class _SamplePacks extends CoinStoreService {
     const usd = ['\$0.99', '\$1.99', '\$4.99'];
     const fr = ['0,99 \$', '1,99 \$', '4,99 \$'];
     const es = ['0,99 US\$', '1,99 US\$', '4,99 US\$'];
-    final prices = switch (lang) { 'fr' => fr, 'es' => es, _ => usd };
+    final prices = switch (lang) {
+      'fr' => fr,
+      'es' => es,
+      _ => usd,
+    };
     return [for (var i = 0; i < coinPacks.length; i++) (coinPacks[i], prices[i])];
   }
 
   @override
   Future<void> buy(CoinPack pack) async {}
+}
+
+/// No online boards (boards=false): the daily Shorts must not show the stand-in's made-up player counts.
+class _NoBoards extends _StagedBoards {
+  @override
+  Future<DailyStanding?> submitDaily(GameKind kind, int day, int millis) async => null;
+
+  @override
+  Future<DailyStanding?> standing(GameKind kind, int day, {int? myMillis}) async => null;
 }
 
 /// A stand-in for the online boards: a few thousand players, most slower than a quick solve.
@@ -233,7 +284,7 @@ class _StagedBoards implements LeaderboardService {
 
   @override
   Future<AllTimeBoards?> allTime() async => const AllTimeBoards(
-        bestStreaks: [(164, false), (151, false), (128, false), (97, false), (12, true)],
-        solved: [(612, false), (540, false), (471, false), (388, false), (36, true)],
-      );
+    bestStreaks: [(164, false), (151, false), (128, false), (97, false), (12, true)],
+    solved: [(612, false), (540, false), (471, false), (388, false), (36, true)],
+  );
 }
