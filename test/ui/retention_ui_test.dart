@@ -305,7 +305,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('calendarClose')));
     await tester.pumpAndSettle();
-    expect(find.text('Semaine des pandas'), findsOneWidget);
+    expect(find.text('Semaine safari'), findsOneWidget);
     await open(tester, const Key('trophies'));
     expect(find.text('Trophées'), findsOneWidget);
     expect(find.text('Fier de moi'), findsOneWidget);

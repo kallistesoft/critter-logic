@@ -104,7 +104,7 @@ class TestApp {
   final leaderboard = FakeLeaderboard();
   final analytics = NoAnalytics();
   final sound = NoSound();
-  DateTime now = DateTime(2026, 12, 12, 10);
+  DateTime now = DateTime(2026, 11, 21, 10);
 
   /// The equipped World (a `world.*` id); null = the Meadow.
   String? world;
