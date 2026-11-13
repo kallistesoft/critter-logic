@@ -15,6 +15,9 @@ class Economy {
   /// Coins for an owned critter reaching ⭐2..⭐5 (see [CritterLevels]).
   static const levelUp = {2: 10, 3: 20, 4: 30, 5: 50};
   static int levelUpCoins(int level) => levelUp[level] ?? 0;
+
+  /// A copy that moves a critter toward its next level without reaching it.
+  static const copyCoins = 5;
   static const setComplete = 200;
 
   /// Coins a new player starts with: enough for a few hints.

@@ -404,7 +404,7 @@ String critterGrantText(AppLocalizations l10n, CritterGrant g, CritterLevels lev
   if (g.leveledUp) return l10n.capsuleLevelUp(g.levelAfter);
   if (g.maxed) return l10n.capsuleMaxLevel(g.coins);
   final need = levels.nextAt(g.critter.rarity, g.levelAfter) ?? g.copies;
-  return l10n.capsuleCopy(g.copies, need, g.levelAfter + 1);
+  return l10n.capsuleCopy(g.copies, need, g.levelAfter + 1, g.coins);
 }
 
 /// The new level's stars popping in one by one on a level-up.

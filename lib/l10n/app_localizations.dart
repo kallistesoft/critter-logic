@@ -1951,8 +1951,8 @@ abstract class AppLocalizations {
   /// Capsule reveal: a copy that does not level up yet; have/need copies for the next level
   ///
   /// In en, this message translates to:
-  /// **'One more! {have}/{need} to ⭐{level}'**
-  String capsuleCopy(int have, int need, int level);
+  /// **'One more! {have}/{need} to ⭐{level} · +{coins}'**
+  String capsuleCopy(int have, int need, int level, int coins);
 
   /// Album: copies owned / copies needed for the next level
   ///

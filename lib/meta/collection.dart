@@ -143,6 +143,8 @@ CritterGrant critterGrantFor(Map<String, int> copies, String id, {CritterLevels 
     coins += Economy.levelUpCoins(levelAfter);
   } else if (levelBefore >= maxCritterLevel) {
     coins += Economy.duplicateCritter;
+  } else {
+    coins += Economy.copyCoins;
   }
   return CritterGrant(
     critter: critter,

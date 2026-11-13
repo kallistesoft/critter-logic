@@ -308,7 +308,7 @@
   "achievementLevel5Desc": "{n, plural, =1{Sube un animalito a ⭐5} other{Sube {n} animalitos a ⭐5}}",
   "capsuleLevelUp": "¡Sube de nivel! ⭐{level}",
   "capsuleMaxLevel": "¡Nivel máximo! +{coins} monedas",
-  "capsuleCopy": "¡Uno más! {have}/{need} para ⭐{level}",
+  "capsuleCopy": "¡Uno más! {have}/{need} para ⭐{level} · +{coins}",
   "critterLevelProgress": "{have}/{need} → ⭐{level}",
   "critterLevelMax": "Máx ⭐5",
   "critterLevelLabel": "Nivel {level}"

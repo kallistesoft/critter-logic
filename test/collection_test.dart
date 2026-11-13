@@ -139,13 +139,13 @@ void main() {
       expect(paid, [
         (1, 0, false),
         (2, 10, true),
-        (2, 0, false),
+        (2, 5, false),
         (3, 20, true),
-        (3, 0, false),
-        (3, 0, false),
+        (3, 5, false),
+        (3, 5, false),
         (4, 30, true),
-        (4, 0, false),
-        (4, 0, false),
+        (4, 5, false),
+        (4, 5, false),
         (5, 50, true),
         (5, 25, false),
         (5, 25, false),
@@ -268,9 +268,9 @@ void main() {
   test('reveal text in every language', () {
     final pig = critterById['pig']!;
     for (final (locale, texts) in [
-      ('en', ['New in your album! ✨', 'Level up! ⭐3', 'Max level! +25 coins', 'One more! 5/7 to ⭐4']),
-      ('fr', ['Nouveau dans ton album ! ✨', 'Niveau supérieur ! ⭐3', 'Niveau max ! +25 pièces', 'Un de plus ! 5/7 pour ⭐4']),
-      ('es', ['¡Nuevo en tu álbum! ✨', '¡Sube de nivel! ⭐3', '¡Nivel máximo! +25 monedas', '¡Uno más! 5/7 para ⭐4']),
+      ('en', ['New in your album! ✨', 'Level up! ⭐3', 'Max level! +25 coins', 'One more! 5/7 to ⭐4 · +5']),
+      ('fr', ['Nouveau dans ton album ! ✨', 'Niveau supérieur ! ⭐3', 'Niveau max ! +25 pièces', 'Un de plus ! 5/7 pour ⭐4 · +5']),
+      ('es', ['¡Nuevo en tu álbum! ✨', '¡Sube de nivel! ⭐3', '¡Nivel máximo! +25 monedas', '¡Uno más! 5/7 para ⭐4 · +5']),
     ]) {
       final l10n = lookupAppLocalizations(Locale(locale));
       final grants = [
