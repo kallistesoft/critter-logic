@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
+import '../meta/onboarding.dart';
 import '../meta/album.dart';
 import '../meta/game_flow.dart';
 import '../meta/progress_store.dart';
@@ -66,6 +67,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   Future<void> _maybeCalendar() async {
     if (!mounted || _calendarOpen || !(ModalRoute.of(context)?.isCurrent ?? false)) return;
     final services = Services.of(context);
+    if (!Onboarding(services.stats).calendarOpen(services.today())) return;
     if (!await services.retention.shouldShowCalendar(services.today())) return;
     if (mounted) await _openCalendar();
   }
@@ -120,6 +122,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     final trophyBadge = retention.achievements.badgeCount;
     final event = retention.event.current(now);
     final luckyFree = retention.luckyNest.state(localDay(now)).freeAvailable;
+    final onboarding = Onboarding(stats);
+    final showCalendar = onboarding.calendarOpen(now);
     var order = 0;
     Widget enter(Widget child) => SlideIn(
       delay: Duration(milliseconds: 70 * order++),
@@ -151,6 +155,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                         ),
                         const SizedBox(width: 8),
                         CoinCounter(key: const Key('homeCoins'), value: stats.coins, iconKey: _coinTarget),
+                        if (showCalendar) ...[
                         const SizedBox(width: 6),
                         _BadgedButton(
                           badge: calendar.available ? const _Dot() : null,
@@ -163,6 +168,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                             onPressed: _openCalendar,
                           ),
                         ),
+                        ],
                         const SizedBox(width: 6),
                         _BadgedButton(
                           badge: trophyBadge > 0 ? CountBadge(key: const Key('trophyBadge'), count: trophyBadge) : null,
@@ -209,7 +215,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     ),
                   ),
                   const SizedBox(height: 14),
-                  if (event != null) ...[
+                  if (event != null && onboarding.eventOpen) ...[
                     enter(EventBanner(state: event, onTap: () => _open(const EventScreen()))),
                     const SizedBox(height: 14),
                   ],
@@ -384,6 +390,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           ),
           _Foreground(
             mascots: buddyCritters(stats, 3),
+            shopOpen: onboarding.shopOpen,
             luckyFree: luckyFree,
             onShop: () => _open(const ShopScreen()),
             onNest: () => _open(const LuckyNestScreen()),
@@ -425,7 +432,16 @@ class _SectionTitle extends StatelessWidget {
 
 /// The grass at the bottom of the home screen: the market stall, critters playing, and the Lucky Nest.
 class _Foreground extends StatelessWidget {
-  const _Foreground({required this.mascots, required this.luckyFree, required this.onShop, required this.onNest});
+  const _Foreground({
+    required this.mascots,
+    required this.shopOpen,
+    required this.luckyFree,
+    required this.onShop,
+    required this.onNest,
+  });
+
+  /// False in a new player's first minutes: only the critters, no stall or nest yet.
+  final bool shopOpen;
 
   final List<String> mascots;
   final bool luckyFree;
@@ -438,13 +454,15 @@ class _Foreground extends StatelessWidget {
   Widget build(BuildContext context) {
     // Short phones get smaller critters, so the list keeps its room.
     final k = (MediaQuery.sizeOf(context).height / 820).clamp(0.72, 1.0);
-    if (!worldOf(context).decorations) return _PlainForeground(luckyFree: luckyFree, onShop: onShop, onNest: onNest);
+    if (!worldOf(context).decorations) {
+      return shopOpen ? _PlainForeground(luckyFree: luckyFree, onShop: onShop, onNest: onNest) : const SizedBox(height: 10);
+    }
     return SizedBox(
       height: 108 * k,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8),
         child: Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
-          Padding(
+          if (shopOpen) Padding(
             padding: EdgeInsets.only(bottom: 4 * k),
             child: PopIn(
               delay: const Duration(milliseconds: 300),
@@ -477,7 +495,7 @@ class _Foreground extends StatelessWidget {
               ]),
             ),
           ),
-          Padding(
+          if (shopOpen) Padding(
             padding: EdgeInsets.only(bottom: 6 * k),
             child: PopIn(
               delay: const Duration(milliseconds: 750),
