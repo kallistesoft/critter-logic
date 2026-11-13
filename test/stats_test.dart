@@ -19,12 +19,12 @@ void main() {
   DailyResult r(GameKind kind, int day, [int millis = 60000]) => DailyResult(kind: kind, number: day, millis: millis);
 
   test('daily numbers follow the local calendar date', () {
-    expect(dailyNumberFor(DateTime(2026, 12, 1, 0, 5)), 1);
-    expect(dailyNumberFor(DateTime(2026, 12, 1, 23, 59)), 1);
-    expect(dailyNumberFor(DateTime(2026, 12, 2)), 2);
+    expect(dailyNumberFor(DateTime(2026, 11, 10, 0, 5)), 1);
+    expect(dailyNumberFor(DateTime(2026, 11, 10, 23, 59)), 1);
+    expect(dailyNumberFor(DateTime(2026, 11, 11)), 2);
     // Across a daylight saving change (Montréal, 2027-03-14).
     expect(dailyNumberFor(DateTime(2027, 3, 15, 0, 30)) - dailyNumberFor(DateTime(2027, 3, 13, 23, 30)), 2);
-    expect(dateOfDaily(32), DateTime.utc(2027, 1, 1));
+    expect(dateOfDaily(53), DateTime.utc(2027, 1, 1));
   });
 
   test('a daily keeps the first attempt', () async {
