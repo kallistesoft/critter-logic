@@ -1,7 +1,9 @@
+import 'package:critter_logic/l10n/app_localizations.dart';
 import 'package:critter_logic/meta/progress_store.dart';
 import 'package:critter_logic/meta/shop.dart';
 import 'package:critter_logic/services/stats_store.dart';
 import 'package:critter_logic/ui/critter_actor.dart';
+import 'package:critter_logic/ui/critter_image.dart';
 import 'package:critter_logic/ui/home_screen.dart';
 import 'package:critter_logic/ui/lucky_nest_screen.dart';
 import 'package:critter_logic/ui/worlds/world.dart';
@@ -130,6 +132,15 @@ void main() {
       expect(find.byKey(const Key('worldPreview')), findsNothing);
       expect(find.byKey(const Key('buy-world.winter')), findsOneWidget);
     });
+  });
+
+  test('the Lodge names each badge after its wild cousin; other Worlds keep the album names', () {
+    final en = lookupAppLocalizations(const Locale('en'));
+    expect(critterName(en, 'pig'), 'Pig');
+    activeWorld = worlds.firstWhere((w) => w.id == 'world.lodge');
+    expect(critterName(en, 'pig'), 'Wild boar');
+    expect(critterName(en, 'chick'), 'Quail');
+    expect(critterName(en, 'panda'), 'Panda', reason: 'same animal, same name');
   });
 
   testWidgets('Settings switches between owned Worlds and links to the shop for the others', (tester) async {

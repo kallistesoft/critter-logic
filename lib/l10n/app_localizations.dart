@@ -1917,6 +1917,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'More worlds in the shop'**
   String get settingWorldMore;
+
+  /// Wild Lodge name of the "chick" critter (its wild cousin shown on the badge)
+  ///
+  /// In en, this message translates to:
+  /// **'Quail'**
+  String get lodgeChick;
+
+  /// Wild Lodge name of the "chicken" critter (its wild cousin shown on the badge)
+  ///
+  /// In en, this message translates to:
+  /// **'Wild turkey'**
+  String get lodgeChicken;
+
+  /// Wild Lodge name of the "pig" critter (its wild cousin shown on the badge)
+  ///
+  /// In en, this message translates to:
+  /// **'Wild boar'**
+  String get lodgePig;
+
+  /// Wild Lodge name of the "goat" critter (its wild cousin shown on the badge)
+  ///
+  /// In en, this message translates to:
+  /// **'Ibex'**
+  String get lodgeGoat;
+
+  /// Wild Lodge name of the "cow" critter (its wild cousin shown on the badge)
+  ///
+  /// In en, this message translates to:
+  /// **'Bison'**
+  String get lodgeCow;
+
+  /// Wild Lodge name of the "dog" critter (its wild cousin shown on the badge)
+  ///
+  /// In en, this message translates to:
+  /// **'Grey wolf'**
+  String get lodgeDog;
+
+  /// Wild Lodge name of the "rabbit" critter (its wild cousin shown on the badge)
+  ///
+  /// In en, this message translates to:
+  /// **'Hare'**
+  String get lodgeRabbit;
+
+  /// Wild Lodge name of the "frog" critter (its wild cousin shown on the badge)
+  ///
+  /// In en, this message translates to:
+  /// **'Bullfrog'**
+  String get lodgeFrog;
+
+  /// Wild Lodge name of the "owl" critter (its wild cousin shown on the badge)
+  ///
+  /// In en, this message translates to:
+  /// **'Eagle-owl'**
+  String get lodgeOwl;
+
+  /// Wild Lodge name of the "bear" critter (its wild cousin shown on the badge)
+  ///
+  /// In en, this message translates to:
+  /// **'Grizzly'**
+  String get lodgeBear;
+
+  /// Wild Lodge name of the "monkey" critter (its wild cousin shown on the badge)
+  ///
+  /// In en, this message translates to:
+  /// **'Macaque'**
+  String get lodgeMonkey;
+
+  /// Wild Lodge name of the "snake" critter (its wild cousin shown on the badge)
+  ///
+  /// In en, this message translates to:
+  /// **'Rattlesnake'**
+  String get lodgeSnake;
+
+  /// Wild Lodge name of the "parrot" critter (its wild cousin shown on the badge)
+  ///
+  /// In en, this message translates to:
+  /// **'Macaw'**
+  String get lodgeParrot;
+
+  /// Wild Lodge name of the "gorilla" critter (its wild cousin shown on the badge)
+  ///
+  /// In en, this message translates to:
+  /// **'Silverback'**
+  String get lodgeGorilla;
 }
 
 class _AppLocalizationsDelegate

@@ -302,5 +302,19 @@
   "previewDaily": "Aujourd’hui",
   "coinsPreview": "Boutique indisponible dans la version de développement : ceci est un aperçu.",
   "settingWorld": "Monde",
-  "settingWorldMore": "Plus de mondes à la boutique"
+  "settingWorldMore": "Plus de mondes à la boutique",
+  "lodgeChick": "Caille",
+  "lodgeChicken": "Dindon sauvage",
+  "lodgePig": "Sanglier",
+  "lodgeGoat": "Bouquetin",
+  "lodgeCow": "Bison",
+  "lodgeDog": "Loup gris",
+  "lodgeRabbit": "Lièvre",
+  "lodgeFrog": "Grenouille-taureau",
+  "lodgeOwl": "Grand-duc",
+  "lodgeBear": "Grizzly",
+  "lodgeMonkey": "Macaque",
+  "lodgeSnake": "Crotale",
+  "lodgeParrot": "Ara",
+  "lodgeGorilla": "Dos-argenté"
 }

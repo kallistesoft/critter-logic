@@ -1121,4 +1121,46 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get settingWorldMore => 'Plus de mondes à la boutique';
+
+  @override
+  String get lodgeChick => 'Caille';
+
+  @override
+  String get lodgeChicken => 'Dindon sauvage';
+
+  @override
+  String get lodgePig => 'Sanglier';
+
+  @override
+  String get lodgeGoat => 'Bouquetin';
+
+  @override
+  String get lodgeCow => 'Bison';
+
+  @override
+  String get lodgeDog => 'Loup gris';
+
+  @override
+  String get lodgeRabbit => 'Lièvre';
+
+  @override
+  String get lodgeFrog => 'Grenouille-taureau';
+
+  @override
+  String get lodgeOwl => 'Grand-duc';
+
+  @override
+  String get lodgeBear => 'Grizzly';
+
+  @override
+  String get lodgeMonkey => 'Macaque';
+
+  @override
+  String get lodgeSnake => 'Crotale';
+
+  @override
+  String get lodgeParrot => 'Ara';
+
+  @override
+  String get lodgeGorilla => 'Dos-argenté';
 }

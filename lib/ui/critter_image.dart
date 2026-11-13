@@ -85,7 +85,29 @@ class Silhouette extends StatelessWidget {
   Widget build(BuildContext context) => ColorFiltered(colorFilter: ColorFilter.mode(color, BlendMode.srcIn), child: child);
 }
 
-String critterName(AppLocalizations l10n, String id) => switch (id) {
+/// Wild Lodge shows the wild cousin on each badge (a quail for the chick, a boar for the pig…), so it uses its name.
+String? _lodgeName(AppLocalizations l10n, String id) => switch (id) {
+      'chick' => l10n.lodgeChick,
+      'chicken' => l10n.lodgeChicken,
+      'pig' => l10n.lodgePig,
+      'goat' => l10n.lodgeGoat,
+      'cow' => l10n.lodgeCow,
+      'dog' => l10n.lodgeDog,
+      'rabbit' => l10n.lodgeRabbit,
+      'frog' => l10n.lodgeFrog,
+      'owl' => l10n.lodgeOwl,
+      'bear' => l10n.lodgeBear,
+      'monkey' => l10n.lodgeMonkey,
+      'snake' => l10n.lodgeSnake,
+      'parrot' => l10n.lodgeParrot,
+      'gorilla' => l10n.lodgeGorilla,
+      _ => null,
+    };
+
+String critterName(AppLocalizations l10n, String id) =>
+    (activeWorld.id == 'world.lodge' ? _lodgeName(l10n, id) : null) ?? _critterName(l10n, id);
+
+String _critterName(AppLocalizations l10n, String id) => switch (id) {
       'chick' => l10n.critterChick,
       'chicken' => l10n.critterChicken,
       'duck' => l10n.critterDuck,

@@ -302,5 +302,19 @@
   "fieldJournal": "Diario de campo",
   "previewDaily": "Hoy",
   "settingWorld": "Mundo",
-  "settingWorldMore": "Más mundos en la tienda"
+  "settingWorldMore": "Más mundos en la tienda",
+  "lodgeChick": "Codorniz",
+  "lodgeChicken": "Pavo salvaje",
+  "lodgePig": "Jabalí",
+  "lodgeGoat": "Íbice",
+  "lodgeCow": "Bisonte",
+  "lodgeDog": "Lobo gris",
+  "lodgeRabbit": "Liebre",
+  "lodgeFrog": "Rana toro",
+  "lodgeOwl": "Búho real",
+  "lodgeBear": "Grizzly",
+  "lodgeMonkey": "Macaco",
+  "lodgeSnake": "Serpiente de cascabel",
+  "lodgeParrot": "Guacamayo",
+  "lodgeGorilla": "Espalda plateada"
 }

@@ -1178,5 +1178,61 @@
   },
   "@settingWorldMore": {
     "description": "World picker button opening the shop Worlds tab"
+  },
+  "lodgeChick": "Quail",
+  "@lodgeChick": {
+    "description": "Wild Lodge name of the \"chick\" critter (its wild cousin shown on the badge)"
+  },
+  "lodgeChicken": "Wild turkey",
+  "@lodgeChicken": {
+    "description": "Wild Lodge name of the \"chicken\" critter (its wild cousin shown on the badge)"
+  },
+  "lodgePig": "Wild boar",
+  "@lodgePig": {
+    "description": "Wild Lodge name of the \"pig\" critter (its wild cousin shown on the badge)"
+  },
+  "lodgeGoat": "Ibex",
+  "@lodgeGoat": {
+    "description": "Wild Lodge name of the \"goat\" critter (its wild cousin shown on the badge)"
+  },
+  "lodgeCow": "Bison",
+  "@lodgeCow": {
+    "description": "Wild Lodge name of the \"cow\" critter (its wild cousin shown on the badge)"
+  },
+  "lodgeDog": "Grey wolf",
+  "@lodgeDog": {
+    "description": "Wild Lodge name of the \"dog\" critter (its wild cousin shown on the badge)"
+  },
+  "lodgeRabbit": "Hare",
+  "@lodgeRabbit": {
+    "description": "Wild Lodge name of the \"rabbit\" critter (its wild cousin shown on the badge)"
+  },
+  "lodgeFrog": "Bullfrog",
+  "@lodgeFrog": {
+    "description": "Wild Lodge name of the \"frog\" critter (its wild cousin shown on the badge)"
+  },
+  "lodgeOwl": "Eagle-owl",
+  "@lodgeOwl": {
+    "description": "Wild Lodge name of the \"owl\" critter (its wild cousin shown on the badge)"
+  },
+  "lodgeBear": "Grizzly",
+  "@lodgeBear": {
+    "description": "Wild Lodge name of the \"bear\" critter (its wild cousin shown on the badge)"
+  },
+  "lodgeMonkey": "Macaque",
+  "@lodgeMonkey": {
+    "description": "Wild Lodge name of the \"monkey\" critter (its wild cousin shown on the badge)"
+  },
+  "lodgeSnake": "Rattlesnake",
+  "@lodgeSnake": {
+    "description": "Wild Lodge name of the \"snake\" critter (its wild cousin shown on the badge)"
+  },
+  "lodgeParrot": "Macaw",
+  "@lodgeParrot": {
+    "description": "Wild Lodge name of the \"parrot\" critter (its wild cousin shown on the badge)"
+  },
+  "lodgeGorilla": "Silverback",
+  "@lodgeGorilla": {
+    "description": "Wild Lodge name of the \"gorilla\" critter (its wild cousin shown on the badge)"
   }
 }
