@@ -14,14 +14,14 @@ Before submitting:
 
 ## Section 2: Organization and contact
 - Applying: **As an organization**
-- Your full legal name: **Jef Ottavi**
+- Your full legal name: **Jean-François Poughon**
 - Organization's legal name: **9536-3529 Québec inc.** (operating as Kallistesoft)
 - Parent company: (blank)
 - Primary website: **https://kallistesoft.ca/en/**
 - Country: **Canada**. Address: **529 4th Avenue**, **Saint-Jean-sur-Richelieu**, **Quebec**, **J2X 1X3**
 - Category: software / mobile games (closest option offered)
 - Organization size: **Startup (fewer than 10 employees)**
-- Primary contact: **Jef Ottavi**, **contact@kallistesoft.ca**. Technical contact: **Same as primary contact**. Business
+- Primary contact: **Jean-François Poughon**, **contact@kallistesoft.ca**. Technical contact: **Same as primary contact**. Business
   contact: (blank)
 
 ## Section 3: Business model
